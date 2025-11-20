@@ -1,50 +1,476 @@
 {% extends 'base.html' %}
 
-{% block title %}Add Food Item - Food Management{% endblock %}
+{% block title %}Add Food Item - Food Inventory{% endblock %}
+
+{% block extra_head %}
+<style>
+    .form-container {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .input-field {
+        transition: all 0.3s ease;
+    }
+
+    .input-field:focus {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(16, 185, 129, 0.2);
+    }
+
+    .category-card {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .category-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    .category-card.selected {
+        border-color: #10b981;
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    }
+
+    .floating-label {
+        transition: all 0.3s ease;
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(229, 231, 235, 0.8);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto">
-    <h1 class="text-3xl font-bold text-gray-800 mb-6">Add Food Item</h1>
-    
-    <div class="bg-white p-8 rounded-lg shadow-md">
-        <form method="post" class="space-y-4">
-            {% csrf_token %}
-            <div>
-                <label for="item_name" class="block text-sm font-medium text-gray-700 mb-2">Item Name</label>
-                <input type="text" id="item_name" name="item_name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
+<div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-5xl mx-auto">
+        
+        <!-- Header Section -->
+        <div class="mb-8 text-center form-container">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl shadow-lg mb-4">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
             </div>
-            
-            <div>
-                <label for="quantity" class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
-                <input type="number" id="quantity" name="quantity" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
+            <h1 class="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">
+                Add Food Item to Inventory
+            </h1>
+            <p class="text-gray-600 text-lg">Track your food items to reduce waste and save money</p>
+        </div>
+
+        <!-- Info Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 form-container" style="animation-delay: 0.1s;">
+            <div class="bg-gradient-to-br from-blue-50 to-cyan-50 p-4 rounded-xl border border-blue-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-800">Why Track?</p>
+                        <p class="text-xs text-gray-600">Reduce food waste by 40%</p>
+                    </div>
+                </div>
             </div>
-            
-            <div>
-                <label for="expiry_date" class="block text-sm font-medium text-gray-700 mb-2">Expiry Date</label>
-                <input type="date" id="expiry_date" name="expiry_date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
+            <div class="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-xl border border-green-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-800">Save Money</p>
+                        <p class="text-xs text-gray-600">Track costs & budget</p>
+                    </div>
+                </div>
             </div>
-            
-            <div>
-                <label for="category" class="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                <select id="category" name="category" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
-                    <option value="">Select a category</option>
-                    <option value="vegetables">Vegetables</option>
-                    <option value="fruits">Fruits</option>
-                    <option value="dairy">Dairy</option>
-                    <option value="meat">Meat</option>
-                    <option value="grains">Grains</option>
-                </select>
+            <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-xl border border-purple-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-800">Stay Organized</p>
+                        <p class="text-xs text-gray-600">Never miss expiry dates</p>
+                    </div>
+                </div>
             </div>
-            
-            <div class="flex gap-4">
-                <button type="submit" class="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition">
-                    Add Item
-                </button>
-                <a href="{% url 'food:inventory_list' %}" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400 transition text-center">
-                    Cancel
-                </a>
+        </div>
+
+        <!-- Main Form Card -->
+        <div class="glass-card rounded-2xl shadow-2xl overflow-hidden form-container" style="animation-delay: 0.2s;">
+            <div class="bg-gradient-to-r from-green-600 to-emerald-600 px-8 py-6">
+                <h2 class="text-2xl font-bold text-white flex items-center">
+                    <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    Item Details
+                </h2>
+                <p class="text-emerald-100 text-sm mt-1">All fields are required for accurate tracking</p>
             </div>
-        </form>
+
+            <form method="post" class="p-8 space-y-6" id="inventoryForm">
+                {% csrf_token %}
+
+                <!-- Item Name -->
+                <div class="relative">
+                    <label for="item_name" class="block text-sm font-bold text-gray-700 mb-2 flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                        </svg>
+                        Item Name
+                    </label>
+                    <input 
+                        type="text" 
+                        id="item_name" 
+                        name="item_name" 
+                        placeholder="e.g., Fresh Milk, Organic Bananas, Whole Wheat Bread"
+                        class="input-field w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-200 focus:border-green-500 focus:outline-none transition-all"
+                        required
+                    >
+                    <p class="text-xs text-gray-500 mt-1.5">Enter the specific name of the food item</p>
+                </div>
+
+                <!-- Category Selection (Radio Cards) -->
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                        </svg>
+                        Category
+                    </label>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <label class="category-card relative p-4 bg-white border-2 border-gray-200 rounded-xl">
+                            <input type="radio" name="category" value="Vegetables" class="peer sr-only" required>
+                            <div class="text-center peer-checked:text-green-600">
+                                <div class="text-3xl mb-2">🥬</div>
+                                <p class="font-semibold text-sm">Vegetables</p>
+                            </div>
+                            <div class="absolute top-2 right-2 w-5 h-5 border-2 border-gray-300 rounded-full peer-checked:bg-green-500 peer-checked:border-green-500 flex items-center justify-center">
+                                <svg class="w-3 h-3 text-white hidden peer-checked:block" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                        </label>
+
+                        <label class="category-card relative p-4 bg-white border-2 border-gray-200 rounded-xl">
+                            <input type="radio" name="category" value="Fruits" class="peer sr-only">
+                            <div class="text-center peer-checked:text-green-600">
+                                <div class="text-3xl mb-2">🍎</div>
+                                <p class="font-semibold text-sm">Fruits</p>
+                            </div>
+                            <div class="absolute top-2 right-2 w-5 h-5 border-2 border-gray-300 rounded-full peer-checked:bg-green-500 peer-checked:border-green-500 flex items-center justify-center">
+                                <svg class="w-3 h-3 text-white hidden peer-checked:block" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                        </label>
+
+                        <label class="category-card relative p-4 bg-white border-2 border-gray-200 rounded-xl">
+                            <input type="radio" name="category" value="Dairy" class="peer sr-only">
+                            <div class="text-center peer-checked:text-green-600">
+                                <div class="text-3xl mb-2">🥛</div>
+                                <p class="font-semibold text-sm">Dairy</p>
+                            </div>
+                            <div class="absolute top-2 right-2 w-5 h-5 border-2 border-gray-300 rounded-full peer-checked:bg-green-500 peer-checked:border-green-500 flex items-center justify-center">
+                                <svg class="w-3 h-3 text-white hidden peer-checked:block" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                        </label>
+
+                        <label class="category-card relative p-4 bg-white border-2 border-gray-200 rounded-xl">
+                            <input type="radio" name="category" value="Protein" class="peer sr-only">
+                            <div class="text-center peer-checked:text-green-600">
+                                <div class="text-3xl mb-2">🍗</div>
+                                <p class="font-semibold text-sm">Protein</p>
+                            </div>
+                            <div class="absolute top-2 right-2 w-5 h-5 border-2 border-gray-300 rounded-full peer-checked:bg-green-500 peer-checked:border-green-500 flex items-center justify-center">
+                                <svg class="w-3 h-3 text-white hidden peer-checked:block" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                        </label>
+
+                        <label class="category-card relative p-4 bg-white border-2 border-gray-200 rounded-xl">
+                            <input type="radio" name="category" value="Grains" class="peer sr-only">
+                            <div class="text-center peer-checked:text-green-600">
+                                <div class="text-3xl mb-2">🌾</div>
+                                <p class="font-semibold text-sm">Grains</p>
+                            </div>
+                            <div class="absolute top-2 right-2 w-5 h-5 border-2 border-gray-300 rounded-full peer-checked:bg-green-500 peer-checked:border-green-500 flex items-center justify-center">
+                                <svg class="w-3 h-3 text-white hidden peer-checked:block" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                        </label>
+
+                        <label class="category-card relative p-4 bg-white border-2 border-gray-200 rounded-xl">
+                            <input type="radio" name="category" value="Snacks" class="peer sr-only">
+                            <div class="text-center peer-checked:text-green-600">
+                                <div class="text-3xl mb-2">🍪</div>
+                                <p class="font-semibold text-sm">Snacks</p>
+                            </div>
+                            <div class="absolute top-2 right-2 w-5 h-5 border-2 border-gray-300 rounded-full peer-checked:bg-green-500 peer-checked:border-green-500 flex items-center justify-center">
+                                <svg class="w-3 h-3 text-white hidden peer-checked:block" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Quantity and Unit -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="quantity" class="block text-sm font-bold text-gray-700 mb-2 flex items-center">
+                            <svg class="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                            </svg>
+                            Quantity
+                        </label>
+                        <input 
+                            type="number" 
+                            id="quantity" 
+                            name="quantity" 
+                            step="0.01"
+                            min="0.01"
+                            placeholder="e.g., 2.5"
+                            class="input-field w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-200 focus:border-green-500 focus:outline-none"
+                            required
+                        >
+                        <p class="text-xs text-gray-500 mt-1.5">Amount you have</p>
+                    </div>
+
+                    <div>
+                        <label for="unit" class="block text-sm font-bold text-gray-700 mb-2 flex items-center">
+                            <svg class="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                            </svg>
+                            Unit
+                        </label>
+                        <select 
+                            id="unit" 
+                            name="unit"
+                            class="input-field w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-200 focus:border-green-500 focus:outline-none"
+                            required
+                        >
+                            <option value="">Select unit</option>
+                            <option value="kg">Kilogram (kg)</option>
+                            <option value="g">Gram (g)</option>
+                            <option value="L">Liter (L)</option>
+                            <option value="mL">Milliliter (mL)</option>
+                            <option value="pieces">Pieces</option>
+                            <option value="packets">Packets</option>
+                            <option value="bottles">Bottles</option>
+                            <option value="cans">Cans</option>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1.5">Measurement unit</p>
+                    </div>
+                </div>
+
+                <!-- Expiry Date and Cost -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="expiry_date" class="block text-sm font-bold text-gray-700 mb-2 flex items-center">
+                            <svg class="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            Expiry Date
+                        </label>
+                        <input 
+                            type="date" 
+                            id="expiry_date" 
+                            name="expiry_date" 
+                            class="input-field w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-200 focus:border-green-500 focus:outline-none"
+                            required
+                        >
+                        <p class="text-xs text-gray-500 mt-1.5">When does it expire?</p>
+                    </div>
+
+                    <div>
+                        <label for="cost_per_unit" class="block text-sm font-bold text-gray-700 mb-2 flex items-center">
+                            <svg class="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Cost Per Unit (Optional)
+                        </label>
+                        <input 
+                            type="number" 
+                            id="cost_per_unit" 
+                            name="cost_per_unit" 
+                            step="0.01"
+                            min="0"
+                            placeholder="e.g., 4.99"
+                            class="input-field w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-200 focus:border-green-500 focus:outline-none"
+                        >
+                        <p class="text-xs text-gray-500 mt-1.5">Price you paid (for budget tracking)</p>
+                    </div>
+                </div>
+
+                <!-- Image URL (Optional) -->
+                <div>
+                    <label for="image_url" class="block text-sm font-bold text-gray-700 mb-2 flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        Image URL (Optional)
+                    </label>
+                    <input 
+                        type="url" 
+                        id="image_url" 
+                        name="image_url" 
+                        placeholder="https://example.com/image.jpg"
+                        class="input-field w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-200 focus:border-green-500 focus:outline-none"
+                    >
+                    <p class="text-xs text-gray-500 mt-1.5">Add a product image (or use upload feature)</p>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                    <button 
+                        type="submit" 
+                        class="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 px-6 rounded-xl font-bold text-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center"
+                    >
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Add to Inventory
+                    </button>
+                    <a 
+                        href="{% url 'food:inventory_list' %}" 
+                        class="flex-1 bg-gray-200 text-gray-700 py-4 px-6 rounded-xl font-bold text-lg hover:bg-gray-300 transition-all duration-300 text-center flex items-center justify-center"
+                    >
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Helper Tips -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4 form-container" style="animation-delay: 0.3s;">
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-semibold text-blue-800">Pro Tip</p>
+                        <p class="text-xs text-blue-700 mt-1">Set expiry dates 2-3 days earlier than actual to get timely alerts</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-lg">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-semibold text-green-800">Best Practice</p>
+                        <p class="text-xs text-green-700 mt-1">Add cost info to track your food budget and savings over time</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // GSAP Animations - Initialize elements as visible first
+    gsap.set('.form-container', { opacity: 1, y: 0 });
+    
+    gsap.from('.form-container', {
+        opacity: 0,
+        y: 30,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: 'power3.out',
+        clearProps: 'all'
+    });
+
+    // Category card selection animation
+    const categoryCards = document.querySelectorAll('.category-card');
+    categoryCards.forEach(card => {
+        card.addEventListener('click', function() {
+            categoryCards.forEach(c => c.classList.remove('selected'));
+            this.classList.add('selected');
+            
+            gsap.from(this, {
+                scale: 0.95,
+                duration: 0.2,
+                ease: 'back.out(1.7)'
+            });
+        });
+    });
+
+    // Set minimum date to today
+    const expiryInput = document.getElementById('expiry_date');
+    const today = new Date().toISOString().split('T')[0];
+    expiryInput.setAttribute('min', today);
+
+    // Form validation with better UX
+    const form = document.getElementById('inventoryForm');
+    form.addEventListener('submit', function(e) {
+        const category = document.querySelector('input[name="category"]:checked');
+        if (!category) {
+            e.preventDefault();
+            alert('Please select a category');
+            gsap.to('.category-card', {
+                x: [0, -10, 10, -10, 10, 0],
+                duration: 0.4
+            });
+        }
+    });
+
+    // Input field animations
+    const inputs = document.querySelectorAll('.input-field');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            gsap.to(this, {
+                scale: 1.02,
+                duration: 0.3,
+                ease: 'power2.out'
+            });
+        });
+        
+        input.addEventListener('blur', function() {
+            gsap.to(this, {
+                scale: 1,
+                duration: 0.3,
+                ease: 'power2.out'
+            });
+        });
+    });
+});
+</script>
 {% endblock %}
