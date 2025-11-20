@@ -1,0 +1,9 @@
+/* Tailwind CSS - Add your custom styles here */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles */
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}

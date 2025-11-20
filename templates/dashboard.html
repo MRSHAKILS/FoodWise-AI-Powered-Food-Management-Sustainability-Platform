@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Food Management{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <h1 class="text-4xl font-bold text-gray-800 mb-8">Dashboard</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-lg font-semibold text-gray-700 mb-2">Total Items</h3>
+            <p class="text-3xl font-bold text-green-600">0</p>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-lg font-semibold text-gray-700 mb-2">Expiring Soon</h3>
+            <p class="text-3xl font-bold text-yellow-600">0</p>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-lg font-semibold text-gray-700 mb-2">Resources Saved</h3>
+            <p class="text-3xl font-bold text-blue-600">0</p>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-lg font-semibold text-gray-700 mb-2">Uploads</h3>
+            <p class="text-3xl font-bold text-purple-600">0</p>
+        </div>
+    </div>
+    
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Welcome to Food Management Platform</h2>
+        <p class="text-gray-600">
+            This platform helps you manage your food inventory, track sustainability, and reduce waste using AI-powered features.
+        </p>
+    </div>
+</div>
+{% endblock %}
