@@ -1,0 +1,368 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Food Management & Sustainability Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #059669, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .feature-card {
+            background: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 40px rgba(5, 150, 105, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .feature-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 20px 60px rgba(5, 150, 105, 0.2);
+        }
+        .stat-card {
+            background: linear-gradient(135deg, rgba(5, 150, 105, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+            border: 2px solid #d1fae5;
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Include Navbar -->
+    {% include 'navbar.html' %}
+
+    <!-- Hero Section -->
+    <section class="hero-section gradient-bg text-white pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <!-- Hero Content -->
+                <div class="hero-content">
+                    <div class="inline-block bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-semibold mb-6">
+                        🌱 Sustainable Food Management for Everyone
+                    </div>
+                    <h1 class="text-5xl lg:text-6xl font-black mb-6 leading-tight">
+                        Reduce Food Waste,<br>
+                        <span class="text-emerald-200">Save Money</span>
+                    </h1>
+                    <p class="text-xl text-emerald-50 mb-8 leading-relaxed">
+                        AI-powered platform to track your food inventory, predict expiration dates, 
+                        get personalized recipes, and contribute to a sustainable future. Join thousands 
+                        fighting food waste together.
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <a href="{% url 'users:register' %}" class="bg-white text-green-600 px-8 py-4 rounded-xl font-bold text-lg shadow-2xl hover:shadow-3xl hover:scale-105 transition-all duration-300 flex items-center space-x-2">
+                            <span>Get Started Free</span>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                            </svg>
+                        </a>
+                        <a href="#features" class="bg-emerald-700/30 backdrop-blur-sm text-white px-8 py-4 rounded-xl font-bold text-lg border-2 border-white/30 hover:bg-emerald-700/50 transition-all duration-300">
+                            Learn More
+                        </a>
+                    </div>
+                    <!-- Stats -->
+                    <div class="grid grid-cols-3 gap-6 mt-12 pt-12 border-t border-white/20">
+                        <div class="stat-item">
+                            <div class="text-4xl font-black text-emerald-100">85%</div>
+                            <div class="text-sm text-emerald-200 mt-1">Waste Reduced</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="text-4xl font-black text-emerald-100">$500+</div>
+                            <div class="text-sm text-emerald-200 mt-1">Avg. Savings/Year</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="text-4xl font-black text-emerald-100">10K+</div>
+                            <div class="text-sm text-emerald-200 mt-1">Active Users</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hero Image/Illustration -->
+                <div class="hero-image relative">
+                    <div class="absolute inset-0 bg-gradient-to-br from-emerald-400/20 to-green-600/20 rounded-3xl blur-3xl"></div>
+                    <div class="relative bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20">
+                        <div class="aspect-square bg-gradient-to-br from-emerald-200 to-green-300 rounded-2xl flex items-center justify-center">
+                            <svg class="w-48 h-48 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16 features-header">
+                <div class="inline-block bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-bold mb-4">
+                    ✨ Powerful Features
+                </div>
+                <h2 class="text-4xl lg:text-5xl font-black text-gray-900 mb-4">
+                    Everything You Need to <span class="text-gradient">Manage Food</span>
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Our AI-powered platform provides comprehensive tools to track, analyze, and optimize your food consumption
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 feature-cards">
+                <!-- Feature 1 -->
+                <div class="feature-card p-8">
+                    <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Smart Inventory Tracking</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Track all your food items with expiry dates, quantities, and categories. Get real-time alerts before items expire.
+                    </p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="feature-card p-8">
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">AI-Powered Insights</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Get personalized recommendations, consumption patterns analysis, and intelligent suggestions to reduce waste.
+                    </p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="feature-card p-8">
+                    <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Recipe Suggestions</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Discover recipes based on ingredients you have. Cook smart and use everything before it expires.
+                    </p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="feature-card p-8">
+                    <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Waste Analytics</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Track your food waste patterns with beautiful visualizations. See your environmental impact and savings.
+                    </p>
+                </div>
+
+                <!-- Feature 5 -->
+                <div class="feature-card p-8">
+                    <div class="w-16 h-16 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-2xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Expiry Reminders</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Never miss an expiration date again. Receive timely notifications to use or freeze items before waste.
+                    </p>
+                </div>
+
+                <!-- Feature 6 -->
+                <div class="feature-card p-8">
+                    <div class="w-16 h-16 bg-gradient-to-br from-green-600 to-lime-600 rounded-2xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Sustainability Impact</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Contribute to UN SDG Goals 2 & 12. Track your carbon footprint reduction and environmental contributions.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-green-50 to-emerald-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16 steps-header">
+                <h2 class="text-4xl lg:text-5xl font-black text-gray-900 mb-4">
+                    How It <span class="text-gradient">Works</span>
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Get started in 3 simple steps and transform your food management
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 steps-container">
+                <!-- Step 1 -->
+                <div class="text-center step-card">
+                    <div class="relative inline-block mb-6">
+                        <div class="w-24 h-24 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center shadow-2xl">
+                            <span class="text-4xl font-black text-white">1</span>
+                        </div>
+                        <div class="absolute -top-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
+                            <span class="text-xl">✓</span>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Sign Up Free</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Create your account in seconds. No credit card required. Start tracking immediately.
+                    </p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="text-center step-card">
+                    <div class="relative inline-block mb-6">
+                        <div class="w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-2xl">
+                            <span class="text-4xl font-black text-white">2</span>
+                        </div>
+                        <div class="absolute -top-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
+                            <span class="text-xl">✓</span>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Add Your Food</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Input your food inventory with expiry dates, categories, and quantities with our easy form.
+                    </p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="text-center step-card">
+                    <div class="relative inline-block mb-6">
+                        <div class="w-24 h-24 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center shadow-2xl">
+                            <span class="text-4xl font-black text-white">3</span>
+                        </div>
+                        <div class="absolute -top-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
+                            <span class="text-xl">✓</span>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Track & Save</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Get AI insights, expiry alerts, and recipe suggestions. Reduce waste and save money.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+        <div class="max-w-4xl mx-auto text-center cta-section">
+            <div class="bg-gradient-to-br from-green-600 to-emerald-600 rounded-3xl p-12 shadow-2xl">
+                <h2 class="text-4xl lg:text-5xl font-black text-white mb-6">
+                    Ready to Reduce Food Waste?
+                </h2>
+                <p class="text-xl text-emerald-100 mb-8 max-w-2xl mx-auto">
+                    Join thousands of users already saving money and contributing to a sustainable future. Start your journey today—completely free!
+                </p>
+                <a href="{% url 'users:register' %}" class="inline-block bg-white text-green-600 px-10 py-5 rounded-xl font-bold text-xl shadow-2xl hover:shadow-3xl hover:scale-105 transition-all duration-300">
+                    Get Started Free →
+                </a>
+                <p class="text-emerald-200 mt-6 text-sm">
+                    No credit card required • Free forever • Cancel anytime
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Include Footer -->
+    {% include 'footer.html' %}
+
+    <script>
+        // GSAP Animations
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Hero animations
+        gsap.from('.hero-content', {
+            opacity: 0,
+            y: 50,
+            duration: 1,
+            ease: 'power3.out'
+        });
+
+        gsap.from('.hero-image', {
+            opacity: 0,
+            x: 50,
+            duration: 1,
+            delay: 0.3,
+            ease: 'power3.out'
+        });
+
+        // Feature cards animation
+        gsap.from('.features-header', {
+            scrollTrigger: {
+                trigger: '.features-header',
+                start: 'top 80%'
+            },
+            opacity: 0,
+            y: 30,
+            duration: 0.8
+        });
+
+        gsap.from('.feature-cards .feature-card', {
+            scrollTrigger: {
+                trigger: '.feature-cards',
+                start: 'top 80%'
+            },
+            opacity: 0,
+            y: 50,
+            stagger: 0.1,
+            duration: 0.8,
+            ease: 'power3.out'
+        });
+
+        // Steps animation
+        gsap.from('.steps-header', {
+            scrollTrigger: {
+                trigger: '.steps-header',
+                start: 'top 80%'
+            },
+            opacity: 0,
+            y: 30,
+            duration: 0.8
+        });
+
+        gsap.from('.step-card', {
+            scrollTrigger: {
+                trigger: '.steps-container',
+                start: 'top 80%'
+            },
+            opacity: 0,
+            scale: 0.8,
+            stagger: 0.2,
+            duration: 0.8,
+            ease: 'back.out(1.7)'
+        });
+
+        // CTA animation
+        gsap.from('.cta-section', {
+            scrollTrigger: {
+                trigger: '.cta-section',
+                start: 'top 80%'
+            },
+            opacity: 0,
+            scale: 0.95,
+            duration: 1,
+            ease: 'power3.out'
+        });
+    </script>
+</body>
+</html>

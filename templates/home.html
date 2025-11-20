@@ -1,0 +1,518 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoodWise - AI-Powered Food Management Platform | Bangladesh</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #059669, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .feature-card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 20px rgba(5,150,105,0.08);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(16,185,129,0.1);
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+        .feature-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 8px 30px rgba(5,150,105,0.15);
+        }
+        .animated-bg {
+            position: relative;
+            overflow: hidden;
+        }
+        .animated-bg::before {
+            content: '';
+            position: absolute;
+            width: 300%;
+            height: 300%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: drift 20s linear infinite;
+        }
+        @keyframes drift {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(100px, 100px); }
+        }
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        .stat-card {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    {% include "navbar.html" %}
+
+    <!-- HERO SECTION -->
+    <section class="gradient-bg animated-bg text-white pt-24 pb-16 px-4 overflow-hidden">
+        <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-10 items-center relative z-10">
+            
+            <div class="space-y-5 hero-content">
+                <div class="inline-block bg-white/15 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-medium border border-white/20">
+                    🇧🇩 Built for Bangladesh | Powered by AI
+                </div>
+                
+                <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
+                    Smart Food Management<br/>
+                    <span class="text-emerald-200">for Every Household</span>
+                </h1>
+                
+                <p class="text-base md:text-lg text-emerald-50 leading-relaxed max-w-xl">
+                    Track inventory, reduce waste, save money, and contribute to UN SDG Goals. 
+                    Join 15,000+ users managing food smarter across Bangladesh.
+                </p>
+                
+                <div class="flex flex-wrap gap-3 pt-2">
+                    <a href="{% url 'users:register' %}" 
+                       class="bg-white text-green-600 px-6 py-2.5 rounded-lg font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all">
+                        Start Free Today
+                    </a>
+                    <a href="#features" 
+                       class="bg-white/10 backdrop-blur border border-white/30 px-6 py-2.5 rounded-lg font-semibold hover:bg-white/20 transition-all">
+                        Learn More
+                    </a>
+                </div>
+            </div>
+            
+            <!-- ANIMATED VISUAL -->
+            <div class="relative hero-visual">
+                <div class="relative bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="col-span-3 bg-emerald-400/30 backdrop-blur rounded-xl p-4 float-animation">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-10 h-10 bg-white/80 rounded-lg flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                    </svg>
+                                </div>
+                                <div class="text-white text-sm font-semibold">Food Inventory</div>
+                            </div>
+                        </div>
+                        <div class="bg-blue-400/30 backdrop-blur rounded-xl p-3 float-animation" style="animation-delay: 1s;">
+                            <div class="w-8 h-8 bg-white/80 rounded-lg mx-auto flex items-center justify-center mb-1">
+                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div class="text-white text-xs text-center font-medium">Alerts</div>
+                        </div>
+                        <div class="bg-purple-400/30 backdrop-blur rounded-xl p-3 float-animation" style="animation-delay: 2s;">
+                            <div class="w-8 h-8 bg-white/80 rounded-lg mx-auto flex items-center justify-center mb-1">
+                                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                                </svg>
+                            </div>
+                            <div class="text-white text-xs text-center font-medium">AI Tips</div>
+                        </div>
+                        <div class="bg-pink-400/30 backdrop-blur rounded-xl p-3 float-animation" style="animation-delay: 3s;">
+                            <div class="w-8 h-8 bg-white/80 rounded-lg mx-auto flex items-center justify-center mb-1">
+                                <svg class="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                </svg>
+                            </div>
+                            <div class="text-white text-xs text-center font-medium">Recipes</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- STATS SECTION -->
+    <section class="py-12 bg-white border-y border-gray-100">
+        <div class="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="stat-card text-center">
+                <div class="text-3xl font-bold text-gradient mb-1">85%</div>
+                <div class="text-sm text-gray-600 font-medium">Food Waste Reduced</div>
+            </div>
+            <div class="stat-card text-center">
+                <div class="text-3xl font-bold text-gradient mb-1">৳12,000+</div>
+                <div class="text-sm text-gray-600 font-medium">Average Annual Savings</div>
+            </div>
+            <div class="stat-card text-center">
+                <div class="text-3xl font-bold text-gradient mb-1">15,000+</div>
+                <div class="text-sm text-gray-600 font-medium">Active Users</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- BANGLADESH CONTEXT SECTION -->
+    <section class="py-16 px-4 bg-gradient-to-br from-green-50 to-emerald-50">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-10">
+                <h2 class="text-2xl md:text-3xl font-bold mb-3">
+                    Why <span class="text-gradient">Bangladesh</span> Needs FoodWise
+                </h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    With rising food prices and increasing urbanization, smart food management 
+                    is essential for Bangladeshi families and students.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-emerald-100">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg mb-1">Save on Grocery Bills</h3>
+                            <p class="text-gray-600 text-sm">
+                                Average Bangladeshi households spend ৳25,000-35,000/month on groceries. 
+                                Reduce waste and save up to 30% monthly.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-emerald-100">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg mb-1">Perfect for Students</h3>
+                            <p class="text-gray-600 text-sm">
+                                Living in Dhaka, Chattogram, or Sylhet? Manage limited budgets, 
+                                track shared groceries with roommates effortlessly.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-emerald-100">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg mb-1">UN SDG Contribution</h3>
+                            <p class="text-gray-600 text-sm">
+                                Aligned with SDG Goal 2 (Zero Hunger) and Goal 12 (Responsible Consumption). 
+                                Track your environmental impact.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-emerald-100">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg mb-1">Local Market Insights</h3>
+                            <p class="text-gray-600 text-sm">
+                                Get price trends based on Dhaka's kitchen markets (Karwan Bazar, Kawran Bazar) 
+                                and optimize purchase timing.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES SECTION -->
+    <section id="features" class="py-16 px-4 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-10 features-header">
+                <h2 class="text-2xl md:text-3xl font-bold mb-3">
+                    Core Features to <span class="text-gradient">Manage Smarter</span>
+                </h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    Everything you need to track inventory, reduce waste, and save money
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 features-grid">
+                <div class="feature-card p-5">
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-3">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">Smart Inventory</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">
+                        Track groceries with expiry dates, quantities, costs, and categories. Never forget what's in your fridge.
+                    </p>
+                </div>
+
+                <div class="feature-card p-5">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">AI-Powered Insights</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">
+                        Get personalized recommendations based on your consumption patterns and eating habits.
+                    </p>
+                </div>
+
+                <div class="feature-card p-5">
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
+                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">Expiry Alerts</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">
+                        Smart notifications before items expire. Use or freeze food before it goes to waste.
+                    </p>
+                </div>
+
+                <div class="feature-card p-5">
+                    <div class="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center mb-3">
+                        <svg class="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">Recipe Generator</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">
+                        Discover Bengali and international recipes based on ingredients you already have at home.
+                    </p>
+                </div>
+
+                <div class="feature-card p-5">
+                    <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-3">
+                        <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">Waste Analytics</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">
+                        Visualize patterns, track savings in BDT, and see your environmental impact over time.
+                    </p>
+                </div>
+
+                <div class="feature-card p-5">
+                    <div class="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center mb-3">
+                        <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">Shared Groceries</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">
+                        Perfect for students and families. Track who bought what and split costs fairly.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS TIMELINE WITH GSAP -->
+    <section class="py-16 px-4 bg-gradient-to-br from-gray-50 to-green-50">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-2xl md:text-3xl font-bold mb-3">
+                    How <span class="text-gradient">FoodWise</span> Works
+                </h2>
+                <p class="text-gray-600">Simple steps to start managing your food inventory efficiently</p>
+            </div>
+
+            <div class="relative">
+                <!-- Timeline Line -->
+                <div class="hidden md:block absolute left-1/2 transform -translate-x-1/2 w-1 bg-gradient-to-b from-green-400 to-emerald-600 h-full"></div>
+
+                <!-- Step 1 -->
+                <div class="timeline-item mb-8 flex flex-col md:flex-row items-center">
+                    <div class="md:w-1/2 md:pr-8 md:text-right mb-4 md:mb-0">
+                        <div class="timeline-content">
+                            <h3 class="text-xl font-bold mb-2">1. Add Your Inventory</h3>
+                            <p class="text-gray-600 text-sm">
+                                Quickly add groceries with names, quantities, expiry dates, and categories. 
+                                Supports Bengali product names.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="timeline-circle w-12 h-12 bg-green-500 border-4 border-white rounded-full flex items-center justify-center shadow-lg z-10 relative">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                    </div>
+                    <div class="md:w-1/2 md:pl-8"></div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="timeline-item mb-8 flex flex-col md:flex-row items-center">
+                    <div class="md:w-1/2 md:pr-8"></div>
+                    <div class="timeline-circle w-12 h-12 bg-blue-500 border-4 border-white rounded-full flex items-center justify-center shadow-lg z-10 relative">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                        </svg>
+                    </div>
+                    <div class="md:w-1/2 md:pl-8 mt-4 md:mt-0">
+                        <div class="timeline-content">
+                            <h3 class="text-xl font-bold mb-2">2. Get Smart Alerts</h3>
+                            <p class="text-gray-600 text-sm">
+                                Receive timely notifications before items expire. Plan meals or freeze food accordingly.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="timeline-item flex flex-col md:flex-row items-center">
+                    <div class="md:w-1/2 md:pr-8 md:text-right mb-4 md:mb-0">
+                        <div class="timeline-content">
+                            <h3 class="text-xl font-bold mb-2">3. Track & Save</h3>
+                            <p class="text-gray-600 text-sm">
+                                View analytics, track expenses in BDT, generate recipes, and see your environmental impact.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="timeline-circle w-12 h-12 bg-purple-500 border-4 border-white rounded-full flex items-center justify-center shadow-lg z-10 relative">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                    </div>
+                    <div class="md:w-1/2 md:pl-8"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TESTIMONIALS WITH SWIPER -->
+    <section class="py-16 px-4 bg-white">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-2xl md:text-3xl font-bold text-center mb-10">
+                Loved by Users Across <span class="text-gradient">Bangladesh</span>
+            </h2>
+
+            <div class="swiper mySwiper">
+                <div class="swiper-wrapper">
+
+                    <div class="swiper-slide bg-gray-50 p-8 rounded-2xl shadow">
+                        <p class="text-gray-700 italic">“My monthly grocery waste reduced by 60%. This app is life-changing!”</p>
+                        <p class="font-semibold mt-4">— University Student, Dhaka</p>
+                    </div>
+
+                    <div class="swiper-slide bg-gray-50 p-8 rounded-2xl shadow">
+                        <p class="text-gray-700 italic">“Love the expiry reminders. I save money every week now.”</p>
+                        <p class="font-semibold mt-4">— Mother of Two, Chattogram</p>
+                    </div>
+
+                    <div class="swiper-slide bg-gray-50 p-8 rounded-2xl shadow">
+                        <p class="text-gray-700 italic">“Bangladesh needs this. Practical and simple.”</p>
+                        <p class="font-semibold mt-4">— Software Engineer, Sylhet</p>
+                    </div>
+
+                </div>
+                <div class="swiper-pagination mt-6"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA SECTION -->
+    <section class="py-16 px-4 bg-gradient-to-br from-green-600 to-emerald-700 text-white">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-2xl md:text-3xl font-bold mb-3">
+                Ready to Start Saving Money & Food?
+            </h2>
+            <p class="text-green-50 mb-6 text-sm md:text-base">
+                Join 15,000+ Bangladeshi families and students reducing waste every day
+            </p>
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <a href="{% url 'users:register' %}" class="px-6 py-2.5 bg-white text-green-600 font-semibold rounded-lg hover:bg-gray-100 transition shadow-lg">
+                    Sign Up Free
+                </a>
+                <a href="{% url 'users:login' %}" class="px-6 py-2.5 bg-transparent border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-green-600 transition">
+                    Log In
+                </a>
+            </div>
+            <p class="text-xs text-green-100 mt-4">No credit card required • 100% Free Forever</p>
+        </div>
+    </section>
+
+    {% include "footer.html" %}
+
+    <!-- GSAP + SWIPER JS -->
+    <script>
+        // Ensure GSAP is loaded
+        if (typeof gsap !== 'undefined') {
+            gsap.registerPlugin(ScrollTrigger);
+
+            // Hero fade in
+            gsap.from('.hero-content', { opacity: 0, y: 40, duration: 1.2, ease: 'power2.out' });
+
+            // Stats section fade
+            gsap.from('.stat-card', {
+                scrollTrigger: { trigger: '.stat-card', start: 'top 85%' },
+                opacity: 0, y: 30, stagger: 0.15, duration: 0.8
+            });
+
+            // Features grid animation
+            gsap.from('.feature-card', {
+                scrollTrigger: { trigger: '#features', start: 'top 80%' },
+                opacity: 0, y: 40, stagger: 0.15, duration: 0.7
+            });
+
+            // Timeline circles scale on scroll
+            gsap.utils.toArray('.timeline-circle').forEach((circle, i) => {
+                gsap.from(circle, {
+                    scrollTrigger: { trigger: circle, start: 'top 85%' },
+                    scale: 0, opacity: 0, duration: 0.6, delay: i * 0.2
+                });
+            });
+
+            // Timeline content fade
+            gsap.from('.timeline-content', {
+                scrollTrigger: { trigger: '.timeline-content', start: 'top 85%' },
+                opacity: 0, x: 30, stagger: 0.2, duration: 0.8
+            });
+        }
+
+        // Swiper testimonials slider
+        if (typeof Swiper !== 'undefined') {
+            new Swiper(".testimonialSwiper", {
+                slidesPerView: 1,
+                spaceBetween: 30,
+                loop: true,
+                autoplay: { delay: 3500, disableOnInteraction: false },
+                pagination: { el: ".swiper-pagination", clickable: true },
+                breakpoints: {
+                    768: { slidesPerView: 1 },
+                    1024: { slidesPerView: 1 }
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>

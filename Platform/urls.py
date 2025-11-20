@@ -17,11 +17,12 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
-from users.views import dashboard_view
+from users.views import dashboard_view, landing_view
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", dashboard_view, name='dashboard'),
+    path("", landing_view, name='landing'),
+    path("dashboard/", dashboard_view, name='dashboard'),
     path("users/", include('users.urls')),
     path("food/", include('food.urls')),
     path("resources/", include('resources.urls')),
