@@ -1,0 +1,13 @@
+# Mark Django template files as linguist-vendored to reduce their weight
+*.html linguist-vendored
+*.css linguist-vendored
+
+# Ensure Python is detected as the primary language
+*.py linguist-detectable=true
+*.py linguist-language=Python
+
+# Documentation
+*.md linguist-documentation
+
+# JavaScript/Node modules
+node_modules/* linguist-vendored
