@@ -1,23 +1,310 @@
-<nav class="bg-white shadow-lg">
-    <div class="container mx-auto px-4">
+<style>
+    .navbar {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(236, 253, 245, 0.95) 100%);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(16, 185, 129, 0.1);
+    }
+    
+    .nav-link {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .nav-link::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #10b981, #059669);
+        transform: translateX(-50%);
+        transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 2px 2px 0 0;
+    }
+    
+    .nav-link:hover::before,
+    .nav-link.active::before {
+        width: 80%;
+    }
+    
+    .nav-link::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
+        transform: scaleX(0);
+        transform-origin: right;
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 8px;
+        z-index: -1;
+    }
+    
+    .nav-link:hover::after {
+        transform: scaleX(1);
+        transform-origin: left;
+    }
+    
+    .logo-glow {
+        filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.3));
+        transition: filter 0.3s ease;
+    }
+    
+    .logo-glow:hover {
+        filter: drop-shadow(0 0 12px rgba(16, 185, 129, 0.5));
+    }
+    
+    .btn-gradient {
+        background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+        background-size: 200% 100%;
+        background-position: 0% 0%;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+    
+    .btn-gradient:hover {
+        background-position: 100% 0%;
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        transform: translateY(-2px);
+    }
+    
+    .btn-gradient:active {
+        transform: translateY(0);
+    }
+    
+    .login-btn {
+        position: relative;
+        color: #374151;
+        font-weight: 600;
+        padding: 8px 16px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .login-btn:hover {
+        color: #10b981;
+        background: rgba(16, 185, 129, 0.05);
+    }
+    
+    .mobile-menu-btn {
+        display: none;
+    }
+    
+    @media (max-width: 768px) {
+        .mobile-menu-btn {
+            display: block;
+        }
+        
+        .nav-links-desktop {
+            display: none;
+        }
+    }
+    
+    .mobile-menu {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .mobile-menu.active {
+        max-height: 500px;
+    }
+    
+    .badge-pulse {
+        animation: badgePulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    
+    @keyframes badgePulse {
+        0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 0.7;
+            transform: scale(1.1);
+        }
+    }
+</style>
+
+<nav class="navbar sticky top-0 z-50 shadow-lg" id="mainNav">
+    <div class="container mx-auto px-4 lg:px-8">
         <div class="flex justify-between items-center py-4">
-            <div class="flex items-center space-x-4">
-                <a href="{% url 'dashboard' %}" class="text-xl font-bold text-green-600">
-                    Food Management Platform
+            <!-- Logo -->
+            <div class="flex items-center space-x-3">
+                <a href="{% url 'dashboard' %}" class="flex items-center space-x-3 group">
+                    <div class="relative logo-glow">
+                        <svg class="w-11 h-11 text-green-600 transform group-hover:rotate-12 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
+                        </svg>
+                        <div class="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full badge-pulse"></div>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-2xl font-bold text-gray-800 tracking-tight" style="font-family: 'Inter', sans-serif; letter-spacing: -0.5px;">
+                            FoodWise<span class="text-green-600">AI</span>
+                        </span>
+                        <span class="text-xs text-green-600 font-semibold -mt-1 tracking-wide">Smart Food Management</span>
+                    </div>
                 </a>
             </div>
             
-            <div class="hidden md:flex space-x-6">
-                <a href="{% url 'dashboard' %}" class="text-gray-700 hover:text-green-600 transition">Dashboard</a>
-                <a href="{% url 'food:inventory_list' %}" class="text-gray-700 hover:text-green-600 transition">Inventory</a>
-                <a href="{% url 'resources:resources_list' %}" class="text-gray-700 hover:text-green-600 transition">Resources</a>
-                <a href="{% url 'uploads:upload_form' %}" class="text-gray-700 hover:text-green-600 transition">Upload</a>
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex items-center space-x-2 nav-links-desktop">
+                <a href="{% url 'dashboard' %}" class="nav-link px-5 py-2.5 rounded-lg text-gray-700 hover:text-green-600 transition-all duration-300 font-semibold text-sm relative z-10">
+                    <span class="flex items-center space-x-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                        </svg>
+                        <span>Dashboard</span>
+                    </span>
+                </a>
+                <a href="{% url 'food:inventory_list' %}" class="nav-link px-5 py-2.5 rounded-lg text-gray-700 hover:text-green-600 transition-all duration-300 font-semibold text-sm relative z-10">
+                    <span class="flex items-center space-x-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                        </svg>
+                        <span>Inventory</span>
+                    </span>
+                </a>
+                <a href="{% url 'resources:resources_list' %}" class="nav-link px-5 py-2.5 rounded-lg text-gray-700 hover:text-green-600 transition-all duration-300 font-semibold text-sm relative z-10">
+                    <span class="flex items-center space-x-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span>Resources</span>
+                    </span>
+                </a>
+                <a href="{% url 'uploads:upload_form' %}" class="nav-link px-5 py-2.5 rounded-lg text-gray-700 hover:text-green-600 transition-all duration-300 font-semibold text-sm relative z-10">
+                    <span class="flex items-center space-x-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        <span>Upload</span>
+                    </span>
+                </a>
             </div>
             
-            <div class="flex space-x-4">
-                <a href="{% url 'users:login' %}" class="text-gray-700 hover:text-green-600 transition">Login</a>
-                <a href="{% url 'users:register' %}" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">Register</a>
+            <!-- Auth Buttons -->
+            <div class="hidden md:flex items-center space-x-3">
+                <a href="{% url 'users:login' %}" class="login-btn flex items-center space-x-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                    </svg>
+                    <span>Login</span>
+                </a>
+                <a href="{% url 'users:register' %}" class="btn-gradient text-white px-6 py-2.5 rounded-xl font-bold text-sm flex items-center space-x-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                    <span>Get Started</span>
+                </a>
+            </div>
+            
+            <!-- Mobile Menu Button -->
+            <button class="mobile-menu-btn text-gray-700 hover:text-green-600 focus:outline-none" id="mobileMenuBtn">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div class="mobile-menu md:hidden" id="mobileMenu">
+            <div class="py-4 space-y-2">
+                <a href="{% url 'dashboard' %}" class="block px-4 py-3 rounded-lg text-gray-700 hover:bg-green-50 hover:text-green-600 transition-all duration-200 font-semibold">
+                    <span class="flex items-center space-x-3">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                        </svg>
+                        <span>Dashboard</span>
+                    </span>
+                </a>
+                <a href="{% url 'food:inventory_list' %}" class="block px-4 py-3 rounded-lg text-gray-700 hover:bg-green-50 hover:text-green-600 transition-all duration-200 font-semibold">
+                    <span class="flex items-center space-x-3">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                        </svg>
+                        <span>Inventory</span>
+                    </span>
+                </a>
+                <a href="{% url 'resources:resources_list' %}" class="block px-4 py-3 rounded-lg text-gray-700 hover:bg-green-50 hover:text-green-600 transition-all duration-200 font-semibold">
+                    <span class="flex items-center space-x-3">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span>Resources</span>
+                    </span>
+                </a>
+                <a href="{% url 'uploads:upload_form' %}" class="block px-4 py-3 rounded-lg text-gray-700 hover:bg-green-50 hover:text-green-600 transition-all duration-200 font-semibold">
+                    <span class="flex items-center space-x-3">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        <span>Upload</span>
+                    </span>
+                </a>
+                <div class="pt-4 mt-4 border-t border-gray-200 space-y-2">
+                    <a href="{% url 'users:login' %}" class="block px-4 py-3 rounded-lg text-gray-700 hover:bg-green-50 hover:text-green-600 transition-all duration-200 font-semibold">Login</a>
+                    <a href="{% url 'users:register' %}" class="block px-4 py-3 rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 text-white text-center font-bold shadow-md hover:shadow-lg">Get Started</a>
+                </div>
             </div>
         </div>
     </div>
 </nav>
+
+<script>
+    // Mobile menu toggle
+    document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+        const menu = document.getElementById('mobileMenu');
+        menu.classList.toggle('active');
+    });
+    
+    // GSAP Navbar Animation on Scroll
+    gsap.registerPlugin(ScrollTrigger);
+    
+    let lastScrollTop = 0;
+    const navbar = document.getElementById('mainNav');
+    
+    window.addEventListener('scroll', function() {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        
+        if (scrollTop > lastScrollTop && scrollTop > 100) {
+            // Scrolling down
+            gsap.to(navbar, {
+                y: -100,
+                duration: 0.3,
+                ease: 'power2.inOut'
+            });
+        } else {
+            // Scrolling up
+            gsap.to(navbar, {
+                y: 0,
+                duration: 0.3,
+                ease: 'power2.inOut'
+            });
+        }
+        
+        lastScrollTop = scrollTop;
+        
+        // Add shadow on scroll
+        if (scrollTop > 10) {
+            navbar.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.1)';
+        } else {
+            navbar.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.05)';
+        }
+    });
+    
+    // Highlight active link
+    const currentPath = window.location.pathname;
+    const navLinks = document.querySelectorAll('.nav-link');
+    
+    navLinks.forEach(link => {
+        if (link.getAttribute('href') === currentPath || 
+            (currentPath.includes(link.getAttribute('href')) && link.getAttribute('href') !== '/')) {
+            link.classList.add('active');
+            link.style.color = '#10b981';
+        }
+    });
+</script>
