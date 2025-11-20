@@ -16,20 +16,15 @@
     </style>
     {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-gradient-to-br from-gray-50 via-green-50 to-blue-50 min-h-screen">
+<body class="bg-gradient-to-br from-gray-50 via-green-50 to-blue-50 min-h-screen flex flex-col">
     {% include 'navbar.html' %}
     
-    <main>
+    <main class="flex-grow">
         {% block content %}
         {% endblock %}
     </main>
     
-    <footer class="bg-gradient-to-r from-gray-800 to-gray-900 text-white text-center py-6 mt-12">
-        <div class="container mx-auto px-4">
-            <p class="text-sm">&copy; 2025 AI-Powered Food Management Platform. All rights reserved.</p>
-            <p class="text-xs text-gray-400 mt-1">Reducing food waste, one meal at a time.</p>
-        </div>
-    </footer>
+    {% include 'footer.html' %}
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>

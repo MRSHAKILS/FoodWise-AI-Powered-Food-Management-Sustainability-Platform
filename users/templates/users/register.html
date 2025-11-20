@@ -5,83 +5,93 @@
 
 {% block extra_head %}
 <style>
-    .form-section {
+    .register-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+    }
+    
+    .register-card {
         background: white;
-        border-radius: 12px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
         overflow: hidden;
+        width: 100%;
+        max-width: 480px;
         position: relative;
     }
     
-    .form-header {
-        background: linear-gradient(135deg, #059669 0%, #0d9488 100%);
+    .card-header {
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
         color: white;
-        padding: 2rem;
+        padding: 2.5rem 2rem;
         text-align: center;
+        position: relative;
+        overflow: hidden;
     }
     
-    .form-step {
-        display: none;
-        padding: 2rem;
+    .card-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
     }
     
-    .form-step.active {
-        display: block;
+    .card-body {
+        padding: 2.5rem 2rem;
     }
     
-    .step-indicator {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 2rem;
-    }
-    
-    .step {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background-color: #e5e7eb;
-        margin: 0 8px;
-        transition: all 0.3s ease;
-    }
-    
-    .step.active {
-        background-color: #059669;
-        transform: scale(1.2);
-    }
-    
-    .input-group {
+    .form-group {
         margin-bottom: 1.5rem;
         position: relative;
-    }
-    
-    .input-icon {
-        position: absolute;
-        left: 1rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #9ca3af;
-    }
-    
-    .form-input {
-        width: 100%;
-        padding: 0.75rem 1rem 0.75rem 2.5rem;
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-        font-size: 1rem;
-    }
-    
-    .form-input:focus {
-        outline: none;
-        border-color: #059669;
-        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
     }
     
     .form-label {
         display: block;
         margin-bottom: 0.5rem;
-        font-weight: 500;
+        font-weight: 600;
         color: #374151;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #fafafa;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #059669;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    .form-input.error {
+        border-color: #ef4444;
+        background: #fef2f2;
+    }
+    
+    .select-input {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.75rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+        padding-right: 2.5rem;
     }
     
     .checkbox-group {
@@ -91,22 +101,22 @@
     }
     
     .checkbox-input {
-        margin-right: 0.75rem;
         width: 1.25rem;
         height: 1.25rem;
+        border: 2px solid #d1d5db;
         border-radius: 4px;
-        border: 1px solid #d1d5db;
-        appearance: none;
+        margin-right: 0.75rem;
         position: relative;
         cursor: pointer;
+        transition: all 0.2s ease;
     }
     
-    .checkbox-input:checked {
+    .checkbox-input.checked {
         background-color: #059669;
         border-color: #059669;
     }
     
-    .checkbox-input:checked::after {
+    .checkbox-input.checked::after {
         content: '✓';
         position: absolute;
         color: white;
@@ -119,302 +129,285 @@
     .checkbox-label {
         cursor: pointer;
         color: #374151;
+        font-size: 0.95rem;
     }
     
     .btn {
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        cursor: pointer;
-        text-align: center;
-        display: inline-block;
         width: 100%;
+        padding: 1rem;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
     }
     
     .btn-primary {
-        background-color: #059669;
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
         color: white;
-        border: none;
+        box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3);
     }
     
     .btn-primary:hover {
-        background-color: #047857;
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+        box-shadow: 0 8px 25px rgba(5, 150, 105, 0.4);
     }
     
-    .btn-secondary {
-        background-color: #f3f4f6;
-        color: #374151;
-        border: 1px solid #d1d5db;
-    }
-    
-    .btn-secondary:hover {
-        background-color: #e5e7eb;
+    .btn-primary:active {
+        transform: translateY(0);
     }
     
     .form-footer {
         text-align: center;
-        margin-top: 1.5rem;
-        padding-top: 1.5rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
         border-top: 1px solid #e5e7eb;
         color: #6b7280;
+        font-size: 0.95rem;
     }
     
     .form-footer a {
         color: #059669;
         text-decoration: none;
-        font-weight: 500;
+        font-weight: 600;
     }
     
     .form-footer a:hover {
         text-decoration: underline;
     }
     
-    .feature-highlight {
+    .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    
+    .feature-item {
         display: flex;
         align-items: center;
-        margin-bottom: 1rem;
-        padding: 1rem;
-        background-color: #f0fdf4;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        background: #f0fdf4;
         border-radius: 8px;
-        border-left: 4px solid #059669;
+        border-left: 3px solid #059669;
     }
     
     .feature-icon {
-        margin-right: 1rem;
+        color: #059669;
+        flex-shrink: 0;
+    }
+    
+    .feature-text {
+        font-size: 0.85rem;
+        color: #065f46;
+        font-weight: 500;
+    }
+    
+    .error-message {
+        color: #ef4444;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .input-icon {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9ca3af;
+        transition: color 0.3s ease;
+    }
+    
+    .form-input:focus + .input-icon {
         color: #059669;
     }
     
-    .password-strength {
-        height: 4px;
-        border-radius: 2px;
-        margin-top: 0.5rem;
-        background-color: #e5e7eb;
-        overflow: hidden;
+    .password-toggle {
+        cursor: pointer;
+        color: #6b7280;
+        transition: color 0.3s ease;
     }
     
-    .password-strength-fill {
-        height: 100%;
-        width: 0%;
-        transition: width 0.3s ease;
-        border-radius: 2px;
+    .password-toggle:hover {
+        color: #059669;
     }
     
-    .password-weak .password-strength-fill {
-        background-color: #ef4444;
-        width: 33%;
-    }
-    
-    .password-medium .password-strength-fill {
-        background-color: #f59e0b;
-        width: 66%;
-    }
-    
-    .password-strong .password-strength-fill {
-        background-color: #10b981;
-        width: 100%;
+    .hidden {
+        display: none;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto px-4 py-8">
-    <!-- Multi-step form container -->
-    <div class="form-section">
-        <div class="form-header">
+<div class="register-container">
+    <div class="register-card">
+        <div class="card-header">
             <h1 class="text-3xl font-bold mb-2">Join FoodWise</h1>
-            <p class="opacity-90">Start your journey to reduce food waste and eat sustainably</p>
+            <p class="opacity-90">Start your sustainable food journey today</p>
         </div>
         
-        <!-- Step indicators -->
-        <div class="step-indicator pt-6">
-            <div class="step active" data-step="1"></div>
-            <div class="step" data-step="2"></div>
-            <div class="step" data-step="3"></div>
-        </div>
-        
-        <form method="post" id="registrationForm" class="space-y-4">
-            {% csrf_token %}
-            
-            <!-- Step 1: Account Details -->
-            <div class="form-step active" id="step1">
-                <h2 class="text-xl font-semibold text-gray-800 mb-6">Account Information</h2>
+        <div class="card-body">
+            <form method="post" id="registrationForm">
+                {% csrf_token %}
                 
-                <div class="input-group">
+                <!-- Personal Information -->
+                <div class="form-group">
                     <label for="full_name" class="form-label">Full Name</label>
-                    <div class="relative">
-                        <div class="input-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                        </div>
-                        <input type="text" id="full_name" name="full_name" class="form-input" placeholder="Enter your full name" required>
+                    <input type="text" id="full_name" name="full_name" class="form-input" placeholder="Enter your full name" required>
+                    <div class="input-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
                     </div>
                 </div>
                 
-                <div class="input-group">
+                <div class="form-group">
                     <label for="email" class="form-label">Email Address</label>
-                    <div class="relative">
-                        <div class="input-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                            </svg>
-                        </div>
-                        <input type="email" id="email" name="email" class="form-input" placeholder="Enter your email" required>
+                    <input type="email" id="email" name="email" class="form-input" placeholder="Enter your email" required>
+                    <div class="input-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
                     </div>
                 </div>
                 
-                <div class="input-group">
+                <div class="form-group">
                     <label for="password" class="form-label">Password</label>
-                    <div class="relative">
-                        <div class="input-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
-                        </div>
-                        <input type="password" id="password" name="password" class="form-input" placeholder="Create a password" required>
-                    </div>
-                    <div class="password-strength">
-                        <div class="password-strength-fill"></div>
+                    <input type="password" id="password" name="password" class="form-input" placeholder="Create a secure password" required>
+                    <div class="input-icon password-toggle" id="passwordToggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
                     </div>
                 </div>
                 
-                <div class="input-group">
+                <div class="form-group">
                     <label for="confirm_password" class="form-label">Confirm Password</label>
-                    <div class="relative">
-                        <div class="input-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                            </svg>
-                        </div>
-                        <input type="password" id="confirm_password" name="confirm_password" class="form-input" placeholder="Confirm your password" required>
+                    <input type="password" id="confirm_password" name="confirm_password" class="form-input" placeholder="Confirm your password" required>
+                    <div class="input-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
                     </div>
                 </div>
                 
-                <div class="flex justify-end mt-8">
-                    <button type="button" class="btn btn-primary next-step" data-next="2">Continue</button>
-                </div>
-            </div>
-            
-            <!-- Step 2: Household & Preferences -->
-            <div class="form-step" id="step2">
-                <h2 class="text-xl font-semibold text-gray-800 mb-6">Household & Preferences</h2>
-                
-                <div class="input-group">
+                <!-- Household & Preferences -->
+                <div class="form-group">
                     <label for="household_size" class="form-label">Household Size</label>
-                    <div class="relative">
-                        <div class="input-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg>
-                        </div>
-                        <select id="household_size" name="household_size" class="form-input" required>
-                            <option value="" disabled selected>Select number of people</option>
-                            <option value="1">1 person</option>
-                            <option value="2">2 people</option>
-                            <option value="3">3 people</option>
-                            <option value="4">4 people</option>
-                            <option value="5">5+ people</option>
-                        </select>
-                    </div>
+                    <select id="household_size" name="household_size" class="form-input select-input" required>
+                        <option value="" disabled selected>Select number of people</option>
+                        <option value="1">1 person</option>
+                        <option value="2">2 people</option>
+                        <option value="3">3 people</option>
+                        <option value="4">4 people</option>
+                        <option value="5">5+ people</option>
+                    </select>
                 </div>
                 
-                <div class="input-group">
-                    <label for="budget_range" class="form-label">Weekly Food Budget</label>
-                    <div class="relative">
-                        <div class="input-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <select id="budget_range" name="budget_range" class="form-input" required>
-                            <option value="" disabled selected>Select your budget range</option>
-                            <option value="low">Under $50</option>
-                            <option value="medium">$50 - $100</option>
-                            <option value="high">$100 - $150</option>
-                            <option value="premium">Over $150</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="input-group">
+                <div class="form-group">
                     <label class="form-label">Dietary Preferences</label>
                     <div class="space-y-2">
                         <div class="checkbox-group">
-                            <input type="checkbox" id="vegetarian" name="dietary_preferences" value="vegetarian" class="checkbox-input">
+                            <div class="checkbox-input" data-for="vegetarian"></div>
+                            <input type="checkbox" id="vegetarian" name="dietary_preferences" value="vegetarian" class="hidden">
                             <label for="vegetarian" class="checkbox-label">Vegetarian</label>
                         </div>
                         <div class="checkbox-group">
-                            <input type="checkbox" id="vegan" name="dietary_preferences" value="vegan" class="checkbox-input">
+                            <div class="checkbox-input" data-for="vegan"></div>
+                            <input type="checkbox" id="vegan" name="dietary_preferences" value="vegan" class="hidden">
                             <label for="vegan" class="checkbox-label">Vegan</label>
                         </div>
                         <div class="checkbox-group">
-                            <input type="checkbox" id="gluten_free" name="dietary_preferences" value="gluten_free" class="checkbox-input">
+                            <div class="checkbox-input" data-for="gluten_free"></div>
+                            <input type="checkbox" id="gluten_free" name="dietary_preferences" value="gluten_free" class="hidden">
                             <label for="gluten_free" class="checkbox-label">Gluten-Free</label>
                         </div>
                         <div class="checkbox-group">
-                            <input type="checkbox" id="dairy_free" name="dietary_preferences" value="dairy_free" class="checkbox-input">
-                            <label for="dairy_free" class="checkbox-label">Dairy-Free</label>
-                        </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="none" name="dietary_preferences" value="none" class="checkbox-input">
+                            <div class="checkbox-input" data-for="none"></div>
+                            <input type="checkbox" id="none" name="dietary_preferences" value="none" class="hidden">
                             <label for="none" class="checkbox-label">No restrictions</label>
                         </div>
                     </div>
                 </div>
                 
-                <div class="flex justify-between mt-8">
-                    <button type="button" class="btn btn-secondary prev-step" data-prev="1">Back</button>
-                    <button type="button" class="btn btn-primary next-step" data-next="3">Continue</button>
-                </div>
-            </div>
-            
-            <!-- Step 3: Location & Final Step -->
-            <div class="form-step" id="step3">
-                <h2 class="text-xl font-semibold text-gray-800 mb-6">Location & Final Details</h2>
-                
-                <div class="input-group">
-                    <label for="location" class="form-label">Location (City)</label>
-                    <div class="relative">
-                        <div class="input-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                        </div>
-                        <input type="text" id="location" name="location" class="form-input" placeholder="Enter your city" required>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-1">We'll use this to provide localized food tips and resources</p>
-                </div>
-                
-                <div class="feature-highlight">
-                    <div class="feature-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                <!-- Location -->
+                <div class="form-group">
+                    <label for="location" class="form-label">Location</label>
+                    <input type="text" id="location" name="location" class="form-input" placeholder="Enter your city" required>
+                    <div class="input-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                     </div>
-                    <div>
-                        <h3 class="font-medium text-gray-800">Sustainable Food Management</h3>
-                        <p class="text-sm text-gray-600">By registering, you'll help reduce food waste and promote sustainable consumption.</p>
+                </div>
+                
+                <!-- Features Highlight -->
+                <div class="feature-grid">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                            </svg>
+                        </div>
+                        <span class="feature-text">Food Tracking</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                        </div>
+                        <span class="feature-text">Waste Reduction</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                            </svg>
+                        </div>
+                        <span class="feature-text">Inventory Management</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                        </div>
+                        <span class="feature-text">Sustainability Tips</span>
                     </div>
                 </div>
                 
+                <!-- Terms Agreement -->
                 <div class="checkbox-group mt-4">
-                    <input type="checkbox" id="terms" name="terms" class="checkbox-input" required>
+                    <div class="checkbox-input" data-for="terms"></div>
+                    <input type="checkbox" id="terms" name="terms" class="hidden" required>
                     <label for="terms" class="checkbox-label">I agree to the <a href="#" class="text-green-600 hover:underline">Terms of Service</a> and <a href="#" class="text-green-600 hover:underline">Privacy Policy</a></label>
                 </div>
                 
-                <div class="flex justify-between mt-8">
-                    <button type="button" class="btn btn-secondary prev-step" data-prev="2">Back</button>
-                    <button type="submit" class="btn btn-primary">Create Account</button>
-                </div>
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-primary mt-6">
+                    <span>Create Account</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </button>
+            </form>
+            
+            <div class="form-footer">
+                <p>Already have an account? <a href="{% url 'users:login' %}">Login here</a></p>
             </div>
-        </form>
-        
-        <div class="form-footer">
-            <p>Already have an account? <a href="{% url 'users:login' %}">Login here</a></p>
         </div>
     </div>
 </div>
@@ -424,131 +417,188 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Form step navigation
-        const steps = document.querySelectorAll('.form-step');
-        const stepIndicators = document.querySelectorAll('.step');
-        let currentStep = 1;
+        // Animate form elements on load
+        gsap.from('.register-card', {
+            y: 30,
+            opacity: 0,
+            duration: 0.8,
+            ease: 'power2.out'
+        });
         
-        // Function to show a specific step
-        function showStep(stepNumber) {
-            // Hide all steps
-            steps.forEach(step => {
-                step.classList.remove('active');
-                gsap.to(step, { opacity: 0, duration: 0.3, display: 'none' });
-            });
+        gsap.from('.form-group', {
+            y: 20,
+            opacity: 0,
+            duration: 0.6,
+            stagger: 0.1,
+            delay: 0.3,
+            ease: 'power2.out'
+        });
+        
+        // Custom checkbox functionality
+        document.querySelectorAll('.checkbox-input').forEach(checkbox => {
+            const inputId = checkbox.getAttribute('data-for');
+            const input = document.getElementById(inputId);
             
-            // Show the current step
-            const currentStepElement = document.getElementById(`step${stepNumber}`);
-            currentStepElement.classList.add('active');
-            gsap.fromTo(currentStepElement, 
-                { opacity: 0, y: 20 }, 
-                { opacity: 1, y: 0, duration: 0.5, display: 'block' }
-            );
-            
-            // Update step indicators
-            stepIndicators.forEach((indicator, index) => {
-                if (index < stepNumber) {
-                    indicator.classList.add('active');
+            checkbox.addEventListener('click', function() {
+                if (inputId === 'none') {
+                    // If "No restrictions" is clicked, uncheck all others
+                    document.querySelectorAll('input[name="dietary_preferences"]').forEach(cb => {
+                        cb.checked = false;
+                        const visualCb = document.querySelector(`.checkbox-input[data-for="${cb.id}"]`);
+                        visualCb.classList.remove('checked');
+                    });
                 } else {
-                    indicator.classList.remove('active');
+                    // If any other checkbox is clicked, uncheck "No restrictions"
+                    document.getElementById('none').checked = false;
+                    document.querySelector('.checkbox-input[data-for="none"]').classList.remove('checked');
                 }
-            });
-            
-            currentStep = stepNumber;
-        }
-        
-        // Next step buttons
-        document.querySelectorAll('.next-step').forEach(button => {
-            button.addEventListener('click', function() {
-                const nextStep = parseInt(this.getAttribute('data-next'));
-                if (validateStep(currentStep)) {
-                    showStep(nextStep);
-                }
+                
+                input.checked = !input.checked;
+                checkbox.classList.toggle('checked');
             });
         });
         
-        // Previous step buttons
-        document.querySelectorAll('.prev-step').forEach(button => {
-            button.addEventListener('click', function() {
-                const prevStep = parseInt(this.getAttribute('data-prev'));
-                showStep(prevStep);
-            });
-        });
-        
-        // Password strength indicator
+        // Password toggle functionality
+        const passwordToggle = document.getElementById('passwordToggle');
         const passwordInput = document.getElementById('password');
-        const passwordStrength = document.querySelector('.password-strength');
         
-        passwordInput.addEventListener('input', function() {
-            const password = this.value;
-            let strength = 0;
+        passwordToggle.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
             
-            if (password.length >= 8) strength++;
-            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
-            if (password.match(/\d/)) strength++;
-            if (password.match(/[^a-zA-Z\d]/)) strength++;
-            
-            // Reset classes
-            passwordStrength.classList.remove('password-weak', 'password-medium', 'password-strong');
-            
-            // Add appropriate class
-            if (strength <= 1) {
-                passwordStrength.classList.add('password-weak');
-            } else if (strength <= 3) {
-                passwordStrength.classList.add('password-medium');
+            // Toggle icon
+            if (type === 'text') {
+                passwordToggle.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                    </svg>
+                `;
             } else {
-                passwordStrength.classList.add('password-strong');
+                passwordToggle.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                `;
             }
         });
         
-        // Form validation for each step
-        function validateStep(step) {
+        // Form validation
+        const form = document.getElementById('registrationForm');
+        
+        form.addEventListener('submit', function(e) {
             let isValid = true;
             
-            if (step === 1) {
-                const fullName = document.getElementById('full_name').value;
-                const email = document.getElementById('email').value;
-                const password = document.getElementById('password').value;
-                const confirmPassword = document.getElementById('confirm_password').value;
-                
-                if (!fullName) {
-                    highlightError('full_name', 'Please enter your full name');
+            // Clear previous errors
+            document.querySelectorAll('.form-input').forEach(input => {
+                input.classList.remove('error');
+                const errorMsg = input.parentNode.querySelector('.error-message');
+                if (errorMsg) errorMsg.remove();
+            });
+            
+            // Validate required fields
+            const requiredFields = ['full_name', 'email', 'password', 'confirm_password', 'household_size', 'location'];
+            requiredFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (!field.value.trim()) {
                     isValid = false;
+                    field.classList.add('error');
+                    const errorMsg = document.createElement('div');
+                    errorMsg.className = 'error-message';
+                    errorMsg.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        This field is required
+                    `;
+                    field.parentNode.appendChild(errorMsg);
+                    
+                    // Animate error
+                    gsap.fromTo(errorMsg, 
+                        { opacity: 0, y: -10 }, 
+                        { opacity: 1, y: 0, duration: 0.3 }
+                    );
                 }
-                
-                if (!email || !isValidEmail(email)) {
-                    highlightError('email', 'Please enter a valid email address');
-                    isValid = false;
-                }
-                
-                if (!password || password.length < 8) {
-                    highlightError('password', 'Password must be at least 8 characters');
-                    isValid = false;
-                }
-                
-                if (password !== confirmPassword) {
-                    highlightError('confirm_password', 'Passwords do not match');
-                    isValid = false;
-                }
+            });
+            
+            // Validate email format
+            const email = document.getElementById('email');
+            if (email.value && !isValidEmail(email.value)) {
+                isValid = false;
+                email.classList.add('error');
+                const errorMsg = document.createElement('div');
+                errorMsg.className = 'error-message';
+                errorMsg.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Please enter a valid email address
+                `;
+                email.parentNode.appendChild(errorMsg);
             }
             
-            if (step === 2) {
-                const householdSize = document.getElementById('household_size').value;
-                const budgetRange = document.getElementById('budget_range').value;
-                
-                if (!householdSize) {
-                    highlightError('household_size', 'Please select your household size');
-                    isValid = false;
-                }
-                
-                if (!budgetRange) {
-                    highlightError('budget_range', 'Please select your budget range');
-                    isValid = false;
-                }
+            // Validate password match
+            const password = document.getElementById('password');
+            const confirmPassword = document.getElementById('confirm_password');
+            if (password.value && confirmPassword.value && password.value !== confirmPassword.value) {
+                isValid = false;
+                password.classList.add('error');
+                confirmPassword.classList.add('error');
+                const errorMsg = document.createElement('div');
+                errorMsg.className = 'error-message';
+                errorMsg.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Passwords do not match
+                `;
+                confirmPassword.parentNode.appendChild(errorMsg);
             }
             
-            return isValid;
-        }
+            // Validate password length
+            if (password.value && password.value.length < 6) {
+                isValid = false;
+                password.classList.add('error');
+                const errorMsg = document.createElement('div');
+                errorMsg.className = 'error-message';
+                errorMsg.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Password must be at least 6 characters
+                `;
+                password.parentNode.appendChild(errorMsg);
+            }
+            
+            // Validate terms agreement
+            const terms = document.getElementById('terms');
+            if (!terms.checked) {
+                isValid = false;
+                const termsLabel = document.querySelector('label[for="terms"]');
+                const errorMsg = document.createElement('div');
+                errorMsg.className = 'error-message';
+                errorMsg.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    You must agree to the terms and conditions
+                `;
+                termsLabel.parentNode.appendChild(errorMsg);
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+                
+                // Shake animation for form
+                gsap.to(form, {
+                    x: 10,
+                    duration: 0.1,
+                    repeat: 3,
+                    yoyo: true,
+                    ease: 'power1.inOut'
+                });
+            }
+        });
         
         // Helper function to validate email
         function isValidEmail(email) {
@@ -556,48 +606,13 @@
             return re.test(String(email).toLowerCase());
         }
         
-        // Helper function to highlight errors
-        function highlightError(fieldId, message) {
-            const field = document.getElementById(fieldId);
-            field.style.borderColor = '#ef4444';
-            
-            // Remove any existing error message
-            const existingError = field.parentNode.querySelector('.error-message');
-            if (existingError) {
-                existingError.remove();
-            }
-            
-            // Add error message
-            const errorElement = document.createElement('p');
-            errorElement.className = 'error-message text-red-500 text-xs mt-1';
-            errorElement.textContent = message;
-            field.parentNode.appendChild(errorElement);
-            
-            // Animate the error
-            gsap.fromTo(errorElement, 
-                { opacity: 0, y: -10 }, 
-                { opacity: 1, y: 0, duration: 0.3 }
-            );
-        }
-        
-        // Remove error highlighting when user starts typing
+        // Remove error styling when user starts typing
         document.querySelectorAll('.form-input').forEach(input => {
             input.addEventListener('input', function() {
-                this.style.borderColor = '#d1d5db';
-                
-                const errorMessage = this.parentNode.querySelector('.error-message');
-                if (errorMessage) {
-                    errorMessage.remove();
-                }
+                this.classList.remove('error');
+                const errorMsg = this.parentNode.querySelector('.error-message');
+                if (errorMsg) errorMsg.remove();
             });
-        });
-        
-        // Animate form on load
-        gsap.from('.form-section', {
-            y: 30,
-            opacity: 0,
-            duration: 0.8,
-            ease: 'power2.out'
         });
     });
 </script>

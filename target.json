@@ -1,0 +1,132 @@
+{
+  "project_metadata": {
+    "name": "Innovatex Hackathon - Part 1: Pre-Hack Foundation",
+    "theme": "SDG 2 (Zero Hunger) & SDG 12 (Responsible Consumption)",
+    "goal": "Build a full-stack food management & sustainability platform (Foundation Layer)",
+    "deadline_context": "Must be completed before onsite hackathon",
+    "technical_constraints": {
+      "stack": "Any modern full-stack (User choice)",
+      "database": "Persistent (SQL or NoSQL)",
+      "deployment": "Deployed or locally runnable with clear instructions",
+      "ai_usage": "No advanced AI required for Part 1 (Rule-based logic only)"
+    }
+  },
+  "implementation_roadmap": [
+    {
+      "phase_id": "1_setup_and_schema",
+      "title": "Project Setup & Database Modeling",
+      "instructions": [
+        "Initialize repository with clear separation of concerns (e.g., /client, /server).",
+        "Design database schema for 'Users', 'Inventory/FoodItems', 'ConsumptionLogs', and 'Resources'."
+      ],
+      "schema_requirements": {
+        "User": {
+          "fields": ["full_name", "email", "password_hash", "household_size", "dietary_preferences", "location", "budget_range"]
+        },
+        "FoodItem/Inventory": {
+          "fields": ["item_name", "category", "quantity", "expiry_date", "cost_per_unit", "user_id (if private)", "image_url (optional)"]
+        },
+        "Resource": {
+          "fields": ["title", "description_or_url", "category", "type (article/video)"]
+        }
+      }
+    },
+    {
+      "phase_id": "2_authentication",
+      "title": "Authentication & User Management",
+      "instructions": [
+        "Implement secure registration and login (Email/Password).",
+        "Add basic validation (email format, password length, required fields)."
+      ],
+      "acceptance_criteria": [
+        "User can register with household details and dietary preferences.",
+        "User can log in and receive a session/token."
+      ]
+    },
+    {
+      "phase_id": "3_data_seeding",
+      "title": "Database Seeding (Mandatory)",
+      "instructions": [
+        "Write a script to populate the database with initial required data."
+      ],
+      "seed_requirements": {
+        "food_items": {
+          "count": "15-20 items minimum",
+          "focus": "Common household foods",
+          "required_fields": ["Name", "Category (fruit, dairy, grain)", "Expiration Period", "Sample Cost"]
+        },
+        "resources": {
+          "count": "15-20 items minimum",
+          "categories": ["Waste Reduction", "Budget Tips", "Meal Planning", "Storage Tips"],
+          "required_fields": ["Title", "Description/URL", "Category", "Type"]
+        }
+      }
+    },
+    {
+      "phase_id": "4_core_features",
+      "title": "Inventory & Consumption Logging",
+      "instructions": [
+        "Build 'Inventory Page': List view with filters (Category, Expiration) and Add/Remove/Edit functionality.",
+        "Build 'Log Food': Manual entry form to log daily usage (Item Name, Quantity, Category).",
+        "Build 'History': Store consumption logs for future AI analysis."
+      ],
+      "constraints": "No AI processing required yet. Data must be stored structurally for Part 2."
+    },
+    {
+      "phase_id": "5_logic_and_recommendations",
+      "title": "Basic Tracking Logic (Rule-Based)",
+      "instructions": [
+        "Implement logic to generate basic summaries (e.g., 'Total items in inventory').",
+        "Implement a recommendation engine based on simple matching."
+      ],
+      "logic_example": "IF user logs 'Milk' (Category: Dairy) THEN suggest Resource 'How to keep milk fresh' (Category: Dairy Storage).",
+      "ui_requirement": "Show 'Why this is recommended' (e.g., 'Related to: Dairy category')."
+    },
+    {
+      "phase_id": "6_image_upload",
+      "title": "Image Upload Infrastructure",
+      "instructions": [
+        "Create UI for uploading food labels or receipts (JPG/PNG).",
+        "Implement backend storage for these files.",
+        "Allow users to manually link an upload to an inventory item or log."
+      ],
+      "constraints": "Do NOT implement OCR or image processing yet. Storage only."
+    },
+    {
+      "phase_id": "7_frontend_dashboard",
+      "title": "User Dashboard & UI",
+      "instructions": [
+        "Develop a 'Dashboard' as the landing page after login.",
+        "Ensure Navbar includes: Dashboard, Logs, Inventory, Resources, Profile, Logout."
+      ],
+      "dashboard_widgets": [
+        "Quick Profile View",
+        "Recent Activity/Logs",
+        "Inventory Summary",
+        "Recommended Resources (from Phase 5 logic)"
+      ],
+      "design_philosophy": "Clarity and usability over heavy visuals. Responsive mobile-friendly layout."
+    },
+    {
+      "phase_id": "8_finalization",
+      "title": "Documentation & Delivery",
+      "instructions": [
+        "Clean up code: Ensure logical separation (Routes vs Controllers vs Models).",
+        "Write README.md."
+      ],
+      "readme_requirements": [
+        "Project Overview (2-3 lines)",
+        "Tech Stack Definition",
+        "Step-by-step Setup Instructions (Install dependencies, Run server/client)",
+        "Environment Config (.env example)",
+        "Instructions on how to run the Seed Script"
+      ]
+    }
+  ],
+  "onsite_readiness_checklist": {
+    "repository": "Public/Shareable and up to date",
+    "portability": "Project runs on a fresh machine following README exactly",
+    "completeness": "All Part 1 features functional (Partial completion = Disadvantage)",
+    "future_proofing": "Data structures ready for AI integration in Part 2"
+  }
+}
