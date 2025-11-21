@@ -2,14 +2,14 @@
 
 {% block content %}
 <div style="margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-    <div style="display: flex; align-items: center; justify-content: space-between;">
-        <div>
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 250px;">
             <h2 style="color: white; margin: 0 0 10px 0; font-size: 24px;">📊 Analytics Dashboard</h2>
             <p style="color: rgba(255,255,255,0.9); margin: 0; font-size: 14px;">
-                View comprehensive analytics including active users, popular foods, nutrient trends, and system health metrics.
+                View comprehensive analytics including active users, popular foods, consumption trends, and system health metrics.
             </p>
         </div>
-        <div>
+        <div style="margin-top: 15px;">
             <a href="{% url 'food_analytics_dashboard' %}" style="
                 display: inline-block;
                 padding: 12px 30px;

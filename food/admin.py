@@ -1,5 +1,93 @@
 from django.contrib import admin
+from django.urls import path
+from django.shortcuts import render
+from django.db.models import Count, Sum, Avg, Q, F
+from django.utils import timezone
+from datetime import timedelta
+from django.contrib.auth import get_user_model
 from .models import FoodItem, ConsumptionLog, FoodItemDatabase, MealPlan, FoodSurplus
+
+User = get_user_model()
+
+
+def analytics_view(request):
+    """Analytics dashboard view showing system metrics"""
+    
+    # Time ranges
+    today = timezone.now().date()
+    last_7_days = today - timedelta(days=7)
+    last_30_days = today - timedelta(days=30)
+    
+    # User analytics
+    total_users = User.objects.filter(is_active=True).count()
+    users_today = User.objects.filter(last_login__date=today).count()
+    users_this_week = User.objects.filter(last_login__gte=last_7_days).count()
+    users_this_month = User.objects.filter(last_login__gte=last_30_days).count()
+    new_users_this_week = User.objects.filter(date_joined__gte=last_7_days).count()
+    new_users_this_month = User.objects.filter(date_joined__gte=last_30_days).count()
+    
+    # Top active users
+    top_users = User.objects.annotate(
+        inventory_count=Count('food_items', filter=Q(food_items__created_at__gte=last_30_days)),
+        consumption_count=Count('consumption_logs', filter=Q(consumption_logs__created_at__gte=last_30_days)),
+        total_activity=F('inventory_count') + F('consumption_count')
+    ).order_by('-total_activity')[:10]
+    
+    # Popular foods
+    popular_inventory_items = FoodItem.objects.filter(
+        created_at__gte=last_30_days
+    ).values('name', 'category').annotate(
+        count=Count('id')
+    ).order_by('-count')[:15]
+    
+    popular_consumed_items = ConsumptionLog.objects.filter(
+        consumption_date__gte=last_30_days
+    ).values('item_name', 'category').annotate(
+        count=Count('id')
+    ).order_by('-count')[:15]
+    
+    # Category distribution
+    category_distribution = FoodItem.objects.filter(
+        created_at__gte=last_30_days
+    ).values('category').annotate(
+        count=Count('id')
+    ).order_by('-count')
+    
+    # System health
+    expired_items = FoodItem.objects.filter(expiration_date__lt=today).count()
+    expiring_soon = FoodItem.objects.filter(
+        expiration_date__gte=today,
+        expiration_date__lte=today + timedelta(days=3)
+    ).count()
+    total_inventory = FoodItem.objects.count()
+    
+    # Surplus stats
+    surplus_stats = {
+        'total': FoodSurplus.objects.count(),
+        'available': FoodSurplus.objects.filter(status='available').count(),
+        'completed': FoodSurplus.objects.filter(status='completed').count(),
+    }
+    
+    context = {
+        'title': 'Analytics Dashboard',
+        'total_users': total_users,
+        'users_today': users_today,
+        'users_this_week': users_this_week,
+        'users_this_month': users_this_month,
+        'new_users_this_week': new_users_this_week,
+        'new_users_this_month': new_users_this_month,
+        'top_users': top_users,
+        'popular_inventory_items': popular_inventory_items,
+        'popular_consumed_items': popular_consumed_items,
+        'category_distribution': category_distribution,
+        'expired_items': expired_items,
+        'expiring_soon': expiring_soon,
+        'total_inventory': total_inventory,
+        'surplus_stats': surplus_stats,
+        'today': today,
+    }
+    
+    return render(request, 'admin/analytics_dashboard.html', context)
 
 
 @admin.register(FoodItemDatabase)
