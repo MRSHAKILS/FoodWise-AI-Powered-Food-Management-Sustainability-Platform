@@ -21,4 +21,9 @@ urlpatterns = [
     # Food Items Database (PART 4)
     path('food-items/', views.food_items_list, name='food_items_list'),
     path('food-items/<int:id>/', views.food_item_detail, name='food_item_detail'),
+    
+    # Dashboard & Recommendations API (PART 6)
+    path('api/dashboard/summary/', views.dashboard_summary_api, name='dashboard_summary_api'),
+    path('api/recommendations/', views.recommendations_api, name='recommendations_api'),
+    path('dashboard/', views.enhanced_dashboard, name='enhanced_dashboard'),
 ]

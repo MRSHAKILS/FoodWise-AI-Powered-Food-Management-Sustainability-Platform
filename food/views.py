@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from .models import FoodItem, ConsumptionLog, FoodItemDatabase
 from users.forms import FoodItemForm, ConsumptionLogForm
+from .utils import calculate_dashboard_summary, generate_recommendations
 
 
 # Inventory Views
@@ -220,3 +222,95 @@ def food_item_detail(request, id):
         'item': item,
     }
     return render(request, 'food/food_item_detail.html', context)
+
+
+# Dashboard and Recommendations API (PART 6)
+@login_required
+def dashboard_summary_api(request):
+    """
+    API endpoint for dashboard summary statistics.
+    Returns JSON with inventory metrics, expiring items, and consumption stats.
+    
+    GET /api/dashboard/summary
+    """
+    summary = calculate_dashboard_summary(request.user)
+    
+    # Convert expiring_items to JSON-serializable format
+    expiring_items_data = []
+    for item_data in summary['expiring_items']:
+        expiring_items_data.append({
+            'id': item_data['item'].id,
+            'name': item_data['item'].name,
+            'quantity': float(item_data['item'].quantity),
+            'unit': item_data['item'].unit,
+            'category': item_data['item'].category,
+            'expiration_date': item_data['item'].expiration_date.isoformat(),
+            'days_left': item_data['days_left'],
+            'urgency': item_data['urgency'],
+        })
+    
+    response_data = {
+        'total_inventory_items': summary['total_inventory_items'],
+        'total_inventory_value': summary['total_inventory_value'],
+        'recent_logs_count': summary['recent_logs_count'],
+        'items_expiring_soon': summary['items_expiring_soon'],
+        'expiring_items': expiring_items_data,
+        'most_logged_category': summary['most_logged_category'],
+        'category_breakdown': summary['category_breakdown'],
+    }
+    
+    return JsonResponse(response_data, safe=False)
+
+
+@login_required
+def recommendations_api(request):
+    """
+    API endpoint for personalized resource recommendations.
+    Returns JSON array of recommended resources with reasons and relevance scores.
+    
+    GET /api/recommendations
+    """
+    recommendations = generate_recommendations(request.user)
+    
+    # Convert recommendations to JSON-serializable format
+    recommendations_data = []
+    for rec in recommendations:
+        recommendations_data.append({
+            'resource': {
+                'id': rec['resource'].id,
+                'title': rec['resource'].title,
+                'description': rec['resource'].description,
+                'category': rec['resource'].category,
+                'category_display': rec['resource'].get_category_display(),
+                'type': rec['resource'].type,
+                'type_display': rec['resource'].get_type_display(),
+                'url': rec['resource'].url,
+                'tags': rec['resource'].tags,
+                'read_time': rec['resource'].read_time,
+            },
+            'reason': rec['reason'],
+            'relevance_score': rec['relevance_score'],
+            'matched_rule': rec['matched_rule'],
+        })
+    
+    return JsonResponse(recommendations_data, safe=False)
+
+
+@login_required
+def enhanced_dashboard(request):
+    """
+    Enhanced dashboard view showing summary statistics and recommendations.
+    Uses the PART_6 tracking logic functions.
+    """
+    # Get dashboard summary
+    summary = calculate_dashboard_summary(request.user)
+    
+    # Get recommendations
+    recommendations = generate_recommendations(request.user)
+    
+    context = {
+        'summary': summary,
+        'recommendations': recommendations,
+    }
+    
+    return render(request, 'dashboard.html', context)
