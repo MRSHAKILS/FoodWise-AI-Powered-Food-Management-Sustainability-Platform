@@ -17,7 +17,7 @@ urlpatterns = [
     
     # History & Analytics (Phase 4 requirement)
     path('history/', views.consumption_history, name='history'),
-    
+    path('analysis/', views.consumption_analysis_dashboard, name='consumption_analysis'),
     # Food Items Database (PART 4)
     path('food-items/', views.food_items_list, name='food_items_list'),
     path('food-items/<int:id>/', views.food_item_detail, name='food_item_detail'),
