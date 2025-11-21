@@ -5,12 +5,13 @@ from django.http import JsonResponse
 from .models import FoodItem, ConsumptionLog, FoodItemDatabase
 from users.forms import FoodItemForm, ConsumptionLogForm
 from .utils import calculate_dashboard_summary, generate_recommendations
+from .risk_predictor import FoodRiskPredictor
 
 
 # Inventory Views
 @login_required
 def inventory_list(request):
-    """List all inventory items with filters"""
+    """List all inventory items with filters and risk predictions"""
     items = FoodItem.objects.filter(user=request.user)
     
     # Apply filters if provided
@@ -18,9 +19,19 @@ def inventory_list(request):
     if category:
         items = items.filter(category=category)
     
+    # Get risk predictions for all items
+    predictor = FoodRiskPredictor(request.user)
+    risk_items = predictor.predict_risks_for_inventory()
+    summary_stats = predictor.get_summary_stats(risk_items)
+    
+    # Create a risk data dictionary keyed by item ID for easy template lookup
+    risk_data_by_id = {risk_item['item'].id: risk_item for risk_item in risk_items}
+    
     context = {
         'items': items,
         'categories': FoodItem.CATEGORY_CHOICES,
+        'risk_data_by_id': risk_data_by_id,
+        'summary_stats': summary_stats,
     }
     return render(request, 'food/inventory_list.html', context)
 
