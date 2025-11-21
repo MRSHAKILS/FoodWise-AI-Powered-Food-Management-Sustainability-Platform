@@ -21,7 +21,11 @@ from django.conf import settings
 from django.conf.urls.static import static
 from users.views import dashboard_view, landing_view
 
+# Import analytics view
+from food.admin import analytics_view_function
+
 urlpatterns = [
+    path("admin/food/analytics/", admin.site.admin_view(analytics_view_function), name='food_analytics_dashboard'),
     path("admin/", admin.site.urls),
     path("", landing_view, name='landing'),
     path("dashboard/", dashboard_view, name='dashboard'),

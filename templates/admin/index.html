@@ -1,0 +1,33 @@
+{% extends "admin/index.html" %}
+
+{% block content %}
+<div style="margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+        <div>
+            <h2 style="color: white; margin: 0 0 10px 0; font-size: 24px;">📊 Analytics Dashboard</h2>
+            <p style="color: rgba(255,255,255,0.9); margin: 0; font-size: 14px;">
+                View comprehensive analytics including active users, popular foods, nutrient trends, and system health metrics.
+            </p>
+        </div>
+        <div>
+            <a href="{% url 'food_analytics_dashboard' %}" style="
+                display: inline-block;
+                padding: 12px 30px;
+                background: white;
+                color: #667eea;
+                text-decoration: none;
+                border-radius: 6px;
+                font-weight: bold;
+                font-size: 16px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                transition: all 0.3s ease;
+            " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.2)'" 
+               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)'">
+                View Analytics →
+            </a>
+        </div>
+    </div>
+</div>
+
+{{ block.super }}
+{% endblock %}
