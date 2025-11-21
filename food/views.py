@@ -47,3 +47,37 @@ def consumption_log_delete(request, pk):
 def consumption_history(request):
     # TODO: Display historical consumption data with charts/graphs
     return render(request, 'food/history.html')
+
+from django.views.generic import TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.utils.safestring import mark_safe
+import json
+
+# Import your service and models
+from .services import ConsumptionAnalyzer
+from .models import ConsumptionLog, PantryItem, FoodCategory
+
+class AnalyticsDashboardView(LoginRequiredMixin, TemplateView):
+    template_name = "dashboard.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Initialize the Service Layer
+        analyzer = ConsumptionAnalyzer(self.request.user)
+
+        # 1. Get Waste Predictions
+        context['waste_predictions'] = analyzer.predict_waste()
+
+        # 2. Get Insights/Imbalances
+        context['insights'] = analyzer.detect_imbalances()
+
+        # 3. Get Heatmap Data
+        # We dump this to JSON string so JavaScript in the template can parse it easily
+        raw_heatmap = analyzer.get_weekly_heatmap_data()
+        context['heatmap_json'] = mark_safe(json.dumps(raw_heatmap))
+        
+        # Pass categories for the legend/filtering
+        context['categories'] = [c[0] for c in FoodCategory.choices]
+
+        return context
