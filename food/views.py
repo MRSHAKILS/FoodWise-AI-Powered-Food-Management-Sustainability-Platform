@@ -71,11 +71,26 @@ def inventory_edit(request, pk):
 
 @login_required
 def inventory_delete(request, pk):
-    """Delete inventory item"""
+    """Delete inventory item and create consumption log"""
     item = get_object_or_404(FoodItem, pk=pk, user=request.user)
+    
+    # Create consumption log before deleting
+    ConsumptionLog.objects.create(
+        user=request.user,
+        item_name=item.name,
+        quantity=item.quantity,
+        unit=item.unit,
+        category=item.category,
+        consumption_date=timezone.now().date(),
+        notes=f"Consumed from inventory (deleted item)"
+    )
+    
     item_name = item.name
+    quantity = item.quantity
+    unit = item.unit
     item.delete()
-    messages.success(request, f'{item_name} removed from inventory.')
+    
+    messages.success(request, f'{item_name} ({quantity} {unit}) removed from inventory and logged as consumed.')
     return redirect('users:profile')
 
 
@@ -133,8 +148,11 @@ def consumption_history(request):
     from datetime import datetime, timedelta
     from django.utils import timezone
     
-    # Get base queryset
-    logs = ConsumptionLog.objects.filter(user=request.user)
+    # Get consumption logs
+    consumption_logs = ConsumptionLog.objects.filter(user=request.user)
+    
+    # Get inventory items (for "added" history)
+    inventory_items = FoodItem.objects.filter(user=request.user)
     
     # Apply filters
     category = request.GET.get('category')
@@ -142,25 +160,64 @@ def consumption_history(request):
     end_date = request.GET.get('end_date')
     
     if category:
-        logs = logs.filter(category=category)
+        consumption_logs = consumption_logs.filter(category=category)
+        inventory_items = inventory_items.filter(category=category)
     if start_date:
-        logs = logs.filter(consumption_date__gte=start_date)
+        consumption_logs = consumption_logs.filter(consumption_date__gte=start_date)
+        inventory_items = inventory_items.filter(created_at__date__gte=start_date)
     if end_date:
-        logs = logs.filter(consumption_date__lte=end_date)
+        consumption_logs = consumption_logs.filter(consumption_date__lte=end_date)
+        inventory_items = inventory_items.filter(created_at__date__lte=end_date)
+    
+    # Combine both into a unified history (limit to recent 50)
+    combined_history = []
+    
+    # Add consumption logs
+    for log in consumption_logs[:25]:
+        combined_history.append({
+            'type': 'consumed',
+            'date': log.consumption_date,
+            'item_name': log.item_name,
+            'category': log.get_category_display(),
+            'quantity': f"{log.quantity} {log.unit}",
+            'notes': log.notes,
+            'id': log.id,
+            'created_at': log.created_at,
+        })
+    
+    # Add inventory additions (recent items)
+    for item in inventory_items[:25]:
+        combined_history.append({
+            'type': 'added',
+            'date': item.created_at.date(),
+            'item_name': item.name,
+            'category': item.get_category_display(),
+            'quantity': f"{item.quantity} {item.unit}",
+            'notes': f"Added to inventory - Expires: {item.expiration_date}" if item.expiration_date else "Added to inventory",
+            'id': item.id,
+            'created_at': item.created_at,
+        })
+    
+    # Sort by date (most recent first)
+    combined_history.sort(key=lambda x: x['created_at'], reverse=True)
+    combined_history = combined_history[:50]  # Limit to 50 items
     
     # Calculate statistics
-    total_logs = logs.count()
+    total_logs = consumption_logs.count()
+    total_added = inventory_items.count()
     
     # This week logs
     week_ago = timezone.now().date() - timedelta(days=7)
-    week_logs = logs.filter(consumption_date__gte=week_ago).count()
+    week_logs = consumption_logs.filter(consumption_date__gte=week_ago).count()
+    week_added = inventory_items.filter(created_at__date__gte=week_ago).count()
     
     # This month logs
     month_ago = timezone.now().date() - timedelta(days=30)
-    month_logs = logs.filter(consumption_date__gte=month_ago).count()
+    month_logs = consumption_logs.filter(consumption_date__gte=month_ago).count()
+    month_added = inventory_items.filter(created_at__date__gte=month_ago).count()
     
-    # Category breakdown
-    category_stats = logs.values('category').annotate(count=Count('id')).order_by('-count')
+    # Category breakdown (consumption only)
+    category_stats = consumption_logs.values('category').annotate(count=Count('id')).order_by('-count')
     category_breakdown = []
     
     if total_logs > 0:
@@ -177,13 +234,15 @@ def consumption_history(request):
     top_category = category_breakdown[0]['category__display'] if category_breakdown else None
     
     context = {
-        'logs': logs.order_by('-consumption_date', '-created_at'),
+        'logs': combined_history,
         'categories': ConsumptionLog.CATEGORY_CHOICES,
-        'total_logs': total_logs,
-        'week_logs': week_logs,
-        'month_logs': month_logs,
+        'total_logs': total_logs + total_added,
+        'week_logs': week_logs + week_added,
+        'month_logs': month_logs + month_added,
         'top_category': top_category,
         'category_breakdown': category_breakdown,
+        'total_consumed': total_logs,
+        'total_added': total_added,
     }
     return render(request, 'food/history.html', context)
 
