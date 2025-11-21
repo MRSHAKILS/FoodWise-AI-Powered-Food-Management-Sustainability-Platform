@@ -90,6 +90,28 @@
                 {% endif %}
             </div>
             
+            <!-- AI Processing Notice -->
+            <div class="bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-200 rounded-xl p-6">
+                <div class="flex items-start">
+                    <svg class="w-6 h-6 text-purple-600 mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-900">
+                            🤖 Automatic AI Processing Enabled
+                        </label>
+                        <p class="mt-1 text-sm text-gray-600">
+                            Your uploaded image will be automatically processed with <span class="font-semibold text-purple-700">Google Gemini AI</span> to extract food items and add them directly to your inventory.
+                        </p>
+                        <div class="mt-3 flex items-center space-x-2 text-xs">
+                            <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-full font-medium">✨ Smart Detection</span>
+                            <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full font-medium">🎯 Auto-Fill Details</span>
+                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full font-medium">⚡ Instant Inventory</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <!-- Action Buttons -->
             <div class="flex justify-end space-x-4 pt-4 border-t">
                 <a href="{% url 'uploads:upload_list' %}" 

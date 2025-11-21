@@ -18,7 +18,7 @@ def analyze_image(image_path):
     genai.configure(api_key=API_KEY)
     
     # 2. Load Model (Using gemini-1.5-pro as requested for best vision capabilities)
-    model = genai.GenerativeModel('gemini-2.5-pro')
+    model = genai.GenerativeModel('gemini-2.5-flash')
 
     # 3. Load Image
     try:
