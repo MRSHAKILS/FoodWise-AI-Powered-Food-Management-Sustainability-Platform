@@ -50,4 +50,8 @@ urlpatterns = [
     # Recipe Browser
     path('recipes/', views.recipe_list, name='recipe_list'),
     path('recipes/<int:pk>/', views.recipe_detail, name='recipe_detail'),
+    
+    # SDG Impact Scoring
+    path('sdg-impact/', views.sdg_impact_dashboard, name='sdg_impact_dashboard'),
+    path('api/sdg-score/', views.sdg_score_api, name='sdg_score_api'),
 ]

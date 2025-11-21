@@ -116,7 +116,7 @@
                     </div>
                 </div>
                 <p class="text-sm font-medium text-gray-600">Total Logs</p>
-                <p class="text-3xl font-bold text-gray-900 mt-1" id="totalLogsCount">0</p>
+                <p class="text-3xl font-bold text-gray-900 mt-1" id="totalLogsCount">{{ stats.total }}</p>
                 <p class="text-xs text-gray-500 mt-2">All time consumption</p>
             </div>
 
@@ -129,7 +129,7 @@
                     </div>
                 </div>
                 <p class="text-sm font-medium text-gray-600">This Week</p>
-                <p class="text-3xl font-bold text-blue-600 mt-1">0</p>
+                <p class="text-3xl font-bold text-blue-600 mt-1">{{ stats.week }}</p>
                 <p class="text-xs text-gray-500 mt-2">Items consumed</p>
             </div>
 
@@ -142,7 +142,7 @@
                     </div>
                 </div>
                 <p class="text-sm font-medium text-gray-600">Most Consumed</p>
-                <p class="text-2xl font-bold text-purple-600 mt-1">-</p>
+                <p class="text-2xl font-bold text-purple-600 mt-1">{{ stats.most_consumed }}</p>
                 <p class="text-xs text-gray-500 mt-2">Popular category</p>
             </div>
 
@@ -155,7 +155,7 @@
                     </div>
                 </div>
                 <p class="text-sm font-medium text-gray-600">Today</p>
-                <p class="text-3xl font-bold text-orange-600 mt-1">0</p>
+                <p class="text-3xl font-bold text-orange-600 mt-1">{{ stats.today }}</p>
                 <p class="text-xs text-gray-500 mt-2">Items logged</p>
             </div>
         </div>
@@ -206,6 +206,74 @@
 
         <!-- Logs Timeline -->
         <div id="logsContainer">
+            {% if logs %}
+            <!-- Logs Timeline with Real Data -->
+            <div id="logsTimeline" class="space-y-6">
+                {% for date, date_logs in logs_by_date.items %}
+                <!-- Date Group -->
+                <div class="log-date-group">
+                    <div class="flex items-center mb-4">
+                        <div class="timeline-dot w-4 h-4 bg-green-500 rounded-full mr-3"></div>
+                        <h3 class="text-lg font-bold text-gray-800">{{ date_logs.0.consumption_date|date:"F j, Y" }}</h3>
+                    </div>
+
+                    {% for log in date_logs %}
+                    <!-- Log Card -->
+                    <div class="log-card glass-card rounded-xl p-6 shadow-lg ml-7 mb-4 border-l-4 border-green-500">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <span class="text-3xl">
+                                        {% if log.category == 'fruit' %}🍎
+                                        {% elif log.category == 'vegetable' %}🥬
+                                        {% elif log.category == 'dairy' %}🥛
+                                        {% elif log.category == 'meat' %}🍖
+                                        {% elif log.category == 'grain' %}🌾
+                                        {% elif log.category == 'beverage' %}🥤
+                                        {% elif log.category == 'snack' %}🍪
+                                        {% else %}🍽️
+                                        {% endif %}
+                                    </span>
+                                    <div>
+                                        <h4 class="text-lg font-bold text-gray-800">{{ log.item_name }}</h4>
+                                        <p class="text-sm text-gray-600">{{ log.get_category_display }}</p>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4 mt-4">
+                                    <div class="flex items-center text-sm text-gray-600">
+                                        <svg class="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                        </svg>
+                                        <span><strong>Quantity:</strong> {{ log.quantity }} {{ log.unit }}</span>
+                                    </div>
+                                    <div class="flex items-center text-sm text-gray-600">
+                                        <svg class="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        <span><strong>Time:</strong> {{ log.created_at|date:"g:i A" }}</span>
+                                    </div>
+                                </div>
+                                {% if log.notes %}
+                                <div class="mt-3 p-3 bg-gray-50 rounded-lg">
+                                    <p class="text-sm text-gray-700"><strong>Notes:</strong> {{ log.notes }}</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <form method="POST" action="{% url 'food:log_delete' log.pk %}" onsubmit="return confirm('Delete this log?');" class="ml-4">
+                                {% csrf_token %}
+                                <button type="submit" class="text-red-500 hover:text-red-700 transition-colors p-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
             <!-- Empty State (Show when no logs) -->
             <div class="empty-state text-center py-16">
                 <div class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full mb-6">
@@ -243,50 +311,8 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Sample Log Cards (Will be populated by JavaScript/Backend) -->
-            <div id="logsTimeline" class="space-y-6 hidden">
-                <!-- Date Group -->
-                <div class="log-date-group">
-                    <div class="flex items-center mb-4">
-                        <div class="timeline-dot w-4 h-4 bg-green-500 rounded-full mr-3"></div>
-                        <h3 class="text-lg font-bold text-gray-800">Today, November 20</h3>
-                    </div>
-
-                    <!-- Log Card -->
-                    <div class="log-card glass-card rounded-xl p-6 shadow-lg ml-7 border-l-4 border-green-500">
-                        <div class="flex items-start justify-between">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-3 mb-3">
-                                    <span class="text-3xl">🍎</span>
-                                    <div>
-                                        <h4 class="text-lg font-bold text-gray-800">Apple</h4>
-                                        <p class="text-sm text-gray-600">Fruits</p>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-2 gap-4 mt-4">
-                                    <div class="flex items-center text-sm text-gray-600">
-                                        <svg class="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                                        </svg>
-                                        <span><strong>Quantity:</strong> 2 pieces</span>
-                                    </div>
-                                    <div class="flex items-center text-sm text-gray-600">
-                                        <svg class="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                        </svg>
-                                        <span><strong>Time:</strong> 10:30 AM</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <button class="text-red-500 hover:text-red-700 transition-colors p-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+            {% endif %}
+        </div>
             </div>
         </div>
 

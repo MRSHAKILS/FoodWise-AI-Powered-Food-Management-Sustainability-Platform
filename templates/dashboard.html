@@ -78,12 +78,219 @@
                             <span class="text-gray-600" id="currentDate"></span>
                         </div>
                     </div>
-                    <div class="flex space-x-3">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <!-- SDG Score Mini Widget -->
+                        <a href="{% url 'food:sdg_impact_dashboard' %}" id="sdgScoreMini" class="flex items-center gap-3 px-5 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                            <div class="text-3xl">🌍</div>
+                            <div>
+                                <div class="text-xs font-medium opacity-90">SDG Score</div>
+                                <div class="text-2xl font-bold" id="sdgScoreValue">...</div>
+                            </div>
+                        </a>
+                        
                         <a href="{% url 'food:inventory_form' %}" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 font-medium shadow-md hover:shadow-lg">
                             + Add Item
                         </a>
                         <a href="{% url 'uploads:upload_form' %}" class="px-6 py-3 bg-white text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium border border-gray-300">
                             📸 Scan Receipt
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Platform Features Section - Full Width -->
+        <div class="mb-8 fade-in" style="animation-delay: 0.15s;">
+            <div class="glass-card rounded-2xl overflow-hidden shadow-xl">
+                <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white px-8 py-5">
+                    <div class="flex items-center justify-between flex-wrap gap-3">
+                        <div>
+                            <h2 class="text-2xl font-bold flex items-center">
+                                <svg class="w-7 h-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                                </svg>
+                                Explore Features
+                            </h2>
+                            <p class="text-sm text-white/90 mt-1">Access powerful tools to manage your food inventory efficiently</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-8 bg-gradient-to-br from-gray-50 to-white">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                        <!-- AI Meal Planner -->
+                        <a href="{% url 'food:meal_plan_list' %}" class="group relative p-6 bg-white rounded-2xl border-2 border-blue-100 hover:border-blue-400 transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1">
+                            <div class="absolute top-4 right-4">
+                                <span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full">NEW</span>
+                            </div>
+                            <div class="mb-4">
+                                <div class="w-14 h-14 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-md">
+                                    <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-bold text-gray-900 mb-2">AI Meal Planner</h3>
+                                <p class="text-sm text-gray-600 leading-relaxed">Generate smart weekly meal plans optimized for budget, inventory, and nutrition goals</p>
+                            </div>
+                            <div class="flex items-center text-sm text-blue-600 font-semibold group-hover:text-blue-700">
+                                <span>Create Plan</span>
+                                <svg class="w-4 h-4 ml-2 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </div>
+                        </a>
+
+                        <!-- Smart Inventory -->
+                        <a href="{% url 'food:inventory_list' %}" class="group relative p-6 bg-white rounded-2xl border-2 border-green-100 hover:border-green-400 transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1">
+                            <div class="mb-4">
+                                <div class="w-14 h-14 bg-gradient-to-br from-green-100 to-emerald-100 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-md">
+                                    <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-bold text-gray-900 mb-2">Smart Inventory</h3>
+                                <p class="text-sm text-gray-600 leading-relaxed">Track items, monitor expiration dates, and receive intelligent alerts</p>
+                            </div>
+                            <div class="flex items-center text-sm text-green-600 font-semibold group-hover:text-green-700">
+                                <span>Manage Items</span>
+                                <svg class="w-4 h-4 ml-2 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </div>
+                        </a>
+
+                        <!-- Receipt Scanner -->
+                        <a href="{% url 'uploads:upload_form' %}" class="group relative p-6 bg-white rounded-2xl border-2 border-purple-100 hover:border-purple-400 transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1">
+                            <div class="mb-4">
+                                <div class="w-14 h-14 bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-md">
+                                    <svg class="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-bold text-gray-900 mb-2">Receipt Scanner</h3>
+                                <p class="text-sm text-gray-600 leading-relaxed">AI-powered scanning for instant inventory updates from receipts</p>
+                            </div>
+                            <div class="flex items-center text-sm text-purple-600 font-semibold group-hover:text-purple-700">
+                                <span>Scan Now</span>
+                                <svg class="w-4 h-4 ml-2 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </div>
+                        </a>
+
+                        <!-- Priority Consumption -->
+                        <a href="{% url 'food:priority_consumption' %}" class="group relative p-6 bg-white rounded-2xl border-2 border-orange-100 hover:border-orange-400 transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1">
+                            <div class="mb-4">
+                                <div class="w-14 h-14 bg-gradient-to-br from-orange-100 to-red-100 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-md">
+                                    <svg class="w-7 h-7 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-bold text-gray-900 mb-2">Priority Alerts</h3>
+                                <p class="text-sm text-gray-600 leading-relaxed">AI-driven waste predictions with smart consumption recommendations</p>
+                            </div>
+                            <div class="flex items-center text-sm text-orange-600 font-semibold group-hover:text-orange-700">
+                                <span>View Alerts</span>
+                                <svg class="w-4 h-4 ml-2 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </div>
+                        </a>
+
+                        <!-- Recipe Library -->
+                        <a href="{% url 'food:recipe_list' %}" class="group relative p-6 bg-white rounded-2xl border-2 border-yellow-100 hover:border-yellow-400 transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1">
+                            <div class="mb-4">
+                                <div class="w-14 h-14 bg-gradient-to-br from-yellow-100 to-amber-100 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-md">
+                                    <svg class="w-7 h-7 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-bold text-gray-900 mb-2">Recipe Library</h3>
+                                <p class="text-sm text-gray-600 leading-relaxed">Browse 32+ Bangladeshi recipes with detailed nutrition information</p>
+                            </div>
+                            <div class="flex items-center text-sm text-yellow-600 font-semibold group-hover:text-yellow-700">
+                                <span>Browse Recipes</span>
+                                <svg class="w-4 h-4 ml-2 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </div>
+                        </a>
+
+                        <!-- Analytics & History -->
+                        <a href="{% url 'food:history' %}" class="group relative p-6 bg-white rounded-2xl border-2 border-teal-100 hover:border-teal-400 transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1">
+                            <div class="mb-4">
+                                <div class="w-14 h-14 bg-gradient-to-br from-teal-100 to-cyan-100 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-md">
+                                    <svg class="w-7 h-7 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-bold text-gray-900 mb-2">Analytics & History</h3>
+                                <p class="text-sm text-gray-600 leading-relaxed">Track consumption patterns and visualize food waste trends</p>
+                            </div>
+                            <div class="flex items-center text-sm text-teal-600 font-semibold group-hover:text-teal-700">
+                                <span>View Analytics</span>
+                                <svg class="w-4 h-4 ml-2 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </div>
+                        </a>
+
+                        <!-- SDG Impact Score -->
+                        <a href="{% url 'food:sdg_impact_dashboard' %}" class="group relative p-6 bg-white rounded-2xl border-2 border-emerald-100 hover:border-emerald-400 transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1">
+                            <div class="absolute top-4 right-4">
+                                <span class="px-3 py-1 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 text-xs font-bold rounded-full">AI</span>
+                            </div>
+                            <div class="mb-4">
+                                <div class="w-14 h-14 bg-gradient-to-br from-emerald-100 to-green-100 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-md">
+                                    <span class="text-3xl">🌍</span>
+                                </div>
+                                <h3 class="text-lg font-bold text-gray-900 mb-2">SDG Impact Score</h3>
+                                <p class="text-sm text-gray-600 leading-relaxed">AI-powered sustainability scoring with personalized recommendations</p>
+                            </div>
+                            <div class="flex items-center text-sm text-emerald-600 font-semibold group-hover:text-emerald-700">
+                                <span>View Score</span>
+                                <svg class="w-4 h-4 ml-2 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </div>
+                        </a>
+
+                        <!-- Food Database -->
+                        <a href="{% url 'food:food_items_list' %}" class="group relative p-6 bg-white rounded-2xl border-2 border-amber-100 hover:border-amber-400 transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1">
+                            <div class="mb-4">
+                                <div class="w-14 h-14 bg-gradient-to-br from-amber-100 to-yellow-100 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-md">
+                                    <svg class="w-7 h-7 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-bold text-gray-900 mb-2">Food Database</h3>
+                                <p class="text-sm text-gray-600 leading-relaxed">Browse 5000+ food items with nutritional info and storage tips</p>
+                            </div>
+                            <div class="flex items-center text-sm text-amber-600 font-semibold group-hover:text-amber-700">
+                                <span>Browse Items</span>
+                                <svg class="w-4 h-4 ml-2 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </div>
+                        </a>
+
+                        <!-- Learning Resources -->
+                        <a href="{% url 'resources:resources_list' %}" class="group relative p-6 bg-white rounded-2xl border-2 border-pink-100 hover:border-pink-400 transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1">
+                            <div class="mb-4">
+                                <div class="w-14 h-14 bg-gradient-to-br from-pink-100 to-rose-100 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-md">
+                                    <svg class="w-7 h-7 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-bold text-gray-900 mb-2">Learning Resources</h3>
+                                <p class="text-sm text-gray-600 leading-relaxed">Tips, guides, and best practices for reducing food waste</p>
+                            </div>
+                            <div class="flex items-center text-sm text-pink-600 font-semibold group-hover:text-pink-700">
+                                <span>Explore Resources</span>
+                                <svg class="w-4 h-4 ml-2 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </div>
                         </a>
                     </div>
                 </div>
@@ -639,5 +846,19 @@
         
         container.innerHTML = html;
     }
+    
+    // Load SDG Score for mini widget
+    fetch('/food/api/sdg-score/')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('sdgScoreValue').textContent = data.score;
+            const widget = document.getElementById('sdgScoreMini');
+            widget.classList.add('animate-pulse');
+            setTimeout(() => widget.classList.remove('animate-pulse'), 1000);
+        })
+        .catch(error => {
+            console.log('SDG score loading...');
+            document.getElementById('sdgScoreValue').textContent = '--';
+        });
 </script>
 {% endblock %}

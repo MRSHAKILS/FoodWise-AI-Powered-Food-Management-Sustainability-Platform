@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+
+{% block title %}SDG Impact Score - FoodWiseAI{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+        
+        <!-- Header -->
+        <div class="mb-8">
+            <a href="{% url 'dashboard' %}" class="inline-flex items-center text-gray-600 hover:text-gray-900 mb-4">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Back to Dashboard
+            </a>
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">🌍 SDG Impact Score</h1>
+            <p class="text-lg text-gray-600">Your personal sustainability performance tracker</p>
+        </div>
+
+        <!-- Main Score Card -->
+        <div class="mb-8">
+            <div class="bg-white rounded-3xl shadow-2xl overflow-hidden">
+                <div class="bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 p-8 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold mb-2">Your SDG Impact Score</h2>
+                            <p class="text-white/90">Measuring your contribution to sustainable food management</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-6xl font-bold">{{ sdg_score }}</div>
+                            <div class="text-2xl font-semibold">/100</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    <div class="mt-6 bg-white/20 rounded-full h-4 overflow-hidden">
+                        <div class="bg-white h-full rounded-full transition-all duration-1000" 
+                             style="width: {{ sdg_score }}%"></div>
+                    </div>
+                    
+                    <!-- Weekly Trend -->
+                    <div class="mt-6 flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            {% if insights.improvement > 0 %}
+                                <svg class="w-6 h-6 text-green-300" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd"/>
+                                </svg>
+                                <span class="text-lg font-semibold">+{{ insights.improvement }} points this week</span>
+                            {% elif insights.improvement < 0 %}
+                                <svg class="w-6 h-6 text-red-300" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M12 13a1 1 0 100 2h5a1 1 0 001-1V9a1 1 0 10-2 0v2.586l-4.293-4.293a1 1 0 00-1.414 0L8 9.586 3.707 5.293a1 1 0 00-1.414 1.414l5 5a1 1 0 001.414 0L11 9.414 14.586 13H12z" clip-rule="evenodd"/>
+                                </svg>
+                                <span class="text-lg font-semibold">{{ insights.improvement }} points this week</span>
+                            {% else %}
+                                <span class="text-lg font-semibold">No change this week</span>
+                            {% endif %}
+                        </div>
+                        <div class="text-sm">Previous: {{ insights.previous_score }}/100</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Score Breakdown Cards -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 border-2 border-green-100 hover:border-green-300 transition-all">
+                <div class="flex items-start justify-between mb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900">Waste Reduction</h3>
+                        <p class="text-sm text-gray-600">SDG Goal 12.3</p>
+                    </div>
+                    <div class="text-3xl">♻️</div>
+                </div>
+                <div class="mb-3">
+                    <div class="flex items-end justify-between mb-2">
+                        <span class="text-4xl font-bold text-green-600">{{ score_breakdown.waste_reduction }}</span>
+                        <span class="text-lg text-gray-500">/40</span>
+                    </div>
+                    <div class="bg-gray-200 rounded-full h-3 overflow-hidden">
+                        <div class="bg-green-600 h-full rounded-full" 
+                             style="width: {% widthratio score_breakdown.waste_reduction 40 100 %}%"></div>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-600">Consumption vs waste tracking performance</p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-lg p-6 border-2 border-blue-100 hover:border-blue-300 transition-all">
+                <div class="flex items-start justify-between mb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900">Nutrition</h3>
+                        <p class="text-sm text-gray-600">SDG Goal 2.2</p>
+                    </div>
+                    <div class="text-3xl">🥗</div>
+                </div>
+                <div class="mb-3">
+                    <div class="flex items-end justify-between mb-2">
+                        <span class="text-4xl font-bold text-blue-600">{{ score_breakdown.nutrition }}</span>
+                        <span class="text-lg text-gray-500">/30</span>
+                    </div>
+                    <div class="bg-gray-200 rounded-full h-3 overflow-hidden">
+                        <div class="bg-blue-600 h-full rounded-full" 
+                             style="width: {% widthratio score_breakdown.nutrition 30 100 %}%"></div>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-600">Meal planning and dietary balance</p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-lg p-6 border-2 border-purple-100 hover:border-purple-300 transition-all">
+                <div class="flex items-start justify-between mb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900">Inventory</h3>
+                        <p class="text-sm text-gray-600">Smart Management</p>
+                    </div>
+                    <div class="text-3xl">📦</div>
+                </div>
+                <div class="mb-3">
+                    <div class="flex items-end justify-between mb-2">
+                        <span class="text-4xl font-bold text-purple-600">{{ score_breakdown.inventory_management }}</span>
+                        <span class="text-lg text-gray-500">/30</span>
+                    </div>
+                    <div class="bg-gray-200 rounded-full h-3 overflow-hidden">
+                        <div class="bg-purple-600 h-full rounded-full" 
+                             style="width: {% widthratio score_breakdown.inventory_management 30 100 %}%"></div>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-600">Organization and expiration tracking</p>
+            </div>
+        </div>
+
+        <!-- AI Recommendations -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+            <div class="flex items-center mb-6">
+                <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center mr-4">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">Personalized Recommendations</h2>
+                    <p class="text-gray-600">
+                        {% if recommendations.ai_generated %}
+                            AI-powered insights to boost your score
+                        {% else %}
+                            Smart suggestions to improve your sustainability
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            
+            <div class="space-y-4">
+                {% for rec in recommendations.recommendations %}
+                <div class="flex items-start p-5 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border-2 border-purple-100 hover:border-purple-300 transition-all">
+                    <div class="flex-shrink-0 w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center font-bold mr-4">
+                        {{ forloop.counter }}
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-gray-800 font-medium">{{ rec }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            {% if recommendations.ai_generated %}
+            <div class="mt-6 flex items-center justify-center text-sm text-gray-500">
+                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/>
+                </svg>
+                Powered by Google Gemini AI
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Achievement Badges -->
+        {% if badges %}
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                <span class="text-3xl mr-3">🏆</span>
+                Your Achievements
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for badge in badges %}
+                <div class="flex items-center p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl border-2 border-yellow-200">
+                    <div class="text-4xl mr-4">{{ badge.icon }}</div>
+                    <div>
+                        <h3 class="font-bold text-gray-900">{{ badge.name }}</h3>
+                        <p class="text-sm text-gray-600">{{ badge.description }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

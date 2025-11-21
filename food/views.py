@@ -133,8 +133,38 @@ def inventory_delete(request, pk):
 # Consumption Logs Views
 @login_required
 def consumption_logs_list(request):
-    """List all consumption logs"""
-    logs = ConsumptionLog.objects.filter(user=request.user)
+    """List all consumption logs with real-time activity tracking"""
+    from django.db.models import Count, Sum
+    from datetime import datetime, timedelta
+    from django.utils import timezone
+    
+    # Get all logs for the user
+    logs = ConsumptionLog.objects.filter(user=request.user).order_by('-consumption_date', '-created_at')
+    
+    # Calculate stats
+    today = timezone.now().date()
+    week_ago = today - timedelta(days=7)
+    
+    total_logs = logs.count()
+    today_logs = logs.filter(consumption_date=today).count()
+    week_logs = logs.filter(consumption_date__gte=week_ago).count()
+    
+    # Get most consumed category
+    category_stats = logs.values('category').annotate(
+        count=Count('id')
+    ).order_by('-count').first()
+    
+    most_consumed = dict(ConsumptionLog.CATEGORY_CHOICES).get(
+        category_stats['category'], 'None'
+    ) if category_stats else 'None'
+    
+    # Get logs grouped by date
+    logs_by_date = {}
+    for log in logs[:50]:  # Limit to recent 50
+        date_key = log.consumption_date.strftime('%Y-%m-%d')
+        if date_key not in logs_by_date:
+            logs_by_date[date_key] = []
+        logs_by_date[date_key].append(log)
     
     # Apply filters if provided
     category = request.GET.get('category')
@@ -142,8 +172,15 @@ def consumption_logs_list(request):
         logs = logs.filter(category=category)
     
     context = {
-        'logs': logs,
+        'logs': logs[:50],
+        'logs_by_date': logs_by_date,
         'categories': ConsumptionLog.CATEGORY_CHOICES,
+        'stats': {
+            'total': total_logs,
+            'today': today_logs,
+            'week': week_logs,
+            'most_consumed': most_consumed,
+        }
     }
     return render(request, 'food/logs_list.html', context)
 
@@ -174,7 +211,7 @@ def consumption_log_delete(request, pk):
     log_name = log.item_name
     log.delete()
     messages.success(request, f'Log for {log_name} deleted.')
-    return redirect('users:profile')
+    return redirect('food:logs_list')
 
 
 @login_required
@@ -1162,3 +1199,45 @@ def recipe_detail(request, pk):
     
     return render(request, 'food/recipe_detail.html', context)
 
+
+# SDG Impact Scoring Views
+@login_required
+def sdg_impact_dashboard(request):
+    """Display SDG Impact Score and insights"""
+    from .sdg_impact_scoring import SDGImpactScorer
+    
+    scorer = SDGImpactScorer(request.user)
+    
+    # Calculate score and get insights
+    sdg_score = scorer.calculate_sdg_score()
+    insights = scorer.get_weekly_insights()
+    recommendations = scorer.generate_ai_recommendations()
+    badges = scorer.get_sdg_achievement_badges()
+    
+    context = {
+        'sdg_score': sdg_score,
+        'insights': insights,
+        'recommendations': recommendations,
+        'badges': badges,
+        'score_breakdown': insights['breakdown']
+    }
+    
+    return render(request, 'food/sdg_dashboard.html', context)
+
+
+@login_required
+def sdg_score_api(request):
+    """API endpoint for SDG score (for AJAX)"""
+    from .sdg_impact_scoring import SDGImpactScorer
+    from django.http import JsonResponse
+    
+    scorer = SDGImpactScorer(request.user)
+    sdg_score = scorer.calculate_sdg_score()
+    insights = scorer.get_weekly_insights()
+    
+    return JsonResponse({
+        'score': sdg_score,
+        'breakdown': insights['breakdown'],
+        'improvement': insights['improvement'],
+        'trend': insights['trend']
+    })

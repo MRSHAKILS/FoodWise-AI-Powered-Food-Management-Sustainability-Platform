@@ -22,12 +22,7 @@ def landing_view(request):
 
 
 def login_view(request):
-    # Debug: Print authentication status
-    print(f"🔐 Login View - User authenticated: {request.user.is_authenticated}")
-    print(f"🔐 Session key: {request.session.session_key}")
-    
     if request.user.is_authenticated:
-        print(f"✅ User {request.user.username} is authenticated, redirecting to dashboard")
         return redirect("dashboard")
 
     username_value = ""
@@ -41,9 +36,6 @@ def login_view(request):
 
         if user is not None:
             login(request, user)
-            print(f"✅ User {user.username} logged in successfully")
-            print(f"✅ Session key after login: {request.session.session_key}")
-            print(f"✅ User authenticated status: {request.user.is_authenticated}")
             return redirect("dashboard")
         else:
             return render(request, "users/login.html", {
@@ -110,9 +102,6 @@ def logout_view(request):
 @login_required(login_url="users:login")
 def dashboard_view(request):
     """Dashboard shown ONLY to logged-in users (allauth and normal)"""
-    print(f"📊 Dashboard View - User: {request.user.username if request.user.is_authenticated else 'Anonymous'}")
-    print(f"📊 Is authenticated: {request.user.is_authenticated}")
-    print(f"📊 Session key: {request.session.session_key}")
     return render(request, "dashboard.html")
 
 
@@ -214,15 +203,6 @@ def profile_edit_view(request):
         form = ProfileEditForm(instance=request.user)
     
     return render(request, "users/profile_edit.html", {'form': form})
-
-def test_login_view(request):
-    """Test login without authentication - for development only"""
-    if request.method == 'POST':
-        # Create a test session to simulate login
-        request.session['test_user_logged_in'] = True
-        request.session['test_username'] = 'TestUser'
-        return redirect('dashboard')
-    return redirect('users:login')
 
 def google_auth_view(request):
     if request.method == "POST":
