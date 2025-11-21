@@ -953,3 +953,212 @@ def priority_alerts_api(request):
         'count': len(alerts)
     })
 
+
+# =====================================================
+# MEAL PLANNING VIEWS (AI Meal Optimization Engine)
+# =====================================================
+
+@login_required
+def meal_plan_create(request):
+    """
+    Create a new AI-optimized meal plan
+    GET: Show form to input budget and preferences
+    POST: Generate optimized meal plan
+    """
+    from .meal_optimizer import MealOptimizer
+    from .models import MealPlan, Recipe
+    from datetime import datetime
+    
+    if request.method == 'POST':
+        # Get form data
+        budget = float(request.POST.get('budget', 5000))
+        week_start_str = request.POST.get('week_start', '')
+        notes = request.POST.get('notes', '')
+        
+        # Parse week start date
+        if week_start_str:
+            week_start = datetime.strptime(week_start_str, '%Y-%m-%d').date()
+        else:
+            week_start = None
+        
+        # Create optimizer and generate plan
+        optimizer = MealOptimizer(request.user, budget, week_start)
+        result = optimizer.generate_meal_plan()
+        
+        # Save meal plan to database
+        meal_plan = MealPlan.objects.create(
+            user=request.user,
+            week_start=result['week_start'],
+            week_end=result['week_end'],
+            budget_limit=result['budget_limit'],
+            actual_cost=result['total_cost'],
+            meals=result['meal_plan'],
+            shopping_list=result['shopping_list'],
+            nutrition_summary=result['nutrition_summary'],
+            inventory_used=result['inventory_used'],
+            notes=notes
+        )
+        
+        messages.success(
+            request, 
+            f'✅ Meal plan created! {len(result["shopping_list"])} items to shop. Cost: ৳{result["total_cost"]:.2f}'
+        )
+        
+        return redirect('food:meal_plan_detail', pk=meal_plan.pk)
+    
+    # GET request - show form
+    budget_limit = request.user.budget_limit if request.user.budget_limit else 5000
+    context = {
+        'user_budget': f'{budget_limit:.0f}',
+        'household_size': request.user.household_size,
+        'dietary_preference': request.user.dietary_preferences if request.user.dietary_preferences else 'any',
+    }
+    
+    return render(request, 'food/meal_plan_create.html', context)
+
+
+@login_required
+def meal_plan_list(request):
+    """List all meal plans for the user"""
+    from .models import MealPlan
+    
+    meal_plans = MealPlan.objects.filter(user=request.user)
+    
+    context = {
+        'meal_plans': meal_plans,
+    }
+    
+    return render(request, 'food/meal_plan_list.html', context)
+
+
+@login_required
+def meal_plan_detail(request, pk):
+    """View detailed meal plan with weekly calendar and shopping list"""
+    from .models import MealPlan, Recipe
+    
+    meal_plan = get_object_or_404(MealPlan, pk=pk, user=request.user)
+    
+    # Get recipe details for each meal
+    weekly_meals = {}
+    for day, meals_data in meal_plan.meals.items():
+        weekly_meals[day] = {
+            'date': meals_data.get('date'),
+            'breakfast': None,
+            'lunch': None,
+            'dinner': None
+        }
+        
+        for meal_type in ['breakfast', 'lunch', 'dinner']:
+            recipe_id = meals_data.get(meal_type)
+            if recipe_id:
+                try:
+                    recipe = Recipe.objects.get(id=recipe_id)
+                    weekly_meals[day][meal_type] = {
+                        'id': recipe.id,
+                        'name': recipe.name,
+                        'cost': recipe.estimated_cost,
+                        'nutrition': recipe.nutrition,
+                        'prep_time': recipe.prep_time,
+                        'tags': recipe.tags
+                    }
+                except Recipe.DoesNotExist:
+                    pass
+    
+    # Group shopping list by category
+    shopping_by_category = {}
+    for item in meal_plan.shopping_list:
+        category = item.get('category', 'other')
+        if category not in shopping_by_category:
+            shopping_by_category[category] = []
+        shopping_by_category[category].append(item)
+    
+    context = {
+        'meal_plan': meal_plan,
+        'weekly_meals': weekly_meals,
+        'shopping_by_category': shopping_by_category,
+        'days_of_week': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+    }
+    
+    return render(request, 'food/meal_plan_detail.html', context)
+
+
+@login_required
+def meal_plan_delete(request, pk):
+    """Delete a meal plan"""
+    from .models import MealPlan
+    
+    meal_plan = get_object_or_404(MealPlan, pk=pk, user=request.user)
+    
+    if request.method == 'POST':
+        meal_plan.delete()
+        messages.success(request, '🗑️ Meal plan deleted successfully')
+        return redirect('food:meal_plan_list')
+    
+    return redirect('food:meal_plan_detail', pk=pk)
+
+
+@login_required
+def recipe_list(request):
+    """Browse all available recipes"""
+    from .models import Recipe
+    
+    # Get filter parameters
+    meal_type = request.GET.get('meal_type', '')
+    max_cost = request.GET.get('max_cost', '')
+    max_prep_time = request.GET.get('max_prep_time', '')
+    tags = request.GET.get('tags', '')
+    search = request.GET.get('search', '')
+    
+    # Start with all recipes
+    recipes = Recipe.objects.all()
+    
+    # Apply filters
+    if meal_type:
+        recipes = recipes.filter(meal_type=meal_type)
+    
+    if max_cost:
+        recipes = recipes.filter(estimated_cost__lte=float(max_cost))
+    
+    if max_prep_time:
+        recipes = recipes.filter(prep_time__lte=int(max_prep_time))
+    
+    if tags:
+        recipes = recipes.filter(tags__contains=[tags])
+    
+    if search:
+        recipes = recipes.filter(
+            Q(name__icontains=search) | 
+            Q(description__icontains=search)
+        )
+    
+    # Count by meal type for filter display
+    meal_type_counts = {
+        'breakfast': Recipe.objects.filter(meal_type='breakfast').count(),
+        'lunch': Recipe.objects.filter(meal_type='lunch').count(),
+        'dinner': Recipe.objects.filter(meal_type='dinner').count(),
+        'snack': Recipe.objects.filter(meal_type='snack').count(),
+    }
+    
+    context = {
+        'recipes': recipes,
+        'meal_type_counts': meal_type_counts,
+        'selected_meal_type': meal_type,
+        'search_query': search,
+    }
+    
+    return render(request, 'food/recipe_list.html', context)
+
+
+@login_required
+def recipe_detail(request, pk):
+    """View detailed recipe information"""
+    from .models import Recipe
+    
+    recipe = get_object_or_404(Recipe, pk=pk)
+    
+    context = {
+        'recipe': recipe,
+    }
+    
+    return render(request, 'food/recipe_detail.html', context)
+

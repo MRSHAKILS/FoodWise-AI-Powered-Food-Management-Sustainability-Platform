@@ -40,4 +40,14 @@ urlpatterns = [
     path('api/dashboard/summary/', views.dashboard_summary_api, name='dashboard_summary_api'),
     path('api/recommendations/', views.recommendations_api, name='recommendations_api'),
     path('dashboard/', views.enhanced_dashboard, name='enhanced_dashboard'),
+    
+    # Meal Planning & Optimization (AI Meal Optimization Engine)
+    path('meal-plans/', views.meal_plan_list, name='meal_plan_list'),
+    path('meal-plans/create/', views.meal_plan_create, name='meal_plan_create'),
+    path('meal-plans/<int:pk>/', views.meal_plan_detail, name='meal_plan_detail'),
+    path('meal-plans/<int:pk>/delete/', views.meal_plan_delete, name='meal_plan_delete'),
+    
+    # Recipe Browser
+    path('recipes/', views.recipe_list, name='recipe_list'),
+    path('recipes/<int:pk>/', views.recipe_detail, name='recipe_detail'),
 ]

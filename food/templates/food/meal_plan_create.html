@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Meal Plan - AI Optimization{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-4xl font-bold text-gray-900 mb-2">🤖 AI Meal Optimization</h1>
+                <p class="text-gray-600">Generate a personalized weekly meal plan optimized for your budget and inventory</p>
+            </div>
+            <a href="{% url 'food:meal_plan_list' %}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                View My Plans
+            </a>
+        </div>
+    </div>
+
+    <!-- How It Works Section -->
+    <div class="bg-gradient-to-r from-green-50 to-teal-50 rounded-xl p-6 mb-8 border border-green-200">
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+            <svg class="w-6 h-6 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+            </svg>
+            How It Works
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-white p-4 rounded-lg shadow-sm">
+                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mb-3">
+                    <span class="text-blue-600 font-bold">1</span>
+                </div>
+                <h3 class="font-semibold text-sm mb-1">Inventory First</h3>
+                <p class="text-xs text-gray-600">Uses your available items to reduce waste</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-sm">
+                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mb-3">
+                    <span class="text-green-600 font-bold">2</span>
+                </div>
+                <h3 class="font-semibold text-sm mb-1">Budget Optimization</h3>
+                <p class="text-xs text-gray-600">Stays within your weekly budget</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-sm">
+                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mb-3">
+                    <span class="text-purple-600 font-bold">3</span>
+                </div>
+                <h3 class="font-semibold text-sm mb-1">Nutrition Balanced</h3>
+                <p class="text-xs text-gray-600">Meets daily nutrition requirements</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-sm">
+                <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mb-3">
+                    <span class="text-orange-600 font-bold">4</span>
+                </div>
+                <h3 class="font-semibold text-sm mb-1">Shopping List</h3>
+                <p class="text-xs text-gray-600">Generates list for missing items</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <div class="bg-white rounded-xl shadow-md p-8">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- Budget Input -->
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                    💰 Weekly Budget (BDT)
+                </label>
+                <div class="relative">
+                    <span class="absolute left-4 top-3 text-gray-500">৳</span>
+                    <input 
+                        type="number" 
+                        name="budget" 
+                        value="5000" 
+                        min="1000" 
+                        max="50000" 
+                        step="100"
+                        required
+                        class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        placeholder="Enter your weekly budget"
+                    >
+                </div>
+                <p class="text-xs text-gray-500 mt-1">Recommended: ৳3000-8000 for household of {{ household_size }} people</p>
+            </div>
+
+            <!-- Week Start Date -->
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                    📅 Week Start Date
+                </label>
+                <input 
+                    type="date" 
+                    name="week_start"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                >
+                <p class="text-xs text-gray-500 mt-1">Leave empty to start from next Monday</p>
+            </div>
+
+            <!-- Your Preferences (Read-only display) -->
+            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <h3 class="font-bold text-sm text-gray-700 mb-3">Your Preferences (from profile)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div>
+                        <span class="text-gray-600">👥 Household Size:</span>
+                        <span class="font-semibold ml-2">{{ household_size }} people</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-600">🥗 Diet:</span>
+                        <span class="font-semibold ml-2">{{ dietary_preference|title }}</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-600">💵 Budget Range:</span>
+                        <span class="font-semibold ml-2">৳{{ user_budget }}</span>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">
+                    💡 Update these in your <a href="{% url 'users:profile' %}" class="text-blue-600 hover:underline">profile settings</a>
+                </p>
+            </div>
+
+            <!-- Additional Notes -->
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                    📝 Additional Preferences (Optional)
+                </label>
+                <textarea 
+                    name="notes"
+                    rows="3"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="E.g., No spicy food, prefer quick recipes, avoid seafood..."
+                ></textarea>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex items-center justify-between pt-4">
+                <a href="{% url 'dashboard' %}" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                    Cancel
+                </a>
+                <button 
+                    type="submit"
+                    class="px-8 py-3 bg-gradient-to-r from-green-500 to-teal-500 text-white font-bold rounded-lg hover:from-green-600 hover:to-teal-600 shadow-lg transform transition hover:scale-105"
+                >
+                    🚀 Generate Meal Plan
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Features Info -->
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <h3 class="font-bold text-gray-800 mb-2">Waste Reduction</h3>
+            <p class="text-sm text-gray-600">Prioritizes items expiring soon in your inventory, reducing waste by up to 80%</p>
+        </div>
+        
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                </svg>
+            </div>
+            <h3 class="font-bold text-gray-800 mb-2">Budget Smart</h3>
+            <p class="text-sm text-gray-600">Automatically adjusts meals to fit your budget while maintaining nutrition quality</p>
+        </div>
+        
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+            </div>
+            <h3 class="font-bold text-gray-800 mb-2">Complete Planning</h3>
+            <p class="text-sm text-gray-600">21 meals (7 days × 3 meals) with full shopping list and nutrition breakdown</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
