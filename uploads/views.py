@@ -2,11 +2,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_http_methods
+from django.views.decorators.csrf import csrf_exempt
 from .models import Upload
 from .forms import UploadForm
 from food.models import FoodItem, ConsumptionLog
-from .ocr_utils import process_upload_with_ocr
+from .ocr_utils import process_upload_with_ocr, process_food_image, create_inventory_items_from_ocr
+import json
 
 
 @login_required
@@ -320,4 +322,80 @@ def upload_associate_api(request, pk):
         return JsonResponse({
             'success': False,
             'message': str(e)
+        }, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def ocr_extract_api(request):
+    """
+    API: Extract food items from uploaded image
+    POST /api/ocr/extract
+    
+    Accepts: multipart/form-data with 'image' file
+    Returns: Extracted food items with confirmation data
+    """
+    try:
+        # Check if file was uploaded
+        if 'image' not in request.FILES:
+            return JsonResponse({
+                'success': False,
+                'error': 'No image file provided. Please upload an image.'
+            }, status=400)
+        
+        uploaded_file = request.FILES['image']
+        
+        # Validate file type
+        if not uploaded_file.content_type.startswith('image/'):
+            return JsonResponse({
+                'success': False,
+                'error': 'Invalid file type. Please upload an image file (JPG, PNG, etc.)'
+            }, status=400)
+        
+        # Create Upload instance
+        upload = Upload.objects.create(
+            user=request.user,
+            file=uploaded_file,
+            file_name=uploaded_file.name,
+            file_size=uploaded_file.size,
+            mime_type=uploaded_file.content_type,
+            file_type='receipt',
+            notes='Uploaded via OCR API'
+        )
+        
+        # Process with OCR
+        result = process_upload_with_ocr(upload)
+        
+        if result['success']:
+            # Return extracted items
+            items_data = []
+            for item in result.get('items', []):
+                items_data.append({
+                    'id': item.id,
+                    'name': item.name,
+                    'quantity': float(item.quantity),
+                    'unit': item.unit,
+                    'category': item.category,
+                    'expiration_date': item.expiration_date.isoformat() if item.expiration_date else None,
+                    'price': float(item.price) if item.price else 0
+                })
+            
+            return JsonResponse({
+                'success': True,
+                'message': result['message'],
+                'upload_id': upload.id,
+                'created_count': result['created_count'],
+                'items': items_data
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': result['message'],
+                'upload_id': upload.id
+            }, status=400)
+    
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
         }, status=500)

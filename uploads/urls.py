@@ -12,6 +12,7 @@ urlpatterns = [
     path('<int:pk>/link/', views.link_to_inventory, name='link_to_inventory'),
     path('<int:pk>/process-ocr/', views.process_ocr_view, name='process_ocr'),
     
-    # API endpoint for associations
+    # API endpoints
     path('api/<int:pk>/associate/', views.upload_associate_api, name='upload_associate_api'),
+    path('api/ocr/extract/', views.ocr_extract_api, name='ocr_extract_api'),
 ]

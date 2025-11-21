@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Waste Estimation - NourishTrack{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">📊 Waste Estimation & Analytics</h1>
+            <p class="text-gray-600">Track and analyze your food waste patterns</p>
+        </div>
+
+        <!-- Get Estimation Button -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8 text-center">
+            <button id="estimateBtn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg transition duration-200 transform hover:scale-105">
+                📈 Get Waste Estimation
+            </button>
+            <div id="loadingIndicator" class="hidden mt-4">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+                <p class="text-gray-600 mt-2">Analyzing waste data...</p>
+            </div>
+        </div>
+
+        <!-- Results Container -->
+        <div id="resultsContainer" class="hidden">
+            <!-- Current Week -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">This Week</h3>
+                    <p class="text-4xl font-bold text-red-600" id="weekWasteKg">-</p>
+                    <p class="text-gray-600">kg wasted</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-2" id="weekWasteCost">-</p>
+                    <p class="text-gray-600">estimated cost</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">This Month</h3>
+                    <p class="text-4xl font-bold text-orange-600" id="monthWasteKg">-</p>
+                    <p class="text-gray-600">kg wasted</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-2" id="monthWasteCost">-</p>
+                    <p class="text-gray-600">estimated cost</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Next Month Projection</h3>
+                    <p class="text-4xl font-bold text-yellow-600" id="projectionKg">-</p>
+                    <p class="text-gray-600">kg estimated</p>
+                    <p class="text-sm text-gray-500 mt-2" id="projectionTrend">-</p>
+                </div>
+            </div>
+
+            <!-- Comparison -->
+            <div class="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-lg shadow-lg p-6 mb-8">
+                <h2 class="text-2xl font-bold mb-4">📊 Community Comparison</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <p class="text-lg mb-2">Your Performance:</p>
+                        <p class="text-4xl font-bold" id="userWastePercent">-</p>
+                    </div>
+                    <div>
+                        <p class="text-lg mb-2">Community Average:</p>
+                        <p class="text-4xl font-bold" id="communityAvg">-</p>
+                    </div>
+                </div>
+                <p class="mt-4 text-xl" id="comparisonMessage">-</p>
+            </div>
+
+            <!-- Recent Waste Logs -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">Recent Waste Logs</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for log in recent_waste_logs %}
+                    <div class="bg-gray-50 p-4 rounded-lg border-l-4 border-red-500">
+                        <p class="font-bold text-gray-900">{{ log.item_name }}</p>
+                        <p class="text-gray-600">{{ log.quantity }} {{ log.unit }} - {{ log.get_reason_display }}</p>
+                        <p class="text-sm text-gray-500">{{ log.waste_date }}</p>
+                        {% if log.estimated_cost %}
+                        <p class="text-red-600 font-bold">৳{{ log.estimated_cost }}</p>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <p class="col-span-full text-gray-600">No waste logs yet. Great job! 🎉</p>
+                    {% endfor %}
+                </div>
+                <div class="mt-4 text-center">
+                    <a href="{% url 'food:waste_logs_list' %}" class="text-blue-600 hover:underline">View all waste logs →</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Container -->
+        <div id="errorContainer" class="hidden bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg"></div>
+    </div>
+</div>
+
+<script>
+document.getElementById('estimateBtn').addEventListener('click', async function() {
+    const button = this;
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const resultsContainer = document.getElementById('resultsContainer');
+    const errorContainer = document.getElementById('errorContainer');
+
+    button.disabled = true;
+    loadingIndicator.classList.remove('hidden');
+    errorContainer.classList.add('hidden');
+
+    try {
+        const response = await fetch("{% url 'food:waste_estimation_api' %}", {
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            displayResults(data.data);
+            resultsContainer.classList.remove('hidden');
+        } else {
+            showError(data.error || 'Failed to estimate waste');
+        }
+    } catch (error) {
+        showError('Network error: ' + error.message);
+    } finally {
+        button.disabled = false;
+        loadingIndicator.classList.add('hidden');
+    }
+});
+
+function displayResults(data) {
+    // Week stats
+    document.getElementById('weekWasteKg').textContent = data.currentWeek.totalWasteKg + ' kg';
+    document.getElementById('weekWasteCost').textContent = '৳' + data.currentWeek.totalWasteCost;
+
+    // Month stats
+    document.getElementById('monthWasteKg').textContent = data.currentMonth.totalWasteKg + ' kg';
+    document.getElementById('monthWasteCost').textContent = '৳' + data.currentMonth.totalWasteCost;
+
+    // Projection
+    document.getElementById('projectionKg').textContent = data.projection.nextMonthKg + ' kg';
+    document.getElementById('projectionTrend').textContent = 'Trend: ' + data.projection.trend;
+
+    // Comparison
+    document.getElementById('userWastePercent').textContent = data.currentMonth.wastePercentage + '%';
+    document.getElementById('communityAvg').textContent = data.comparison.communityAverage + '%';
+    document.getElementById('comparisonMessage').textContent = data.comparison.message;
+}
+
+function showError(message) {
+    const errorContainer = document.getElementById('errorContainer');
+    errorContainer.textContent = '❌ Error: ' + message;
+    errorContainer.classList.remove('hidden');
+}
+</script>
+{% endblock %}

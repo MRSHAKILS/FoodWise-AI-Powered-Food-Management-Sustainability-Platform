@@ -1,20 +1,30 @@
 # 🍽️ FoodWise - AI-Powered Food Management & Sustainability Platform
 
-> **Innovatex Hackathon - Part 1: Pre-Hack Foundation**  
+> **Innovatex Hackathon - Part 2: AI Integration Complete** 🤖  
 > Reducing food waste, promoting responsible consumption, and supporting SDG 2 (Zero Hunger) & SDG 12 (Responsible Consumption)
 
 [![Django](https://img.shields.io/badge/Django-5.2.6-green.svg)](https://www.djangoproject.com/)
 [![Python](https://img.shields.io/badge/Python-3.13-blue.svg)](https://www.python.org/)
+[![Gemini API](https://img.shields.io/badge/Google_Gemini-AI_Powered-blue.svg)](https://ai.google.dev/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/Status-Part%201%20Complete-success.svg)](https://github.com/MRSHAKILS/AI-Powered-Food-Management-Sustainability-Platform)
+[![Status](https://img.shields.io/badge/Status-Part%202%20Complete-success.svg)](https://github.com/MRSHAKILS/AI-Powered-Food-Management-Sustainability-Platform)
 
 ---
 
 ## 📋 Project Overview
 
-**FoodWise** is a full-stack food management platform designed to help households track their food inventory, monitor expiry dates, log daily consumption, and reduce food waste through intelligent recommendations. Built for the **Innovatex Hackathon**, this project addresses critical sustainability challenges by empowering users to make informed decisions about their food consumption patterns.
+**FoodWise** is a next-generation AI-powered food management platform that combines traditional inventory tracking with cutting-edge artificial intelligence to help households reduce food waste, optimize nutrition, and achieve UN Sustainable Development Goals. Built for the **Innovatex Hackathon**, this platform leverages **Google Gemini AI** to provide intelligent insights, personalized meal plans, and automated food extraction from images.
 
-### 🎯 Key Features (Part 1 - COMPLETE)
+### 🤖 NEW AI Features (Part 2 - COMPLETE)
+
+- 🎯 **AI Consumption Pattern Analyzer** - Analyzes 30 days of consumption data to identify trends, over/under-consumption patterns, and predict waste risks using Google Gemini
+- 🍱 **AI Meal Optimization Engine** - Generates optimized weekly meal plans based on budget, inventory, dietary needs, prioritizing expiring items with creative AI suggestions
+- 💬 **NourishBot Chatbot** - Interactive AI assistant for food sustainability guidance, recipe suggestions, and waste reduction tips with conversation memory
+- 🗑️ **Waste Estimation Model** - Tracks food waste, calculates metrics (kg, cost), compares to community averages, and predicts future waste trends
+- 📊 **SDG Impact Scoring** - Calculates your sustainability score (0-100) based on waste reduction (40%), nutrition balance (30%), budget efficiency (20%), and community engagement (10%)
+- 📸 **Gemini Vision OCR** - Extracts food items, quantities, and expiration dates from images (receipts, labels, groceries) using AI vision and automatically adds them to inventory
+
+### 🎯 Core Features (Part 1 - COMPLETE)
 
 - ✅ **User Authentication System** - Secure registration/login with household profiles and budget tracking
 - ✅ **Smart Inventory Management** - Track food items with categories, quantities, expiry dates, and costs
@@ -45,12 +55,112 @@
 - **Components:** Swiper.js 11.x (Sliders/Carousels)
 - **Motion:** Framer Motion 12.23.24 (React-style animations)
 
+### **AI Services**
+
+- **Google Gemini API:** gemini-2.0-flash-exp, gemini-exp-1206
+- **Vision AI:** Gemini Vision for OCR and image analysis
+- **NLP:** Natural language processing for chatbot and insights
+- **Caching:** Redis/Django cache for rate limiting and performance
+
 ### **Development Tools**
 
 - **Version Control:** Git + GitHub
 - **Virtual Environment:** Python venv
 - **Package Management:** pip + npm
 - **Code Editor:** VS Code (recommended)
+- **Documentation:** API docs, Architecture docs
+
+---
+
+## 🤖 AI Features Overview
+
+### 1. **AI Consumption Pattern Analyzer**
+
+Analyzes your last 30 days of food consumption to:
+
+- Identify weekly consumption trends by category
+- Detect over/under-consumption patterns
+- Predict items likely to waste in next 7 days
+- Flag nutritional imbalances
+- Provide AI-generated insights
+
+**API:** `POST /food/api/analyze/consumption/`
+
+### 2. **AI Meal Optimization Engine**
+
+Generates optimized weekly meal plans:
+
+- Works within your budget constraints
+- Prioritizes items expiring within 5 days (FIFO)
+- Ensures minimum nutrition requirements (50g protein/day, 5 veggie servings/day)
+- Provides creative meal ideas using AI
+- Generates shopping list with cost estimates
+- Tracks nutrition scores and waste reduction
+
+**API:** `POST /food/api/optimize/meal-plan/`
+
+### 3. **NourishBot Chatbot**
+
+Your personal AI food sustainability assistant:
+
+- Answers food-related questions
+- Suggests recipes based on available ingredients
+- Provides nutrition advice and storage tips
+- Helps reduce food waste
+- Maintains conversation context across sessions
+- Aligned with UN SDG 2 & SDG 12 goals
+
+**API:** `POST /food/api/chat/nourish-bot/`
+
+**Example queries:**
+
+- "I have leftover rice, chicken, and broccoli. What can I make?"
+- "How can I reduce my food waste?"
+- "What's the best way to store tomatoes?"
+- "Give me a high-protein meal idea"
+
+### 4. **Waste Estimation Model**
+
+Comprehensive waste tracking and prediction:
+
+- Tracks all wasted food with reason (expired/spoiled/excess)
+- Calculates weekly and monthly waste metrics (kg and cost)
+- Compares your performance to community average
+- Projects future waste trends
+- Provides actionable insights to reduce waste
+
+**API:** `GET /food/api/estimate/waste/`
+
+### 5. **SDG Impact Scoring System**
+
+Measures your sustainability impact:
+
+- **Total Score (0-100)** calculated from:
+  - Waste Reduction (40%): How much food waste you prevent
+  - Nutrition Balance (30%): Diversity and adequacy of diet
+  - Budget Efficiency (20%): Cost optimization vs nutrition
+  - Community Engagement (10%): Food sharing activities
+- AI-generated weekly insights
+- Actionable recommendations to improve your score
+- Track progress over time
+
+**API:** `GET /food/api/score/sdg/`
+
+### 6. **Gemini Vision OCR**
+
+Automated food extraction from images:
+
+- Upload images of receipts, food labels, or groceries
+- AI automatically detects:
+  - Item names (with English translations)
+  - Quantities and units
+  - Expiration dates (if visible)
+  - Categories (fruit, dairy, vegetable, etc.)
+  - Estimated costs
+- Instantly adds extracted items to your inventory
+- Saves time on manual data entry
+
+**API:** `POST /uploads/api/ocr/extract/`
 
 ---
 

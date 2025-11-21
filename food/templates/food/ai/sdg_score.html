@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}SDG Impact Score - NourishTrack{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">🌍 Your SDG Impact Score</h1>
+            <p class="text-gray-600">Track your contribution to UN Sustainable Development Goals 2 & 12</p>
+        </div>
+
+        <!-- Calculate Button -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8 text-center">
+            <button id="calculateBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition duration-200 transform hover:scale-105">
+                📊 Calculate This Week's Score
+            </button>
+            <div id="loadingIndicator" class="hidden mt-4">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <p class="text-gray-600 mt-2">Calculating your SDG impact...</p>
+            </div>
+        </div>
+
+        <!-- Current Score -->
+        <div id="currentScore" class="hidden mb-8">
+            <div class="bg-gradient-to-r from-blue-500 to-green-600 text-white rounded-lg shadow-lg p-8 text-center mb-6">
+                <h2 class="text-6xl font-bold mb-2" id="totalScore">-</h2>
+                <p class="text-xl">Your SDG Impact Score (0-100)</p>
+            </div>
+
+            <!-- Breakdown -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                    <h3 class="text-3xl font-bold text-green-600" id="wasteScore">-</h3>
+                    <p class="text-gray-700 font-bold">Waste Reduction</p>
+                    <p class="text-sm text-gray-600">40% weight</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                    <h3 class="text-3xl font-bold text-blue-600" id="nutritionScore">-</h3>
+                    <p class="text-gray-700 font-bold">Nutrition Balance</p>
+                    <p class="text-sm text-gray-600">30% weight</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                    <h3 class="text-3xl font-bold text-yellow-600" id="budgetScore">-</h3>
+                    <p class="text-gray-700 font-bold">Budget Efficiency</p>
+                    <p class="text-sm text-gray-600">20% weight</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                    <h3 class="text-3xl font-bold text-purple-600" id="communityScore">-</h3>
+                    <p class="text-gray-700 font-bold">Community</p>
+                    <p class="text-sm text-gray-600">10% weight</p>
+                </div>
+            </div>
+
+            <!-- Insights -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">💡 AI Insights</h2>
+                <p id="insights" class="text-gray-700 text-lg"></p>
+            </div>
+
+            <!-- Recommendations -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">🎯 Recommendations</h2>
+                <ul id="recommendations" class="space-y-2"></ul>
+            </div>
+        </div>
+
+        <!-- Historical Scores -->
+        {% if historical_scores %}
+        <div class="bg-white rounded-lg shadow-md p-6 mt-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">📈 Score History</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Week</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Score</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Waste</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nutrition</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Budget</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for score in historical_scores %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">Week {{ score.week_number }}/{{ score.year }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap font-bold text-blue-600">{{ score.score }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ score.waste_reduction_score }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ score.nutrition_score }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ score.budget_efficiency_score }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Error Container -->
+        <div id="errorContainer" class="hidden bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg"></div>
+    </div>
+</div>
+
+<script>
+document.getElementById('calculateBtn').addEventListener('click', async function() {
+    const button = this;
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const currentScore = document.getElementById('currentScore');
+    const errorContainer = document.getElementById('errorContainer');
+
+    button.disabled = true;
+    loadingIndicator.classList.remove('hidden');
+    errorContainer.classList.add('hidden');
+
+    try {
+        const response = await fetch("{% url 'food:sdg_score_api' %}", {
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            displayScore(data.data);
+            currentScore.classList.remove('hidden');
+        } else {
+            showError(data.error || 'Failed to calculate SDG score');
+        }
+    } catch (error) {
+        showError('Network error: ' + error.message);
+    } finally {
+        button.disabled = false;
+        loadingIndicator.classList.add('hidden');
+    }
+});
+
+function displayScore(data) {
+    document.getElementById('totalScore').textContent = data.totalScore;
+    document.getElementById('wasteScore').textContent = data.breakdown.wasteReduction.toFixed(1);
+    document.getElementById('nutritionScore').textContent = data.breakdown.nutritionBalance.toFixed(1);
+    document.getElementById('budgetScore').textContent = data.breakdown.budgetEfficiency.toFixed(1);
+    document.getElementById('communityScore').textContent = data.breakdown.communityEngagement.toFixed(1);
+    document.getElementById('insights').textContent = data.insights || 'No insights available';
+
+    const recommendationsList = document.getElementById('recommendations');
+    recommendationsList.innerHTML = '';
+    if (data.recommendations && data.recommendations.length > 0) {
+        data.recommendations.forEach(rec => {
+            const li = document.createElement('li');
+            li.className = 'flex items-start';
+            li.innerHTML = `<span class="text-green-600 mr-2">✓</span><span class="text-gray-700">${rec}</span>`;
+            recommendationsList.appendChild(li);
+        });
+    } else {
+        recommendationsList.innerHTML = '<li class="text-gray-600">Keep up the great work!</li>';
+    }
+}
+
+function showError(message) {
+    const errorContainer = document.getElementById('errorContainer');
+    errorContainer.textContent = '❌ Error: ' + message;
+    errorContainer.classList.remove('hidden');
+}
+</script>
+{% endblock %}

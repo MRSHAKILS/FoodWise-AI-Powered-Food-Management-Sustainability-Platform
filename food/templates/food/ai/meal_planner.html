@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}AI Meal Planner - NourishTrack{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-yellow-50 to-orange-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">🍽️ AI Meal Planner</h1>
+            <p class="text-gray-600">Generate optimized meal plans based on your budget and inventory</p>
+        </div>
+
+        <!-- Configuration Form -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">📝 Plan Configuration</h2>
+            <form id="mealPlanForm" class="space-y-4">
+                {% csrf_token %}
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2">Budget ($)</label>
+                    <input type="number" id="budget" name="budget" value="{{ user_budget }}" step="0.01" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2">Number of Days</label>
+                    <input type="number" id="days" name="days" value="7" min="1" max="14" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2">Dietary Preferences (Optional)</label>
+                    <textarea id="dietary_preferences" name="dietary_preferences" rows="3" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500" placeholder="e.g., vegetarian, gluten-free, low-carb"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg transition duration-200 transform hover:scale-105">
+                    🎯 Generate Meal Plan
+                </button>
+                <div id="loadingIndicator" class="hidden text-center mt-4">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                    <p class="text-gray-600 mt-2">Creating your personalized meal plan...</p>
+                </div>
+            </form>
+        </div>
+
+        <!-- Current Inventory -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">📦 Current Inventory</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                {% for item in inventory %}
+                <div class="bg-gray-50 p-3 rounded-lg text-center">
+                    <p class="font-bold text-sm">{{ item.name }}</p>
+                    <p class="text-xs text-gray-600">{{ item.quantity }} {{ item.unit }}</p>
+                    {% if item.is_expiring_soon %}
+                    <span class="text-xs text-red-600">⚠️ Expiring soon</span>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <p class="col-span-full text-gray-600">No inventory items found. <a href="{% url 'food:inventory_form' %}" class="text-green-600 underline">Add some items</a> first!</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Results Container -->
+        <div id="resultsContainer" class="hidden">
+            <!-- Meal Plan -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">📅 Your Meal Plan</h2>
+                <div id="mealPlanContent" class="space-y-4"></div>
+            </div>
+
+            <!-- Shopping List -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">🛒 Shopping List</h2>
+                <div id="shoppingListContent"></div>
+            </div>
+
+            <!-- Summary -->
+            <div class="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold mb-4">📊 Plan Summary</h2>
+                <div id="summaryContent" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+            </div>
+        </div>
+
+        <!-- Error Container -->
+        <div id="errorContainer" class="hidden bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg"></div>
+    </div>
+</div>
+
+<script>
+document.getElementById('mealPlanForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const resultsContainer = document.getElementById('resultsContainer');
+    const errorContainer = document.getElementById('errorContainer');
+    const submitBtn = this.querySelector('button[type="submit"]');
+
+    // Show loading
+    submitBtn.disabled = true;
+    loadingIndicator.classList.remove('hidden');
+    resultsContainer.classList.add('hidden');
+    errorContainer.classList.add('hidden');
+
+    const formData = {
+        budget: parseFloat(document.getElementById('budget').value),
+        days: parseInt(document.getElementById('days').value),
+        dietary_preferences: document.getElementById('dietary_preferences').value
+    };
+
+    try {
+        const response = await fetch("{% url 'food:generate_meal_plan_api' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            displayMealPlan(data.data);
+        } else {
+            showError(data.error || 'Failed to generate meal plan');
+        }
+    } catch (error) {
+        showError('Network error: ' + error.message);
+    } finally {
+        submitBtn.disabled = false;
+        loadingIndicator.classList.add('hidden');
+    }
+});
+
+function displayMealPlan(data) {
+    const resultsContainer = document.getElementById('resultsContainer');
+    
+    // Display meal plan
+    const mealPlanContent = document.getElementById('mealPlanContent');
+    mealPlanContent.innerHTML = '';
+    if (data.mealPlan && data.mealPlan.length > 0) {
+        data.mealPlan.forEach(dayPlan => {
+            let mealsHtml = '';
+            if (dayPlan.meals) {
+                dayPlan.meals.forEach(meal => {
+                    mealsHtml += `
+                        <div class="ml-4 bg-gray-50 p-3 rounded">
+                            <p class="font-bold">${meal.name}</p>
+                            <p class="text-sm text-gray-600">Ingredients: ${meal.ingredients.join(', ')}</p>
+                            <p class="text-sm text-green-600">Cost: $${meal.cost.toFixed(2)}</p>
+                        </div>
+                    `;
+                });
+            }
+            mealPlanContent.innerHTML += `
+                <div class="border-l-4 border-green-500 pl-4">
+                    <h3 class="text-xl font-bold text-gray-900">${dayPlan.day}</h3>
+                    <div class="space-y-2 mt-2">${mealsHtml}</div>
+                </div>
+            `;
+        });
+    }
+
+    // Display shopping list
+    const shoppingListContent = document.getElementById('shoppingListContent');
+    shoppingListContent.innerHTML = '';
+    if (data.shoppingList && data.shoppingList.length > 0) {
+        let listHtml = '<ul class="grid grid-cols-1 md:grid-cols-2 gap-2">';
+        data.shoppingList.forEach(item => {
+            listHtml += `
+                <li class="bg-gray-50 p-3 rounded flex justify-between">
+                    <span>${item.item} - ${item.quantity}</span>
+                    <span class="text-green-600 font-bold">$${item.estimatedCost.toFixed(2)}</span>
+                </li>
+            `;
+        });
+        listHtml += '</ul>';
+        shoppingListContent.innerHTML = listHtml;
+    } else {
+        shoppingListContent.innerHTML = '<p class="text-gray-600">You have everything you need! 🎉</p>';
+    }
+
+    // Display summary
+    const summaryContent = document.getElementById('summaryContent');
+    summaryContent.innerHTML = `
+        <div class="text-center">
+            <p class="text-3xl font-bold">$${data.totalCost.toFixed(2)}</p>
+            <p class="text-sm">Total Cost</p>
+        </div>
+        <div class="text-center">
+            <p class="text-3xl font-bold">${data.nutritionScore || 'N/A'}</p>
+            <p class="text-sm">Nutrition Score</p>
+        </div>
+        <div class="text-center">
+            <p class="text-3xl font-bold">${data.wasteReduction || 'N/A'}</p>
+            <p class="text-sm">Waste Reduction</p>
+        </div>
+    `;
+
+    // Show results
+    resultsContainer.classList.remove('hidden');
+}
+
+function showError(message) {
+    const errorContainer = document.getElementById('errorContainer');
+    errorContainer.textContent = '❌ Error: ' + message;
+    errorContainer.classList.remove('hidden');
+}
+</script>
+{% endblock %}

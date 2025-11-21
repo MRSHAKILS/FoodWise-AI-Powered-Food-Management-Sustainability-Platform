@@ -2,10 +2,24 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from .models import FoodItem, ConsumptionLog, FoodItemDatabase
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q
+from datetime import datetime, timedelta
+from django.utils import timezone
+import json
+
+from .models import FoodItem, ConsumptionLog, FoodItemDatabase, MealPlan, SDGScore, WasteLog, ChatSession
 from users.forms import FoodItemForm, ConsumptionLogForm
 from .utils import calculate_dashboard_summary, generate_recommendations
 from .risk_predictor import FoodRiskPredictor
+from .ai_services import (
+    analyze_consumption_patterns,
+    generate_meal_plan,
+    chat_with_nourish_bot,
+    calculate_sdg_score,
+    rule_based_consumption_analysis
+)
 
 
 # Inventory Views
@@ -18,6 +32,9 @@ def inventory_list(request):
     category = request.GET.get('category')
     if category:
         items = items.filter(category=category)
+    
+    # Calculate total inventory value
+    total_value = sum(item.quantity * (item.price or 0) for item in items)
     
     # Get risk predictions for all items
     predictor = FoodRiskPredictor(request.user)
@@ -32,6 +49,7 @@ def inventory_list(request):
         'categories': FoodItem.CATEGORY_CHOICES,
         'risk_data_by_id': risk_data_by_id,
         'summary_stats': summary_stats,
+        'total_value': total_value,
     }
     return render(request, 'food/inventory_list.html', context)
 
@@ -519,3 +537,569 @@ def enhanced_dashboard(request):
     }
     
     return render(request, 'dashboard.html', context)
+
+
+# ==================== AI-POWERED FEATURES (Part 2) ====================
+
+@login_required
+@require_http_methods(["POST"])
+def analyze_consumption_api(request):
+    """
+    API: Analyze consumption patterns using AI
+    POST /api/analyze/consumption
+    
+    Returns trends, flags, waste predictions, and insights
+    """
+    try:
+        # Get last 30 days of consumption data
+        thirty_days_ago = timezone.now().date() - timedelta(days=30)
+        consumption_logs = ConsumptionLog.objects.filter(
+            user=request.user,
+            consumption_date__gte=thirty_days_ago
+        ).values('item_name', 'quantity', 'unit', 'category', 'consumption_date')
+        
+        consumption_data = list(consumption_logs)
+        
+        # Convert dates to strings for JSON serialization
+        for log in consumption_data:
+            log['consumption_date'] = log['consumption_date'].isoformat()
+        
+        if not consumption_data:
+            return JsonResponse({
+                'success': False,
+                'error': 'No consumption data found for the last 30 days'
+            }, status=404)
+        
+        # Analyze using AI
+        analysis_result = analyze_consumption_patterns(consumption_data)
+        
+        # Fallback to rule-based if AI fails
+        if not analysis_result:
+            analysis_result = rule_based_consumption_analysis(consumption_data)
+        
+        return JsonResponse({
+            'success': True,
+            'data': analysis_result,
+            'period': {
+                'start': thirty_days_ago.isoformat(),
+                'end': timezone.now().date().isoformat(),
+                'total_logs': len(consumption_data)
+            }
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def generate_meal_plan_api(request):
+    """
+    API: Generate AI-optimized meal plan
+    POST /api/optimize/meal-plan
+    
+    Body: {
+        "budget": float,
+        "days": int (optional, default 7),
+        "dietary_preferences": {}
+    }
+    """
+    try:
+        data = json.loads(request.body)
+        budget = float(data.get('budget', request.user.budget_limit or 100))
+        days = int(data.get('days', 7))
+        dietary_needs = data.get('dietary_preferences', {})
+        
+        # Get current inventory
+        inventory = FoodItem.objects.filter(user=request.user).values(
+            'id', 'name', 'quantity', 'unit', 'expiration_date', 'category', 'price'
+        )
+        
+        inventory_data = []
+        for item in inventory:
+            inventory_data.append({
+                'id': item['id'],
+                'name': item['name'],
+                'quantity': float(item['quantity']),
+                'unit': item['unit'],
+                'expiration_date': item['expiration_date'].isoformat() if item['expiration_date'] else None,
+                'category': item['category'],
+                'price': float(item['price']) if item['price'] else 0
+            })
+        
+        # Generate meal plan using AI
+        meal_plan_result = generate_meal_plan(budget, inventory_data, dietary_needs, days)
+        
+        if not meal_plan_result:
+            return JsonResponse({
+                'success': False,
+                'error': 'Failed to generate meal plan. Please try again.'
+            }, status=500)
+        
+        # Save meal plan to database
+        from datetime import date
+        meal_plan = MealPlan.objects.create(
+            user=request.user,
+            week_start_date=date.today(),
+            meals_data=meal_plan_result.get('mealPlan', []),
+            shopping_list=meal_plan_result.get('shoppingList', []),
+            total_cost=meal_plan_result.get('totalCost', 0),
+            budget_limit=budget,
+            nutrition_score=meal_plan_result.get('nutritionScore', 0),
+            waste_reduction_estimate=meal_plan_result.get('wasteReduction', ''),
+            generated_by='AI'
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'data': meal_plan_result,
+            'meal_plan_id': meal_plan.id
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'error': 'Invalid JSON data'
+        }, status=400)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def nourish_bot_chat_api(request):
+    """
+    API: Chat with NourishBot
+    POST /api/chat/nourish-bot
+    
+    Body: {
+        "message": str,
+        "session_id": str (optional)
+    }
+    """
+    try:
+        data = json.loads(request.body)
+        user_message = data.get('message', '').strip()
+        session_id = data.get('session_id')
+        
+        if not user_message:
+            return JsonResponse({
+                'success': False,
+                'error': 'Message is required'
+            }, status=400)
+        
+        # Get or create chat session
+        if session_id:
+            chat_session = ChatSession.objects.filter(
+                user=request.user,
+                session_id=session_id,
+                is_active=True
+            ).first()
+        else:
+            # Create new session
+            import uuid
+            session_id = str(uuid.uuid4())
+            chat_session = ChatSession.objects.create(
+                user=request.user,
+                session_id=session_id
+            )
+        
+        # Prepare user context with detailed data
+        inventory = FoodItem.objects.filter(user=request.user).order_by('expiration_date')[:20]
+        recent_consumption = ConsumptionLog.objects.filter(user=request.user).order_by('-consumption_date')[:15]
+        
+        user_context = {
+            'inventory': [
+                {
+                    'name': item.name, 
+                    'quantity': float(item.quantity), 
+                    'expiring_days': item.days_until_expiration,
+                    'category': item.category
+                }
+                for item in inventory
+            ],
+            'recent_consumption': [
+                {
+                    'name': log.item_name, 
+                    'quantity': float(log.quantity), 
+                    'date': log.consumption_date.isoformat(),
+                    'category': log.category
+                }
+                for log in recent_consumption
+            ],
+            'budget': float(request.user.budget_limit) if request.user.budget_limit else None
+        }
+        
+        # Get chat history from session
+        chat_history = None
+        if chat_session and hasattr(chat_session, 'messages'):
+            try:
+                chat_history = json.loads(chat_session.messages) if chat_session.messages else []
+            except:
+                chat_history = []
+        
+        # Get AI response
+        bot_response = chat_with_nourish_bot(user_message, user_context, chat_history)
+        
+        if not bot_response:
+            bot_response = "I'm sorry, I'm having trouble connecting right now. Please try again in a moment."
+        
+        # Save messages to session
+        chat_session.add_message('user', user_message)
+        chat_session.add_message('assistant', bot_response)
+        
+        return JsonResponse({
+            'success': True,
+            'response': bot_response,
+            'session_id': session_id
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'error': 'Invalid JSON data'
+        }, status=400)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+@login_required
+def waste_estimation_api(request):
+    """
+    API: Get waste estimation and projections
+    GET /api/estimate/waste
+    """
+    try:
+        # Get waste logs
+        waste_logs = WasteLog.objects.filter(user=request.user)
+        
+        # Current week
+        week_start = timezone.now().date() - timedelta(days=timezone.now().date().weekday())
+        week_waste = waste_logs.filter(waste_date__gte=week_start)
+        
+        # Current month
+        month_start = timezone.now().date().replace(day=1)
+        month_waste = waste_logs.filter(waste_date__gte=month_start)
+        
+        # Calculate metrics
+        week_total_kg = sum(float(log.quantity) for log in week_waste)
+        week_total_cost = sum(float(log.estimated_cost or 0) for log in week_waste)
+        
+        month_total_kg = sum(float(log.quantity) for log in month_waste)
+        month_total_cost = sum(float(log.estimated_cost or 0) for log in month_waste)
+        
+        # Average community baseline (dummy data)
+        community_avg_waste_percent = 30
+        
+        # Calculate user's waste percentage
+        total_inventory_value = sum(
+            float(item.price or 0) * float(item.quantity)
+            for item in FoodItem.objects.filter(user=request.user)
+        )
+        
+        if total_inventory_value > 0:
+            user_waste_percent = (month_total_cost / total_inventory_value) * 100
+        else:
+            user_waste_percent = 0
+        
+        # Projection (simple linear projection)
+        avg_weekly_waste = month_total_kg / 4 if month_total_kg > 0 else 0
+        next_month_projection = avg_weekly_waste * 4
+        
+        return JsonResponse({
+            'success': True,
+            'data': {
+                'currentWeek': {
+                    'totalWasteKg': round(week_total_kg, 2),
+                    'totalWasteCost': round(week_total_cost, 2),
+                    'itemsWasted': week_waste.count()
+                },
+                'currentMonth': {
+                    'totalWasteKg': round(month_total_kg, 2),
+                    'totalWasteCost': round(month_total_cost, 2),
+                    'itemsWasted': month_waste.count(),
+                    'wastePercentage': round(user_waste_percent, 2)
+                },
+                'projection': {
+                    'nextMonthKg': round(next_month_projection, 2),
+                    'trend': 'stable'
+                },
+                'comparison': {
+                    'communityAverage': community_avg_waste_percent,
+                    'yourPerformance': round(community_avg_waste_percent - user_waste_percent, 2),
+                    'message': f"You're wasting {abs(community_avg_waste_percent - user_waste_percent):.1f}% {'less' if user_waste_percent < community_avg_waste_percent else 'more'} than average"
+                }
+            }
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+@login_required
+def sdg_score_api(request):
+    """
+    API: Get user's SDG impact score
+    GET /api/score/sdg
+    """
+    try:
+        # Get or calculate current week's score
+        current_date = timezone.now().date()
+        week_number = current_date.isocalendar()[1]
+        year = current_date.year
+        
+        # Check if score already calculated this week
+        existing_score = SDGScore.objects.filter(
+            user=request.user,
+            year=year,
+            week_number=week_number
+        ).first()
+        
+        if existing_score:
+            score_data = {
+                'totalScore': existing_score.score,
+                'breakdown': {
+                    'wasteReduction': float(existing_score.waste_reduction_score),
+                    'nutritionBalance': float(existing_score.nutrition_score),
+                    'budgetEfficiency': float(existing_score.budget_efficiency_score),
+                    'communityEngagement': float(existing_score.community_engagement_score)
+                },
+                'insights': existing_score.insights,
+                'recommendations': existing_score.recommendations
+            }
+        else:
+            # Calculate new score
+            # Get waste data
+            week_start = current_date - timedelta(days=current_date.weekday())
+            waste_logs = WasteLog.objects.filter(
+                user=request.user,
+                waste_date__gte=week_start
+            )
+            
+            waste_data = {
+                'total_waste_kg': sum(float(log.quantity) for log in waste_logs),
+                'total_cost': sum(float(log.estimated_cost or 0) for log in waste_logs)
+            }
+            
+            # Get nutrition data (simplified)
+            consumption_logs = ConsumptionLog.objects.filter(
+                user=request.user,
+                consumption_date__gte=week_start
+            )
+            
+            category_counts = {}
+            for log in consumption_logs:
+                category_counts[log.category] = category_counts.get(log.category, 0) + 1
+            
+            nutrition_data = {
+                'category_diversity': len(category_counts),
+                'total_items': consumption_logs.count()
+            }
+            
+            # Get budget data
+            budget_data = {
+                'budget_limit': float(request.user.budget_limit) if request.user.budget_limit else 100,
+                'actual_spend': sum(float(item.price or 0) for item in FoodItem.objects.filter(user=request.user))
+            }
+            
+            # Calculate using AI
+            score_result = calculate_sdg_score(waste_data, nutrition_data, budget_data)
+            
+            if score_result:
+                # Save to database
+                sdg_score = SDGScore.objects.create(
+                    user=request.user,
+                    score=score_result['totalScore'],
+                    waste_reduction_score=score_result['breakdown']['wasteReduction'],
+                    nutrition_score=score_result['breakdown']['nutritionBalance'],
+                    budget_efficiency_score=score_result['breakdown']['budgetEfficiency'],
+                    community_engagement_score=score_result['breakdown']['communityEngagement'],
+                    waste_reduced_kg=waste_data['total_waste_kg'],
+                    waste_cost_saved=waste_data['total_cost'],
+                    nutrition_balance=nutrition_data,
+                    budget_data=budget_data,
+                    insights=score_result.get('insights', ''),
+                    recommendations=score_result.get('recommendations', []),
+                    week_number=week_number,
+                    year=year
+                )
+                
+                score_data = score_result
+            else:
+                # Fallback calculation
+                score_data = {
+                    'totalScore': 50,
+                    'breakdown': {
+                        'wasteReduction': 50,
+                        'nutritionBalance': 50,
+                        'budgetEfficiency': 50,
+                        'communityEngagement': 50
+                    },
+                    'insights': 'Score calculated using basic metrics. Enable AI for detailed insights.',
+                    'recommendations': ['Track your food consumption regularly', 'Plan meals to reduce waste']
+                }
+        
+        return JsonResponse({
+            'success': True,
+            'data': score_data
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+# ==================== FRONTEND VIEWS FOR AI FEATURES ====================
+
+@login_required
+def consumption_analysis_view(request):
+    """Frontend view for consumption pattern analysis"""
+    return render(request, 'food/ai/consumption_analysis.html')
+
+
+@login_required
+def meal_planner_view(request):
+    """Frontend view for AI meal planner"""
+    # Get user's current inventory for display
+    inventory = FoodItem.objects.filter(user=request.user)
+    context = {
+        'inventory': inventory,
+        'user_budget': request.user.budget_limit or 100
+    }
+    return render(request, 'food/ai/meal_planner.html', context)
+
+
+@login_required
+def nourish_bot_view(request):
+    """Frontend view for NourishBot chatbot"""
+    return render(request, 'food/ai/nourish_bot.html')
+
+
+@login_required
+def sdg_score_view(request):
+    """Frontend view for SDG impact score dashboard"""
+    # Get historical scores
+    scores = SDGScore.objects.filter(user=request.user).order_by('-calculated_date')[:10]
+    context = {
+        'historical_scores': scores
+    }
+    return render(request, 'food/ai/sdg_score.html', context)
+
+
+@login_required
+def waste_estimation_view(request):
+    """Frontend view for waste estimation and analytics"""
+    # Get recent waste logs
+    waste_logs = WasteLog.objects.filter(user=request.user).order_by('-waste_date')[:20]
+    context = {
+        'recent_waste_logs': waste_logs
+    }
+    return render(request, 'food/ai/waste_estimation.html', context)
+
+
+@login_required
+def expiration_risks_view(request):
+    """Frontend view for expiration risk prediction"""
+    # Get risk predictions using existing predictor
+    predictor = FoodRiskPredictor(request.user)
+    risk_items = predictor.predict_risks_for_inventory()
+    summary_stats = predictor.get_summary_stats(risk_items)
+    
+    context = {
+        'risk_items': risk_items,
+        'summary_stats': summary_stats
+    }
+    return render(request, 'food/ai/expiration_risks.html', context)
+
+
+# ==================== WASTE LOG MANAGEMENT ====================
+
+@login_required
+def waste_logs_list(request):
+    """List all waste logs with filtering"""
+    logs = WasteLog.objects.filter(user=request.user)
+    
+    # Apply filters if provided
+    category = request.GET.get('category')
+    reason = request.GET.get('reason')
+    
+    if category:
+        logs = logs.filter(category=category)
+    if reason:
+        logs = logs.filter(reason=reason)
+    
+    # Calculate summary stats
+    total_waste_kg = sum(float(log.quantity) for log in logs)
+    total_waste_cost = sum(float(log.estimated_cost or 0) for log in logs)
+    
+    context = {
+        'logs': logs,
+        'categories': WasteLog._meta.get_field('category').choices,
+        'reasons': WasteLog._meta.get_field('reason').choices,
+        'total_waste_kg': total_waste_kg,
+        'total_waste_cost': total_waste_cost,
+    }
+    return render(request, 'food/waste_logs_list.html', context)
+
+
+@login_required
+def waste_log_form(request):
+    """Add new waste log"""
+    if request.method == 'POST':
+        # Create waste log from POST data
+        item_name = request.POST.get('item_name')
+        quantity = request.POST.get('quantity')
+        unit = request.POST.get('unit')
+        category = request.POST.get('category')
+        estimated_cost = request.POST.get('estimated_cost')
+        reason = request.POST.get('reason')
+        waste_date = request.POST.get('waste_date')
+        notes = request.POST.get('notes', '')
+        
+        try:
+            WasteLog.objects.create(
+                user=request.user,
+                item_name=item_name,
+                quantity=quantity,
+                unit=unit,
+                category=category,
+                estimated_cost=estimated_cost if estimated_cost else None,
+                reason=reason,
+                waste_date=waste_date if waste_date else timezone.now().date(),
+                notes=notes
+            )
+            messages.success(request, f'Waste log for {item_name} added successfully!')
+            return redirect('food:waste_logs_list')
+        except Exception as e:
+            messages.error(request, f'Error creating waste log: {str(e)}')
+    
+    context = {
+        'categories': WasteLog._meta.get_field('category').choices,
+        'reasons': WasteLog._meta.get_field('reason').choices,
+        'units': ['kg', 'g', 'liter', 'ml', 'piece', 'pcs'],
+    }
+    return render(request, 'food/waste_log_form.html', context)
+
+
+@login_required
+def waste_log_delete(request, pk):
+    """Delete waste log"""
+    log = get_object_or_404(WasteLog, pk=pk, user=request.user)
+    log_name = log.item_name
+    log.delete()
+    messages.success(request, f'Waste log for {log_name} deleted.')
+    return redirect('food:waste_logs_list')
