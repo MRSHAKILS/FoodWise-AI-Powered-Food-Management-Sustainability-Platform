@@ -107,14 +107,58 @@ def dashboard_view(request):
 
 @login_required(login_url="users:login")
 def profile_view(request):
-    """Show logged-in user's profile"""
-    return render(request, "users/profile.html")
+    """Show logged-in user's profile with inventory and consumption logs"""
+    from food.models import FoodItem, ConsumptionLog
+    from .forms import ProfileEditForm, FoodItemForm, ConsumptionLogForm
+    
+    # Handle profile edit form submission
+    if request.method == 'POST':
+        profile_form = ProfileEditForm(request.POST, instance=request.user)
+        if profile_form.is_valid():
+            profile_form.save()
+            messages.success(request, 'Profile updated successfully!')
+            return redirect('users:profile')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        profile_form = ProfileEditForm(instance=request.user)
+    
+    # Get user's data
+    food_items = FoodItem.objects.filter(user=request.user).order_by('-created_at')[:10]
+    consumption_logs = ConsumptionLog.objects.filter(user=request.user).order_by('-consumption_date', '-created_at')[:10]
+    
+    # Initialize other forms
+    food_form = FoodItemForm()
+    log_form = ConsumptionLogForm()
+    
+    context = {
+        'profile_form': profile_form,
+        'food_form': food_form,
+        'log_form': log_form,
+        'food_items': food_items,
+        'consumption_logs': consumption_logs,
+    }
+    
+    return render(request, "users/profile.html", context)
 
 
 @login_required(login_url="users:login")
 def profile_edit_view(request):
-    """Profile editing page (later will have actual form)"""
-    return render(request, "users/profile_edit.html")
+    """Profile editing page with form handling"""
+    from .forms import ProfileEditForm
+    
+    if request.method == 'POST':
+        form = ProfileEditForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Profile updated successfully!')
+            return redirect('users:profile')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = ProfileEditForm(instance=request.user)
+    
+    return render(request, "users/profile_edit.html", {'form': form})
 
 def test_login_view(request):
     """Test login without authentication - for development only"""

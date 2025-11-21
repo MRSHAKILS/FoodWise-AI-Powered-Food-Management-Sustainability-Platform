@@ -3,12 +3,404 @@
 {% block title %}Profile - Food Management{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto">
-    <h1 class="text-3xl font-bold text-gray-800 mb-6">User Profile</h1>
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">My Profile</h1>
     
-    <div class="bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-xl font-semibold text-gray-700 mb-4">Profile Information</h2>
-        <p class="text-gray-600">Profile details will be displayed here.</p>
+    <!-- Tab Navigation -->
+    <div class="mb-6 border-b border-gray-200">
+        <nav class="flex space-x-8" aria-label="Tabs">
+            <button onclick="showTab('profile')" id="tab-profile" class="tab-button active border-b-2 border-green-500 py-4 px-1 text-sm font-medium text-green-600">
+                Profile Details
+            </button>
+            <button onclick="showTab('inventory')" id="tab-inventory" class="tab-button border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                Food Inventory
+            </button>
+            <button onclick="showTab('consumption')" id="tab-consumption" class="tab-button border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                Consumption Logs
+            </button>
+        </nav>
+    </div>
+
+    <!-- Profile Details Tab -->
+    <div id="profile-tab" class="tab-content">
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-semibold text-gray-700">Profile Information</h2>
+                <button onclick="toggleEditMode()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                    Edit Profile
+                </button>
+            </div>
+            
+            <!-- View Mode -->
+            <div id="view-mode" class="space-y-4 {% if profile_form.errors %}hidden{% endif %}">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Full Name</label>
+                        <p class="text-lg text-gray-800">{{ user.full_name }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Email</label>
+                        <p class="text-lg text-gray-800">{{ user.email }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Household Size</label>
+                        <p class="text-lg text-gray-800">{{ user.household_size }} {% if user.household_size == 1 %}person{% else %}people{% endif %}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Location</label>
+                        <p class="text-lg text-gray-800">{{ user.location }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Dietary Preferences</label>
+                        <p class="text-lg text-gray-800">{{ user.dietary_preferences|default:"Not specified" }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Monthly Budget Limit</label>
+                        <p class="text-lg text-gray-800">${{ user.budget_limit|default:"Not set" }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Edit Mode -->
+            <div id="edit-mode" class="{% if profile_form.errors %}{% else %}hidden{% endif %}">
+                <form method="POST" class="space-y-4">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ profile_form.full_name.label }}</label>
+                            {{ profile_form.full_name }}
+                            {% if profile_form.full_name.errors %}
+                                <p class="text-red-500 text-sm mt-1">{{ profile_form.full_name.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ profile_form.email.label }}</label>
+                            {{ profile_form.email }}
+                            {% if profile_form.email.errors %}
+                                <p class="text-red-500 text-sm mt-1">{{ profile_form.email.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ profile_form.household_size.label }}</label>
+                            {{ profile_form.household_size }}
+                            {% if profile_form.household_size.errors %}
+                                <p class="text-red-500 text-sm mt-1">{{ profile_form.household_size.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ profile_form.location.label }}</label>
+                            {{ profile_form.location }}
+                            {% if profile_form.location.errors %}
+                                <p class="text-red-500 text-sm mt-1">{{ profile_form.location.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ profile_form.dietary_preferences.label }}</label>
+                            {{ profile_form.dietary_preferences }}
+                            {% if profile_form.dietary_preferences.errors %}
+                                <p class="text-red-500 text-sm mt-1">{{ profile_form.dietary_preferences.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ profile_form.budget_limit.label }}</label>
+                            {{ profile_form.budget_limit }}
+                            {% if profile_form.budget_limit.errors %}
+                                <p class="text-red-500 text-sm mt-1">{{ profile_form.budget_limit.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="flex space-x-4 pt-4">
+                        <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+                            Save Changes
+                        </button>
+                        <button type="button" onclick="toggleEditMode()" class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inventory Tab -->
+    <div id="inventory-tab" class="tab-content hidden">
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-semibold text-gray-700">Food Inventory</h2>
+                <button onclick="toggleInventoryForm()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                    + Add Item
+                </button>
+            </div>
+            
+            <!-- Add Inventory Form -->
+            <div id="inventory-form" class="hidden mb-6 p-4 bg-gray-50 rounded-lg">
+                <form method="POST" action="{% url 'food:inventory_form' %}">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ food_form.name.label }}</label>
+                            {{ food_form.name }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ food_form.category.label }}</label>
+                            {{ food_form.category }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ food_form.quantity.label }}</label>
+                            {{ food_form.quantity }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ food_form.unit.label }}</label>
+                            {{ food_form.unit }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ food_form.purchase_date.label }}</label>
+                            {{ food_form.purchase_date }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ food_form.expiration_date.label }}</label>
+                            {{ food_form.expiration_date }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ food_form.price.label }}</label>
+                            {{ food_form.price }}
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ food_form.notes.label }}</label>
+                        {{ food_form.notes }}
+                    </div>
+                    <div class="flex space-x-4 mt-4">
+                        <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+                            Add to Inventory
+                        </button>
+                        <button type="button" onclick="toggleInventoryForm()" class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Inventory List -->
+            <div class="overflow-x-auto">
+                {% if food_items %}
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expiration</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for item in food_items %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">{{ item.name }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    {{ item.get_category_display }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ item.quantity }} {{ item.unit }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {% if item.expiration_date %}
+                                    {{ item.expiration_date|date:"M d, Y" }}
+                                    {% if item.is_expired %}
+                                        <span class="text-red-600 font-semibold">(Expired)</span>
+                                    {% elif item.days_until_expiration <= 3 %}
+                                        <span class="text-orange-600 font-semibold">({{ item.days_until_expiration }} days)</span>
+                                    {% endif %}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {% if item.price %}${{ item.price }}{% else %}-{% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <a href="{% url 'food:inventory_edit' item.pk %}" class="text-blue-600 hover:text-blue-900 mr-3">Edit</a>
+                                <a href="{% url 'food:inventory_delete' item.pk %}" onclick="return confirm('Are you sure?')" class="text-red-600 hover:text-red-900">Delete</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="text-gray-500 text-center py-8">No items in inventory. Click "Add Item" to get started.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Consumption Tab -->
+    <div id="consumption-tab" class="tab-content hidden">
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-semibold text-gray-700">Consumption Logs</h2>
+                <div class="flex space-x-2">
+                    <a href="{% url 'food:history' %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                        View Full History
+                    </a>
+                    <button onclick="toggleConsumptionForm()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                        + Log Usage
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Add Consumption Form -->
+            <div id="consumption-form" class="hidden mb-6 p-4 bg-gray-50 rounded-lg">
+                <form method="POST" action="{% url 'food:log_form' %}">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ log_form.item_name.label }}</label>
+                            {{ log_form.item_name }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ log_form.category.label }}</label>
+                            {{ log_form.category }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ log_form.quantity.label }}</label>
+                            {{ log_form.quantity }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ log_form.unit.label }}</label>
+                            {{ log_form.unit }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ log_form.consumption_date.label }}</label>
+                            {{ log_form.consumption_date }}
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ log_form.notes.label }}</label>
+                        {{ log_form.notes }}
+                    </div>
+                    <div class="flex space-x-4 mt-4">
+                        <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+                            Log Consumption
+                        </button>
+                        <button type="button" onclick="toggleConsumptionForm()" class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Consumption List -->
+            <div class="overflow-x-auto">
+                {% if consumption_logs %}
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for log in consumption_logs %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">{{ log.item_name }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                    {{ log.get_category_display }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ log.quantity }} {{ log.unit }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ log.consumption_date|date:"M d, Y" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <a href="{% url 'food:log_delete' log.pk %}" onclick="return confirm('Are you sure?')" class="text-red-600 hover:text-red-900">Delete</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="text-gray-500 text-center py-8">No consumption logs yet. Click "Log Usage" to track your food consumption.</p>
+                {% endif %}
+            </div>
+            
+            <!-- Helper Card -->
+            <div class="mt-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-semibold text-blue-800">Quick Tip</p>
+                        <p class="text-xs text-blue-700 mt-1">Log your food consumption daily to track patterns and reduce waste. Click "View Full History" for detailed analytics, charts, and export options.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+<script>
+    function showTab(tabName) {
+        // Hide all tabs
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.add('hidden');
+        });
+        
+        // Remove active class from all buttons
+        document.querySelectorAll('.tab-button').forEach(btn => {
+            btn.classList.remove('active', 'border-green-500', 'text-green-600');
+            btn.classList.add('border-transparent', 'text-gray-500');
+        });
+        
+        // Show selected tab
+        document.getElementById(tabName + '-tab').classList.remove('hidden');
+        
+        // Add active class to selected button
+        const activeBtn = document.getElementById('tab-' + tabName);
+        activeBtn.classList.add('active', 'border-green-500', 'text-green-600');
+        activeBtn.classList.remove('border-transparent', 'text-gray-500');
+    }
+    
+    function toggleEditMode() {
+        const viewMode = document.getElementById('view-mode');
+        const editMode = document.getElementById('edit-mode');
+        
+        if (viewMode.classList.contains('hidden')) {
+            viewMode.classList.remove('hidden');
+            editMode.classList.add('hidden');
+        } else {
+            viewMode.classList.add('hidden');
+            editMode.classList.remove('hidden');
+        }
+    }
+    
+    function toggleInventoryForm() {
+        const form = document.getElementById('inventory-form');
+        form.classList.toggle('hidden');
+    }
+    
+    function toggleConsumptionForm() {
+        const form = document.getElementById('consumption-form');
+        form.classList.toggle('hidden');
+    }
+</script>
 {% endblock %}

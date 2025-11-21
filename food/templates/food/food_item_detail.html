@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ item.item_name }} - Food Item Details{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Back Button -->
+    <div class="mb-6">
+        <a 
+            href="{% url 'food:food_items_list' %}"
+            class="inline-flex items-center text-green-600 hover:text-green-700 font-semibold transition duration-200"
+        >
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Back to Food Items
+        </a>
+    </div>
+
+    <!-- Main Card -->
+    <div class="bg-white rounded-lg shadow-xl overflow-hidden">
+        <!-- Header Section -->
+        <div class="bg-gradient-to-r from-green-500 to-green-600 px-8 py-6">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h1 class="text-4xl font-bold text-white mb-2">{{ item.item_name }}</h1>
+                    <span class="inline-block bg-white bg-opacity-20 text-white px-4 py-1 rounded-full text-sm font-semibold">
+                        {{ item.get_category_display }}
+                    </span>
+                </div>
+                {% if item.image_url %}
+                    <img src="{{ item.image_url }}" alt="{{ item.item_name }}" class="w-24 h-24 rounded-lg shadow-lg">
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Content Section -->
+        <div class="p-8">
+            <!-- Key Information Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <!-- Shelf Life Card -->
+                <div class="bg-blue-50 rounded-lg p-6 text-center border border-blue-200">
+                    <svg class="mx-auto h-12 w-12 text-blue-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <h3 class="text-sm font-semibold text-gray-600 uppercase mb-1">Shelf Life</h3>
+                    <p class="text-3xl font-bold text-blue-600">{{ item.typical_expiration_days }}</p>
+                    <p class="text-gray-600 text-sm">days</p>
+                </div>
+
+                <!-- Price Card -->
+                <div class="bg-green-50 rounded-lg p-6 text-center border border-green-200">
+                    <svg class="mx-auto h-12 w-12 text-green-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <h3 class="text-sm font-semibold text-gray-600 uppercase mb-1">Sample Cost</h3>
+                    <p class="text-3xl font-bold text-green-600">{{ item.sample_cost_per_unit }}</p>
+                    <p class="text-gray-600 text-sm">BDT per {{ item.unit }}</p>
+                </div>
+
+                <!-- Unit Card -->
+                <div class="bg-purple-50 rounded-lg p-6 text-center border border-purple-200">
+                    <svg class="mx-auto h-12 w-12 text-purple-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                    </svg>
+                    <h3 class="text-sm font-semibold text-gray-600 uppercase mb-1">Unit</h3>
+                    <p class="text-3xl font-bold text-purple-600">{{ item.unit }}</p>
+                    <p class="text-gray-600 text-sm">measurement</p>
+                </div>
+            </div>
+
+            <!-- Storage Instructions -->
+            {% if item.storage_instructions %}
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                        <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Storage Instructions
+                    </h2>
+                    <div class="bg-blue-50 border-l-4 border-blue-600 p-6 rounded-lg">
+                        <p class="text-gray-700 text-lg leading-relaxed">{{ item.storage_instructions }}</p>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Nutritional Information -->
+            {% if item.nutritional_info %}
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                        <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Nutritional Information (per 100g)
+                    </h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {% if item.nutritional_info.calories %}
+                            <div class="bg-orange-50 rounded-lg p-4 text-center border border-orange-200">
+                                <p class="text-sm text-gray-600 mb-1">Calories</p>
+                                <p class="text-2xl font-bold text-orange-600">{{ item.nutritional_info.calories }}</p>
+                                <p class="text-xs text-gray-500">kcal</p>
+                            </div>
+                        {% endif %}
+                        {% if item.nutritional_info.protein %}
+                            <div class="bg-red-50 rounded-lg p-4 text-center border border-red-200">
+                                <p class="text-sm text-gray-600 mb-1">Protein</p>
+                                <p class="text-2xl font-bold text-red-600">{{ item.nutritional_info.protein }}</p>
+                                <p class="text-xs text-gray-500">g</p>
+                            </div>
+                        {% endif %}
+                        {% if item.nutritional_info.carbs %}
+                            <div class="bg-yellow-50 rounded-lg p-4 text-center border border-yellow-200">
+                                <p class="text-sm text-gray-600 mb-1">Carbs</p>
+                                <p class="text-2xl font-bold text-yellow-600">{{ item.nutritional_info.carbs }}</p>
+                                <p class="text-xs text-gray-500">g</p>
+                            </div>
+                        {% endif %}
+                        {% if item.nutritional_info.fat %}
+                            <div class="bg-pink-50 rounded-lg p-4 text-center border border-pink-200">
+                                <p class="text-sm text-gray-600 mb-1">Fat</p>
+                                <p class="text-2xl font-bold text-pink-600">{{ item.nutritional_info.fat }}</p>
+                                <p class="text-xs text-gray-500">g</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Additional Information -->
+            <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800 mb-3">Additional Information</h3>
+                <div class="space-y-2 text-gray-700">
+                    <p><span class="font-semibold">Category:</span> {{ item.get_category_display }}</p>
+                    <p><span class="font-semibold">Added to database:</span> {{ item.created_at|date:"F d, Y" }}</p>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="mt-8 flex gap-4">
+                <a 
+                    href="{% url 'food:inventory_form' %}"
+                    class="flex-1 bg-green-600 text-white text-center py-3 rounded-lg hover:bg-green-700 transition duration-200 font-semibold"
+                >
+                    Add to My Inventory
+                </a>
+                <a 
+                    href="{% url 'food:food_items_list' %}"
+                    class="flex-1 bg-gray-200 text-gray-700 text-center py-3 rounded-lg hover:bg-gray-300 transition duration-200 font-semibold"
+                >
+                    Browse More Items
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
