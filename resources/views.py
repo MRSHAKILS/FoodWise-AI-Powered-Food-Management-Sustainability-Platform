@@ -18,6 +18,19 @@ def resources_list(request):
     if resource_type:
         resources = resources.filter(type=resource_type)
     
+    # Apply tag filter if provided
+    tag = request.GET.get('tag')
+    if tag:
+        resources = resources.filter(tags__contains=[tag])
+    
+    # Apply relevant_food_categories filter if provided
+    food_category = request.GET.get('food_category')
+    if food_category:
+        resources = resources.filter(
+            Q(relevant_food_categories__contains=[food_category]) |
+            Q(relevant_food_categories__contains=['all'])
+        )
+    
     # Apply search filter if provided (search in title and description)
     search = request.GET.get('search')
     if search:
@@ -32,12 +45,27 @@ def resources_list(request):
     categories = Resource.CATEGORY_CHOICES
     types = Resource.TYPE_CHOICES
     
+    # Get all unique tags and food categories for filters
+    all_resources = Resource.objects.all()
+    all_tags = set()
+    all_food_categories = set()
+    
+    for resource in all_resources:
+        if resource.tags:
+            all_tags.update(resource.tags)
+        if resource.relevant_food_categories:
+            all_food_categories.update(resource.relevant_food_categories)
+    
     context = {
         'resources': resources,
         'categories': categories,
         'types': types,
+        'all_tags': sorted(all_tags),
+        'all_food_categories': sorted(all_food_categories),
         'selected_category': category,
         'selected_type': resource_type,
+        'selected_tag': tag,
+        'selected_food_category': food_category,
         'search_query': search,
     }
     return render(request, 'resources/resources_list.html', context)

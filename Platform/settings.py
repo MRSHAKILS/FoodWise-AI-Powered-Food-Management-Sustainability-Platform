@@ -56,6 +56,7 @@ INSTALLED_APPS = [
 ]
 SITE_ID = 1
 
+LOGIN_URL = "/users/login/"
 LOGIN_REDIRECT_URL = "dashboard"
 LOGOUT_REDIRECT_URL = "landing"
 
@@ -64,6 +65,12 @@ ACCOUNT_LOGIN_METHODS = {'username', 'email'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
 
 AUTH_USER_MODEL = "users.User"
+
+# Authentication Backends
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
 
 
 MIDDLEWARE = [
@@ -80,6 +87,12 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "Platform.urls"
+
+# Session Configuration
+SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds
+SESSION_SAVE_EVERY_REQUEST = False
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
 
 TEMPLATES = [
     {
@@ -134,7 +147,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Dhaka"
 
 USE_I18N = True
 

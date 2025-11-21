@@ -41,7 +41,13 @@ def inventory_form(request):
     else:
         form = FoodItemForm()
     
-    return render(request, 'food/inventory_form.html', {'form': form})
+    # Get all food database items for quick selection
+    food_database_items = FoodItemDatabase.objects.all().order_by('item_name')
+    
+    return render(request, 'food/inventory_form.html', {
+        'form': form,
+        'food_database_items': food_database_items
+    })
 
 
 @login_required
@@ -222,6 +228,135 @@ def food_item_detail(request, id):
         'item': item,
     }
     return render(request, 'food/food_item_detail.html', context)
+
+
+# Food Database Views (PART 4 - Enhanced)
+def food_database_list(request):
+    """Browse food database with advanced filtering"""
+    items = FoodItemDatabase.objects.all()
+    
+    # Category filter
+    category = request.GET.get('category')
+    if category:
+        items = items.filter(category=category)
+    
+    # Unit filter
+    unit = request.GET.get('unit')
+    if unit:
+        items = items.filter(unit=unit)
+    
+    # Search filter
+    search = request.GET.get('search')
+    if search:
+        items = items.filter(
+            Q(item_name__icontains=search) | 
+            Q(storage_instructions__icontains=search)
+        )
+    
+    # Sort option
+    sort_by = request.GET.get('sort', 'item_name')
+    if sort_by == 'expiration':
+        items = items.order_by('typical_expiration_days')
+    elif sort_by == 'price':
+        items = items.order_by('sample_cost_per_unit')
+    else:
+        items = items.order_by('item_name')
+    
+    context = {
+        'items': items,
+        'categories': FoodItemDatabase.CATEGORY_CHOICES,
+        'units': FoodItemDatabase.UNIT_CHOICES,
+        'selected_category': category,
+        'selected_unit': unit,
+        'search_query': search,
+        'sort_by': sort_by,
+    }
+    return render(request, 'food/food_database_list.html', context)
+
+
+def food_database_detail(request, pk):
+    """Show detailed view of a single food database item"""
+    item = get_object_or_404(FoodItemDatabase, pk=pk)
+    
+    # Get related inventory items (items user added based on this database item)
+    if request.user.is_authenticated:
+        related_inventory = FoodItem.objects.filter(
+            user=request.user,
+            name__icontains=item.item_name
+        )[:5]
+    else:
+        related_inventory = None
+    
+    context = {
+        'item': item,
+        'related_inventory': related_inventory,
+    }
+    return render(request, 'food/food_database_detail.html', context)
+
+
+def food_database_search(request):
+    """Advanced search interface for food database"""
+    results = None
+    total_items = FoodItemDatabase.objects.count()
+    
+    # Check if any search parameter is provided
+    if any(request.GET.get(param) for param in ['q', 'category', 'max_price', 'min_shelf_life', 'unit', 'sort']):
+        query = request.GET.get('q', '')
+        category = request.GET.get('category', '')
+        max_price = request.GET.get('max_price', '')
+        min_shelf_life = request.GET.get('min_shelf_life', '')
+        unit = request.GET.get('unit', '')
+        sort_by = request.GET.get('sort', 'item_name')
+        
+        results = FoodItemDatabase.objects.all()
+        
+        # Text search
+        if query:
+            results = results.filter(
+                Q(item_name__icontains=query) |
+                Q(storage_instructions__icontains=query)
+            )
+        
+        # Category filter
+        if category:
+            results = results.filter(category=category)
+        
+        # Price filter
+        if max_price:
+            try:
+                results = results.filter(sample_cost_per_unit__lte=float(max_price))
+            except ValueError:
+                pass
+        
+        # Shelf life filter
+        if min_shelf_life:
+            try:
+                results = results.filter(typical_expiration_days__gte=int(min_shelf_life))
+            except ValueError:
+                pass
+        
+        # Unit filter
+        if unit:
+            results = results.filter(unit=unit)
+        
+        # Sort results
+        if sort_by in ['item_name', '-item_name', 'sample_cost_per_unit', '-sample_cost_per_unit', 
+                       'typical_expiration_days', '-typical_expiration_days']:
+            results = results.order_by(sort_by)
+        else:
+            results = results.order_by('item_name')
+    
+    context = {
+        'results': results,
+        'total_items': total_items,
+        'query': request.GET.get('q', ''),
+        'category': request.GET.get('category', ''),
+        'max_price': request.GET.get('max_price', ''),
+        'min_shelf_life': request.GET.get('min_shelf_life', ''),
+        'unit': request.GET.get('unit', ''),
+        'sort_by': request.GET.get('sort', 'item_name'),
+    }
+    return render(request, 'food/food_database_search.html', context)
 
 
 # Dashboard and Recommendations API (PART 6)

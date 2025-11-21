@@ -96,6 +96,20 @@ class FoodItem(models.Model):
             delta = self.expiration_date - timezone.now().date()
             return delta.days
         return None
+    
+    @property
+    def is_expiring_soon(self):
+        """Check if item is expiring within 7 days"""
+        if self.expiration_date:
+            days_left = self.days_until_expiration
+            if days_left is not None:
+                return 0 <= days_left <= 7
+        return False
+    
+    @property
+    def is_low_stock(self):
+        """Check if item quantity is below threshold (2 units)"""
+        return float(self.quantity) <= 2.0
 
 
 class ConsumptionLog(models.Model):
