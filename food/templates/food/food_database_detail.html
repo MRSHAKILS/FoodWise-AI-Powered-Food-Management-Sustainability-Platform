@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ item.item_name }} - Food Database{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Back Button -->
+    <div class="mb-6">
+        <a href="{% url 'food:food_database_list' %}" 
+           class="inline-flex items-center text-green-600 hover:text-green-700">
+            ← Back to Food Database
+        </a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-xl overflow-hidden">
+        <div class="md:flex">
+            <!-- Image Section -->
+            <div class="md:w-1/2">
+                {% if item.image_url %}
+                <img src="{{ item.image_url }}" alt="{{ item.item_name }}" 
+                     class="w-full h-96 object-cover">
+                {% else %}
+                <div class="w-full h-96 bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center">
+                    <span class="text-9xl">🍽️</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Details Section -->
+            <div class="md:w-1/2 p-8">
+                <div class="mb-4">
+                    <span class="px-4 py-2 text-sm font-semibold rounded-full 
+                                 {% if item.category == 'fruit' %}bg-red-100 text-red-800
+                                 {% elif item.category == 'vegetable' %}bg-green-100 text-green-800
+                                 {% elif item.category == 'dairy' %}bg-blue-100 text-blue-800
+                                 {% elif item.category == 'protein' %}bg-purple-100 text-purple-800
+                                 {% elif item.category == 'grain' %}bg-yellow-100 text-yellow-800
+                                 {% else %}bg-gray-100 text-gray-800{% endif %}">
+                        {{ item.get_category_display }}
+                    </span>
+                </div>
+
+                <h1 class="text-4xl font-bold text-gray-900 mb-4">{{ item.item_name }}</h1>
+
+                <!-- Key Info Cards -->
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-green-50 rounded-lg p-4">
+                        <div class="text-sm text-gray-600 mb-1">💰 Average Cost</div>
+                        <div class="text-2xl font-bold text-green-600">
+                            ৳{{ item.sample_cost_per_unit }}
+                        </div>
+                        <div class="text-sm text-gray-500">per {{ item.get_unit_display }}</div>
+                    </div>
+
+                    <div class="bg-blue-50 rounded-lg p-4">
+                        <div class="text-sm text-gray-600 mb-1">📅 Shelf Life</div>
+                        <div class="text-2xl font-bold text-blue-600">
+                            {{ item.typical_expiration_days }}
+                        </div>
+                        <div class="text-sm text-gray-500">days typically</div>
+                    </div>
+                </div>
+
+                <!-- Nutritional Information -->
+                {% if item.nutritional_info %}
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">🔥 Nutritional Information (per 100g)</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        {% if item.nutritional_info.calories %}
+                        <div class="bg-gray-50 rounded-lg p-3">
+                            <div class="text-sm text-gray-600">Calories</div>
+                            <div class="text-xl font-bold">{{ item.nutritional_info.calories }} kcal</div>
+                        </div>
+                        {% endif %}
+                        {% if item.nutritional_info.protein %}
+                        <div class="bg-gray-50 rounded-lg p-3">
+                            <div class="text-sm text-gray-600">Protein</div>
+                            <div class="text-xl font-bold">{{ item.nutritional_info.protein }}g</div>
+                        </div>
+                        {% endif %}
+                        {% if item.nutritional_info.carbs %}
+                        <div class="bg-gray-50 rounded-lg p-3">
+                            <div class="text-sm text-gray-600">Carbs</div>
+                            <div class="text-xl font-bold">{{ item.nutritional_info.carbs }}g</div>
+                        </div>
+                        {% endif %}
+                        {% if item.nutritional_info.fat %}
+                        <div class="bg-gray-50 rounded-lg p-3">
+                            <div class="text-sm text-gray-600">Fat</div>
+                            <div class="text-xl font-bold">{{ item.nutritional_info.fat }}g</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Storage Instructions -->
+                {% if item.storage_instructions %}
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">📦 Storage Instructions</h3>
+                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+                        <p class="text-gray-700">{{ item.storage_instructions }}</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Action Buttons -->
+                {% if user.is_authenticated %}
+                <div class="flex gap-3">
+                    <a href="{% url 'food:inventory_form' %}?prefill={{ item.item_name }}" 
+                       class="flex-1 text-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                        ➕ Add to My Inventory
+                    </a>
+                </div>
+                {% else %}
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p class="text-blue-800">
+                        <a href="{% url 'users:login' %}" class="font-semibold underline">Log in</a> 
+                        to add this item to your inventory!
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Items in User's Inventory -->
+    {% if related_inventory %}
+    <div class="mt-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">📋 Your Related Items</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {% for inv_item in related_inventory %}
+            <div class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition-shadow">
+                <h4 class="font-semibold text-gray-900 mb-2">{{ inv_item.name }}</h4>
+                <div class="text-sm text-gray-600 space-y-1">
+                    <div>Quantity: {{ inv_item.quantity }} {{ inv_item.unit }}</div>
+                    {% if inv_item.expiration_date %}
+                    <div class="{% if inv_item.is_expired %}text-red-600{% elif inv_item.is_expiring_soon %}text-yellow-600{% endif %}">
+                        Expires: {{ inv_item.expiration_date }}
+                    </div>
+                    {% endif %}
+                </div>
+                <a href="{% url 'food:inventory_edit' inv_item.pk %}" 
+                   class="inline-block mt-3 text-green-600 hover:text-green-700 text-sm">
+                    Edit →
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Additional Info -->
+    <div class="mt-8 text-center text-sm text-gray-500">
+        <p>Prices and nutritional information are approximate and may vary by region and brand.</p>
+        <p class="mt-1">Last updated: {{ item.created_at|date:"F j, Y" }}</p>
+    </div>
+</div>
+{% endblock %}

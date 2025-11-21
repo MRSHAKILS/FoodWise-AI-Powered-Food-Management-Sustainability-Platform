@@ -1,0 +1,171 @@
+{
+  "user_id": "user_001",
+  "user_name": "Rahul Ahmed",
+  "inventory": [
+    {
+      "item_id": 1,
+      "item_name": "Liquid Milk (Aarong)",
+      "category": "Dairy",
+      "quantity": 2,
+      "quantity_unit": "liter",
+      "unit": "liter",
+      "purchase_date": "2025-11-20",
+      "typical_expiration_days": 2,
+      "sample_cost_per_unit": 90.00
+    },
+    {
+      "item_id": 2,
+      "item_name": "Sagor Kola (Banana)",
+      "category": "Fruit",
+      "quantity": 6,
+      "quantity_unit": "pcs",
+      "unit": "pcs",
+      "purchase_date": "2025-11-19",
+      "typical_expiration_days": 4,
+      "sample_cost_per_unit": 10.00
+    },
+    {
+      "item_id": 3,
+      "item_name": "Chicken Egg (Farm)",
+      "category": "Dairy/Poultry",
+      "quantity": 12,
+      "quantity_unit": "pcs",
+      "unit": "pcs",
+      "purchase_date": "2025-11-18",
+      "typical_expiration_days": 17,
+      "sample_cost_per_unit": 12.50
+    },
+    {
+      "item_id": 4,
+      "item_name": "Red Spinach (Lal Shak)",
+      "category": "Vegetable",
+      "quantity": 2,
+      "quantity_unit": "bundle",
+      "unit": "bundle",
+      "purchase_date": "2025-11-21",
+      "typical_expiration_days": 2,
+      "sample_cost_per_unit": 20.00
+    },
+    {
+      "item_id": 5,
+      "item_name": "Broiler Chicken",
+      "category": "Fish/Meat",
+      "quantity": 1.5,
+      "quantity_unit": "kg",
+      "unit": "kg",
+      "purchase_date": "2025-11-20",
+      "typical_expiration_days": 2,
+      "sample_cost_per_unit": 210.00
+    },
+    {
+      "item_id": 6,
+      "item_name": "Tomato",
+      "category": "Vegetable",
+      "quantity": 2,
+      "quantity_unit": "kg",
+      "unit": "kg",
+      "purchase_date": "2025-11-17",
+      "typical_expiration_days": 6,
+      "sample_cost_per_unit": 80.00
+    },
+    {
+      "item_id": 7,
+      "item_name": "Bread (Sliced)",
+      "category": "Grain/Snack",
+      "quantity": 2,
+      "quantity_unit": "packet",
+      "unit": "packet",
+      "purchase_date": "2025-11-19",
+      "typical_expiration_days": 4,
+      "sample_cost_per_unit": 60.00
+    },
+    {
+      "item_id": 8,
+      "item_name": "Sweet Yogurt (Mishti Doi)",
+      "category": "Dairy",
+      "quantity": 0.5,
+      "quantity_unit": "kg",
+      "unit": "kg",
+      "purchase_date": "2025-11-20",
+      "typical_expiration_days": 4,
+      "sample_cost_per_unit": 300.00
+    },
+    {
+      "item_id": 9,
+      "item_name": "Potato (Diamond)",
+      "category": "Vegetable",
+      "quantity": 5,
+      "quantity_unit": "kg",
+      "unit": "kg",
+      "purchase_date": "2025-11-15",
+      "typical_expiration_days": 30,
+      "sample_cost_per_unit": 60.00
+    },
+    {
+      "item_id": 10,
+      "item_name": "Onion (Deshi)",
+      "category": "Vegetable",
+      "quantity": 3,
+      "quantity_unit": "kg",
+      "unit": "kg",
+      "purchase_date": "2025-11-15",
+      "typical_expiration_days": 30,
+      "sample_cost_per_unit": 110.00
+    },
+    {
+      "item_id": 11,
+      "item_name": "Minikit Rice",
+      "category": "Grain",
+      "quantity": 10,
+      "quantity_unit": "kg",
+      "unit": "kg",
+      "purchase_date": "2025-11-10",
+      "typical_expiration_days": 365,
+      "sample_cost_per_unit": 75.00
+    },
+    {
+      "item_id": 12,
+      "item_name": "Soybean Oil",
+      "category": "Oil/Fat",
+      "quantity": 2,
+      "quantity_unit": "liter",
+      "unit": "liter",
+      "purchase_date": "2025-11-10",
+      "typical_expiration_days": 365,
+      "sample_cost_per_unit": 170.00
+    },
+    {
+      "item_id": 13,
+      "item_name": "Green Chili",
+      "category": "Vegetable",
+      "quantity": 0.5,
+      "quantity_unit": "kg",
+      "unit": "kg",
+      "purchase_date": "2025-11-18",
+      "typical_expiration_days": 7,
+      "sample_cost_per_unit": 200.00
+    },
+    {
+      "item_id": 14,
+      "item_name": "Atta (Flour)",
+      "category": "Grain",
+      "quantity": 5,
+      "quantity_unit": "kg",
+      "unit": "kg",
+      "purchase_date": "2025-11-12",
+      "typical_expiration_days": 90,
+      "sample_cost_per_unit": 55.00
+    },
+    {
+      "item_id": 15,
+      "item_name": "Garlic (Imported)",
+      "category": "Spice",
+      "quantity": 0.5,
+      "quantity_unit": "kg",
+      "unit": "kg",
+      "purchase_date": "2025-11-16",
+      "typical_expiration_days": 60,
+      "sample_cost_per_unit": 220.00
+    }
+  ]
+}
