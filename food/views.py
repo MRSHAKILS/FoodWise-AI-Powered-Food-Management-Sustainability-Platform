@@ -556,22 +556,21 @@ from .services import ConsumptionAnalyzer
 def consumption_analysis_dashboard(request):
     """
     MVT View for the AI Analysis Dashboard.
+    Displays weekly consumption patterns, trends, imbalances, and waste predictions.
     """
     analyzer = ConsumptionAnalyzer(request.user)
     
-    # Call the REAL AI Service
-    # NOTE: This might take 1-3 seconds. In production, use Celery/background tasks.
+    # Get AI insights (trends, imbalances, waste predictions)
     ai_results = analyzer.get_ai_insights()
     
-    # Fallback: If API failed, ensure we still have heatmap data to show the chart
-    if 'raw_heatmap' not in ai_results:
-        ai_results['raw_heatmap'] = analyzer._get_weekly_heatmap_data()
+    # Get heatmap data (always use generate_heatmap_data to ensure JSON-serializable format)
+    heatmap_data = analyzer.generate_heatmap_data()
 
     context = {
         'trends': ai_results.get('trends', []),
         'imbalances': ai_results.get('imbalances', []),
         'waste_predictions': ai_results.get('waste_predictions', []),
-        'heatmap_data': ai_results.get('raw_heatmap', {}),
+        'heatmap_data': heatmap_data,  # JSON-serializable dict
         'has_api_key': hasattr(settings, 'GEMINI_API_KEY') and settings.GEMINI_API_KEY
     }
     

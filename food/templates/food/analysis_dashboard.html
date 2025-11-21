@@ -11,6 +11,7 @@
                 <i class="fas fa-robot text-green-600 mr-2"></i>AI Consumption Insights
             </h1>
             <p class="text-gray-600">Smart analysis of your eating habits and waste risks</p>
+            <p class="text-xs text-gray-500 mt-2">📊 Data Points: {{ heatmap_data|length }} days | 📈 {{ trends|length }} trends | ⚠️ {{ imbalances|length }} alerts | 🗑️ {{ waste_predictions|length }} waste risks</p>
         </div>
         {% if not has_api_key %}
         <div class="mt-4 md:mt-0 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded shadow-sm">
@@ -148,7 +149,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const rawData = ({ heatmap_data : safe }); 
+        const rawData = {{ heatmap_data|safe }};
         
         const labels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
         
@@ -166,8 +167,24 @@
                 datasets: [{
                     label: 'Items Consumed',
                     data: dataValues,
-                    backgroundColor: 'rgba(16, 185, 129, 0.6)', // Tailwind Green-500
-                    borderColor: 'rgba(16, 185, 129, 1)',
+                    backgroundColor: [
+                        'rgba(34, 197, 94, 0.6)',     // Monday - Green
+                        'rgba(34, 197, 94, 0.6)',     // Tuesday - Green
+                        'rgba(34, 197, 94, 0.6)',     // Wednesday - Green
+                        'rgba(34, 197, 94, 0.6)',     // Thursday - Green
+                        'rgba(234, 179, 8, 0.6)',     // Friday - Yellow
+                        'rgba(234, 179, 8, 0.6)',     // Saturday - Yellow
+                        'rgba(34, 197, 94, 0.6)',     // Sunday - Green
+                    ],
+                    borderColor: [
+                        'rgba(34, 197, 94, 1)',
+                        'rgba(34, 197, 94, 1)',
+                        'rgba(34, 197, 94, 1)',
+                        'rgba(34, 197, 94, 1)',
+                        'rgba(234, 179, 8, 1)',
+                        'rgba(234, 179, 8, 1)',
+                        'rgba(34, 197, 94, 1)',
+                    ],
                     borderWidth: 1,
                     borderRadius: 4,
                 }]
@@ -181,7 +198,11 @@
                 scales: {
                     y: { 
                         beginAtZero: true,
-                        grid: { color: '#f3f4f6' }
+                        grid: { color: '#f3f4f6' },
+                        title: {
+                            display: true,
+                            text: 'Total Quantity Consumed'
+                        }
                     },
                     x: {
                         grid: { display: false }
