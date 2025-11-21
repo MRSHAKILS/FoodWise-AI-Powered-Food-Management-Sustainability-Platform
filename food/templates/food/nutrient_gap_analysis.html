@@ -1,0 +1,283 @@
+{% extends 'base.html' %}
+
+{% block title %}Nutrient Gap Analysis - FoodWiseAI{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8">
+            <a href="{% url 'dashboard' %}" class="inline-flex items-center text-gray-600 hover:text-gray-900 mb-4 transition-colors">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                Back to Dashboard
+            </a>
+            <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                🥗 Nutrient Gap Analysis
+            </h1>
+            <p class="text-gray-600 text-lg">AI-powered analysis of your dietary patterns and nutrient intake</p>
+            <p class="text-sm text-gray-500 mt-2">Based on {{ total_logs }} consumption logs over the last {{ days_analyzed }} days</p>
+        </div>
+
+        <!-- Overall Nutrition Score -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-8 border-2 border-purple-200">
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full mb-4 shadow-lg">
+                    <div class="text-center text-white">
+                        <div class="text-5xl font-bold">{{ overall_score }}</div>
+                        <div class="text-sm font-medium">/ 100</div>
+                    </div>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Overall Nutrition Score</h2>
+                <p class="text-gray-600">
+                    {% if overall_score >= 80 %}
+                        Excellent! You're meeting most nutritional recommendations 🎉
+                    {% elif overall_score >= 60 %}
+                        Good progress! Some areas need attention 👍
+                    {% elif overall_score >= 40 %}
+                        Room for improvement. Focus on the gaps below 📈
+                    {% else %}
+                        Needs attention. Follow the suggestions to improve 🎯
+                    {% endif %}
+                </p>
+                
+                <!-- Progress Bar -->
+                <div class="mt-6 max-w-md mx-auto">
+                    <div class="bg-gray-200 rounded-full h-4 overflow-hidden">
+                        <div class="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-1000" 
+                             style="width: {{ overall_score }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nutrient Gaps & Strengths Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Nutrient Gaps -->
+            <div class="bg-white rounded-2xl shadow-xl p-6">
+                <div class="flex items-center mb-6">
+                    <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mr-4">
+                        <svg class="w-7 h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">Nutrient Gaps</h2>
+                        <p class="text-sm text-gray-600">Areas needing improvement</p>
+                    </div>
+                </div>
+
+                {% if nutrient_gaps %}
+                <div class="space-y-4">
+                    {% for gap in nutrient_gaps %}
+                    <div class="p-5 bg-gradient-to-r from-red-50 to-orange-50 rounded-xl border-2 
+                                {% if gap.severity == 'critical' %}border-red-500
+                                {% elif gap.severity == 'high' %}border-orange-500
+                                {% elif gap.severity == 'moderate' %}border-yellow-500
+                                {% else %}border-yellow-300{% endif %}">
+                        <div class="flex items-start justify-between mb-3">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900">{{ gap.category_display }}</h3>
+                                <p class="text-sm text-gray-600">{{ gap.daily_avg }} of {{ gap.recommended }} daily servings</p>
+                            </div>
+                            <span class="px-3 py-1 text-xs font-bold rounded-full
+                                        {% if gap.severity == 'critical' %}bg-red-500 text-white
+                                        {% elif gap.severity == 'high' %}bg-orange-500 text-white
+                                        {% elif gap.severity == 'moderate' %}bg-yellow-500 text-white
+                                        {% else %}bg-yellow-300 text-gray-800{% endif %}">
+                                {{ gap.deficit_percent|floatformat:0 }}% Gap
+                            </span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="bg-white rounded-full h-2 overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-red-500 to-orange-500" 
+                                     style="width: {{ gap.deficit_percent }}%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-2">
+                            <span class="text-xs font-medium text-gray-700">Missing nutrients:</span>
+                            {% for nutrient in gap.missing_nutrients %}
+                            <span class="px-2 py-1 bg-white text-xs font-medium text-gray-700 rounded-full border border-gray-300">
+                                {{ nutrient }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-8 text-gray-500">
+                    <svg class="w-16 h-16 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <p class="font-medium">No significant nutrient gaps detected!</p>
+                    <p class="text-sm">Keep up the great work! 🎉</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Nutritional Strengths -->
+            <div class="bg-white rounded-2xl shadow-xl p-6">
+                <div class="flex items-center mb-6">
+                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4">
+                        <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">Your Strengths</h2>
+                        <p class="text-sm text-gray-600">Categories you're doing well</p>
+                    </div>
+                </div>
+
+                {% if strengths %}
+                <div class="space-y-4">
+                    {% for strength in strengths %}
+                    <div class="p-5 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border-2 border-green-300">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900">{{ strength.category_display }}</h3>
+                                <p class="text-sm text-gray-600">{{ strength.daily_avg }} daily servings</p>
+                            </div>
+                            <div class="text-3xl">✅</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-8 text-gray-500">
+                    <p class="font-medium">Start logging more consumption to see your strengths!</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Food Suggestions -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+            <div class="flex items-center mb-6">
+                <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
+                    <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">Suggested Foods to Add</h2>
+                    <p class="text-sm text-gray-600">Personalized recommendations to fill nutrient gaps</p>
+                </div>
+            </div>
+
+            {% if food_suggestions %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for food in food_suggestions %}
+                <div class="p-5 bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl border-2 border-blue-200 hover:border-blue-400 transition-all hover:shadow-lg">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                            <span class="text-4xl">{{ food.emoji }}</span>
+                            <div>
+                                <h3 class="font-bold text-gray-900">{{ food.food }}</h3>
+                                <p class="text-xs text-gray-600">{{ food.category }}</p>
+                            </div>
+                        </div>
+                        <span class="px-2 py-1 text-xs font-bold rounded-full
+                                    {% if food.impact == 'High' %}bg-green-500 text-white
+                                    {% else %}bg-blue-500 text-white{% endif %}">
+                            {{ food.impact }}
+                        </span>
+                    </div>
+                    <p class="text-sm text-gray-700 mb-2"><strong>Rich in:</strong> {{ food.nutrients }}</p>
+                    <p class="text-xs text-blue-600 italic">💡 {{ food.reason }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-8 text-gray-500">
+                <p>Great! No immediate food suggestions needed. Keep tracking your consumption for personalized recommendations.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Meal Plan Suggestions -->
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+            <div class="flex items-center mb-6">
+                <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
+                    <svg class="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">Weekly Meal Plan Tips</h2>
+                    <p class="text-sm text-gray-600">Actionable steps to improve your nutrition</p>
+                </div>
+            </div>
+
+            {% if meal_suggestions %}
+            <div class="space-y-4">
+                {% for meal in meal_suggestions %}
+                <div class="p-5 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border-2 border-purple-200 hover:border-purple-400 transition-all">
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0 w-10 h-10 bg-purple-500 text-white rounded-full flex items-center justify-center font-bold">
+                            {{ forloop.counter }}
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-gray-900 mb-1">{{ meal.meal_type }}</h3>
+                            <p class="text-gray-700 mb-2">{{ meal.suggestion }}</p>
+                            <p class="text-sm text-purple-600 font-medium">✨ Impact: {{ meal.impact }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-8 text-gray-500">
+                <p>Start logging more meals to get personalized meal plan suggestions!</p>
+            </div>
+            {% endif %}
+
+            <div class="mt-6 flex justify-center">
+                <a href="{% url 'food:meal_plan_list' %}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-bold hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    Create AI Meal Plan
+                </a>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <a href="{% url 'food:log_form' %}" class="p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all border-2 border-transparent hover:border-green-500">
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                </div>
+                <h3 class="font-bold text-gray-900 mb-2">Log Consumption</h3>
+                <p class="text-sm text-gray-600">Track what you eat for better analysis</p>
+            </a>
+
+            <a href="{% url 'food:inventory_list' %}" class="p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all border-2 border-transparent hover:border-blue-500">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                    </svg>
+                </div>
+                <h3 class="font-bold text-gray-900 mb-2">View Inventory</h3>
+                <p class="text-sm text-gray-600">Check available foods</p>
+            </a>
+
+            <a href="{% url 'food:history' %}" class="p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all border-2 border-transparent hover:border-purple-500">
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                </div>
+                <h3 class="font-bold text-gray-900 mb-2">View Analytics</h3>
+                <p class="text-sm text-gray-600">Detailed consumption trends</p>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1241,3 +1241,28 @@ def sdg_score_api(request):
         'improvement': insights['improvement'],
         'trend': insights['trend']
     })
+
+
+@login_required
+def nutrient_gap_analysis(request):
+    """Nutrient Gap Prediction - Analyze consumption and predict deficiencies"""
+    from .nutrient_gap_analyzer import NutrientGapAnalyzer
+    
+    analyzer = NutrientGapAnalyzer(request.user)
+    
+    # Get predictions and suggestions
+    gaps_data = analyzer.predict_nutrient_gaps()
+    food_suggestions = analyzer.generate_food_suggestions()
+    meal_plan_suggestions = analyzer.generate_weekly_meal_plan_suggestions()
+    
+    context = {
+        'overall_score': gaps_data['overall_score'],
+        'nutrient_gaps': gaps_data['gaps'],
+        'strengths': gaps_data['strengths'],
+        'food_suggestions': food_suggestions,
+        'meal_suggestions': meal_plan_suggestions,
+        'days_analyzed': gaps_data['patterns']['days_analyzed'],
+        'total_logs': gaps_data['patterns']['total_logs'],
+    }
+    
+    return render(request, 'food/nutrient_gap_analysis.html', context)

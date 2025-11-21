@@ -54,4 +54,7 @@ urlpatterns = [
     # SDG Impact Scoring
     path('sdg-impact/', views.sdg_impact_dashboard, name='sdg_impact_dashboard'),
     path('api/sdg-score/', views.sdg_score_api, name='sdg_score_api'),
+    
+    # Nutrient Gap Analysis
+    path('nutrient-gap/', views.nutrient_gap_analysis, name='nutrient_gap_analysis'),
 ]
