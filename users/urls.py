@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import include, path
 from . import views
 
 app_name = 'users'
@@ -10,4 +10,6 @@ urlpatterns = [
     path('test-login/', views.test_login_view, name='test_login'),
     path('register/', views.register_view, name='register'),
     path('logout/', views.logout_view, name='logout'),
-]
+    path("google-auth/", views.google_auth_view, name="google_auth"),
+
+]    
