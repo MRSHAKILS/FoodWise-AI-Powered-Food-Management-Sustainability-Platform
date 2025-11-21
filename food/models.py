@@ -258,3 +258,102 @@ class ChatSession(models.Model):
             'timestamp': datetime.now().isoformat()
         })
         self.save()
+
+
+class FoodSurplus(models.Model):
+    """Food surplus sharing system for reducing waste"""
+    STATUS_CHOICES = [
+        ('available', 'Available'),
+        ('reserved', 'Reserved'),
+        ('completed', 'Completed'),
+        ('expired', 'Expired'),
+    ]
+    
+    CATEGORY_CHOICES = [
+        ('vegetable', 'Vegetable'),
+        ('fruit', 'Fruit'),
+        ('dairy', 'Dairy'),
+        ('meat', 'Meat'),
+        ('grain', 'Grain'),
+        ('beverage', 'Beverage'),
+        ('snack', 'Snack'),
+        ('prepared_meal', 'Prepared Meal'),
+        ('other', 'Other'),
+    ]
+    
+    # Donor Information
+    donor = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name='donated_surplus'
+    )
+    
+    # Item Details
+    item_name = models.CharField(max_length=255)
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='other')
+    quantity = models.DecimalField(max_digits=10, decimal_places=2)
+    unit = models.CharField(max_length=50, default='units')
+    description = models.TextField(blank=True, help_text='Additional details about the food')
+    
+    # Availability
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='available')
+    available_until = models.DateTimeField(help_text='When this surplus expires')
+    
+    # Location (simple text-based for now)
+    pickup_location = models.CharField(
+        max_length=255, 
+        help_text='General area or neighborhood for pickup'
+    )
+    pickup_instructions = models.TextField(
+        blank=True, 
+        help_text='Specific pickup instructions'
+    )
+    
+    # Optional recipient
+    recipient = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='received_surplus'
+    )
+    
+    # Images
+    image_url = models.URLField(max_length=500, blank=True)
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Food Surplus'
+        verbose_name_plural = 'Food Surplus'
+    
+    def __str__(self):
+        return f"{self.item_name} - {self.status} by {self.donor.username}"
+    
+    @property
+    def is_available(self):
+        """Check if surplus is still available"""
+        if self.status != 'available':
+            return False
+        if self.available_until and timezone.now() > self.available_until:
+            return False
+        return True
+    
+    @property
+    def time_remaining(self):
+        """Calculate time remaining until expiry"""
+        if self.available_until:
+            delta = self.available_until - timezone.now()
+            hours = delta.total_seconds() / 3600
+            if hours < 0:
+                return "Expired"
+            elif hours < 24:
+                return f"{int(hours)} hours"
+            else:
+                days = int(hours / 24)
+                return f"{days} days"
+        return "N/A"

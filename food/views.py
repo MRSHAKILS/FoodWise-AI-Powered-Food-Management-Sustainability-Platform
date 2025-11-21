@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from django.utils import timezone
 import json
 
-from .models import FoodItem, ConsumptionLog, FoodItemDatabase, MealPlan, SDGScore, WasteLog, ChatSession
+from .models import FoodItem, ConsumptionLog, FoodItemDatabase, MealPlan, SDGScore, WasteLog, ChatSession, FoodSurplus
 from users.forms import FoodItemForm, ConsumptionLogForm
 from .utils import calculate_dashboard_summary, generate_recommendations
 from .risk_predictor import FoodRiskPredictor
@@ -1103,3 +1103,145 @@ def waste_log_delete(request, pk):
     log.delete()
     messages.success(request, f'Waste log for {log_name} deleted.')
     return redirect('food:waste_logs_list')
+
+
+# Food Surplus/Sharing Views
+@login_required
+def surplus_list(request):
+    """List all available food surplus"""
+    from .models import FoodSurplus
+    
+    # Get all available surplus items
+    surplus_items = FoodSurplus.objects.filter(status='available')
+    
+    # Filter by category if provided
+    category = request.GET.get('category')
+    if category:
+        surplus_items = surplus_items.filter(category=category)
+    
+    # Filter by location if provided
+    location = request.GET.get('location')
+    if location:
+        surplus_items = surplus_items.filter(pickup_location__icontains=location)
+    
+    # Exclude expired items
+    surplus_items = surplus_items.filter(available_until__gt=timezone.now())
+    
+    context = {
+        'surplus_items': surplus_items,
+        'categories': FoodSurplus.CATEGORY_CHOICES,
+        'user_surplus': FoodSurplus.objects.filter(donor=request.user).order_by('-created_at')[:5]
+    }
+    return render(request, 'food/surplus_list.html', context)
+
+
+@login_required
+def surplus_create(request):
+    """Create a new food surplus listing"""
+    from .models import FoodSurplus
+    
+    if request.method == 'POST':
+        try:
+            # Calculate available_until datetime
+            hours = int(request.POST.get('available_hours', 24))
+            available_until = timezone.now() + timedelta(hours=hours)
+            
+            surplus = FoodSurplus.objects.create(
+                donor=request.user,
+                item_name=request.POST.get('item_name'),
+                category=request.POST.get('category'),
+                quantity=request.POST.get('quantity'),
+                unit=request.POST.get('unit'),
+                description=request.POST.get('description', ''),
+                available_until=available_until,
+                pickup_location=request.POST.get('pickup_location'),
+                pickup_instructions=request.POST.get('pickup_instructions', ''),
+                status='available'
+            )
+            
+            messages.success(request, f'Surplus "{surplus.item_name}" listed successfully!')
+            return redirect('food:surplus_list')
+        except Exception as e:
+            messages.error(request, f'Error creating surplus: {str(e)}')
+    
+    context = {
+        'categories': FoodSurplus.CATEGORY_CHOICES,
+        'units': ['kg', 'g', 'liter', 'ml', 'piece', 'bunch', 'loaf', 'dozen'],
+    }
+    return render(request, 'food/surplus_form.html', context)
+
+
+@login_required
+def surplus_detail(request, pk):
+    """View surplus details and claim it"""
+    from .models import FoodSurplus
+    
+    surplus = get_object_or_404(FoodSurplus, pk=pk)
+    
+    if request.method == 'POST' and request.POST.get('action') == 'claim':
+        if surplus.status == 'available' and surplus.is_available:
+            if surplus.donor != request.user:
+                surplus.recipient = request.user
+                surplus.status = 'reserved'
+                surplus.save()
+                messages.success(request, f'You have claimed "{surplus.item_name}". Contact donor for pickup.')
+            else:
+                messages.warning(request, 'You cannot claim your own surplus.')
+        else:
+            messages.error(request, 'This surplus is no longer available.')
+        return redirect('food:surplus_detail', pk=pk)
+    
+    context = {
+        'surplus': surplus,
+    }
+    return render(request, 'food/surplus_detail.html', context)
+
+
+@login_required
+def surplus_my_listings(request):
+    """View user's own surplus listings"""
+    from .models import FoodSurplus
+    from django.db.models import Sum
+    
+    # Get filter from query params
+    status_filter = request.GET.get('status', 'all')
+    
+    my_listings = FoodSurplus.objects.filter(donor=request.user).order_by('-created_at')
+    
+    # Apply status filter
+    if status_filter and status_filter != 'all':
+        my_listings = my_listings.filter(status=status_filter)
+    
+    # Calculate stats
+    all_listings = FoodSurplus.objects.filter(donor=request.user)
+    available_count = all_listings.filter(status='available').count()
+    reserved_count = all_listings.filter(status='reserved').count()
+    completed_count = all_listings.filter(status='completed').count()
+    total_quantity = all_listings.aggregate(Sum('quantity'))['quantity__sum'] or 0
+    
+    context = {
+        'listings': my_listings,
+        'status_filter': status_filter,
+        'available_count': available_count,
+        'reserved_count': reserved_count,
+        'completed_count': completed_count,
+        'total_quantity': total_quantity,
+    }
+    return render(request, 'food/surplus_my_listings.html', context)
+
+
+@login_required
+def surplus_complete(request, pk):
+    """Mark surplus as completed"""
+    from .models import FoodSurplus
+    
+    surplus = get_object_or_404(FoodSurplus, pk=pk, donor=request.user)
+    
+    if request.method == 'POST':
+        surplus.status = 'completed'
+        surplus.completed_at = timezone.now()
+        surplus.save()
+        messages.success(request, f'Surplus "{surplus.item_name}" marked as completed.')
+        return redirect('food:surplus_my_listings')
+    
+    return redirect('food:surplus_detail', pk=pk)

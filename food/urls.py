@@ -49,4 +49,11 @@ urlpatterns = [
     path('waste-logs/', views.waste_logs_list, name='waste_logs_list'),
     path('waste-logs/add/', views.waste_log_form, name='waste_log_form'),
     path('waste-logs/<int:pk>/delete/', views.waste_log_delete, name='waste_log_delete'),
+    
+    # Food Surplus/Sharing
+    path('surplus/', views.surplus_list, name='surplus_list'),
+    path('surplus/create/', views.surplus_create, name='surplus_create'),
+    path('surplus/<int:pk>/', views.surplus_detail, name='surplus_detail'),
+    path('surplus/my-listings/', views.surplus_my_listings, name='surplus_my_listings'),
+    path('surplus/<int:pk>/complete/', views.surplus_complete, name='surplus_complete'),
 ]

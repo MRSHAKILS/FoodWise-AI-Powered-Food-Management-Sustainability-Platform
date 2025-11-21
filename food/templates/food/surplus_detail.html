@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ surplus.item_name }} - Surplus Detail{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+    <!-- Back Button -->
+    <div class="mb-6">
+        <a href="{% url 'food:surplus_list' %}" class="text-green-600 hover:text-green-700 flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Back to Listings
+        </a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-green-500 to-green-600 p-6 text-white">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h1 class="text-3xl font-bold">{{ surplus.item_name }}</h1>
+                    <p class="text-green-100 mt-2">Listed by {{ surplus.donor.username }}</p>
+                </div>
+                <span class="px-4 py-2 rounded-full text-sm font-semibold
+                    {% if surplus.status == 'available' %}bg-white text-green-600
+                    {% elif surplus.status == 'reserved' %}bg-yellow-400 text-yellow-900
+                    {% elif surplus.status == 'completed' %}bg-gray-200 text-gray-700
+                    {% else %}bg-red-200 text-red-800{% endif %}">
+                    {{ surplus.get_status_display }}
+                </span>
+            </div>
+        </div>
+
+        <div class="p-6 space-y-6">
+            <!-- Key Information Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <div class="text-green-600 text-sm font-medium mb-1">Category</div>
+                    <div class="text-gray-800 font-semibold">{{ surplus.get_category_display }}</div>
+                </div>
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <div class="text-blue-600 text-sm font-medium mb-1">Quantity</div>
+                    <div class="text-gray-800 font-semibold">{{ surplus.quantity }} {{ surplus.unit }}</div>
+                </div>
+                <div class="bg-purple-50 p-4 rounded-lg">
+                    <div class="text-purple-600 text-sm font-medium mb-1">Available Until</div>
+                    <div class="text-gray-800 font-semibold">{{ surplus.available_until|date:"M d, Y g:i A" }}</div>
+                </div>
+            </div>
+
+            <!-- Time Remaining Alert -->
+            {% if surplus.is_available %}
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                    </svg>
+                    <span class="text-yellow-800 font-medium">
+                        ⏰ Time Remaining: {{ surplus.time_remaining }}
+                    </span>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Description -->
+            {% if surplus.description %}
+            <div>
+                <h2 class="text-xl font-semibold text-gray-800 mb-3">📝 Description</h2>
+                <p class="text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-lg">{{ surplus.description }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Pickup Information -->
+            <div>
+                <h2 class="text-xl font-semibold text-gray-800 mb-3">📍 Pickup Information</h2>
+                <div class="bg-gray-50 p-4 rounded-lg space-y-3">
+                    <div>
+                        <span class="font-medium text-gray-700">Location:</span>
+                        <span class="text-gray-900 ml-2">{{ surplus.pickup_location }}</span>
+                    </div>
+                    {% if surplus.pickup_instructions %}
+                    <div>
+                        <span class="font-medium text-gray-700">Instructions:</span>
+                        <p class="text-gray-900 mt-1 ml-2">{{ surplus.pickup_instructions }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Donor Information -->
+            <div>
+                <h2 class="text-xl font-semibold text-gray-800 mb-3">👤 Donor Information</h2>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <p class="text-gray-700">
+                        <span class="font-medium">Shared by:</span> 
+                        <span class="text-gray-900">{{ surplus.donor.username }}</span>
+                    </p>
+                    <p class="text-sm text-gray-500 mt-2">
+                        Listed on {{ surplus.created_at|date:"F d, Y" }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="border-t pt-6">
+                {% if surplus.is_available %}
+                    {% if user != surplus.donor %}
+                    <form method="post" class="space-y-4">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="claim">
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                            <p class="text-green-800 text-sm mb-2">
+                                🎉 <strong>Ready to claim this surplus?</strong>
+                            </p>
+                            <p class="text-green-700 text-sm">
+                                By claiming, you agree to pick up the food from the specified location within the available time. 
+                                The donor will be notified of your claim.
+                            </p>
+                        </div>
+                        <button type="submit"
+                                class="w-full bg-green-600 text-white px-6 py-4 rounded-lg hover:bg-green-700 transition font-semibold text-lg">
+                            ✅ Claim This Surplus
+                        </button>
+                    </form>
+                    {% else %}
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <p class="text-blue-800">
+                            📢 This is your listing. You cannot claim your own surplus.
+                        </p>
+                        <a href="{% url 'food:surplus_my_listings' %}" 
+                           class="text-blue-600 hover:text-blue-700 font-medium inline-block mt-2">
+                            Manage My Listings →
+                        </a>
+                    </div>
+                    {% endif %}
+                {% elif surplus.status == 'reserved' %}
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        {% if user == surplus.recipient %}
+                        <p class="text-yellow-800 mb-3">
+                            🎊 <strong>You have claimed this surplus!</strong> Please coordinate with the donor for pickup.
+                        </p>
+                        <p class="text-yellow-700 text-sm">
+                            Pickup Location: <strong>{{ surplus.pickup_location }}</strong>
+                        </p>
+                        {% else %}
+                        <p class="text-yellow-800">
+                            ⚠️ This surplus has been reserved by another user.
+                        </p>
+                        {% endif %}
+                    </div>
+                {% elif surplus.status == 'completed' %}
+                    <div class="bg-gray-100 border border-gray-300 rounded-lg p-4">
+                        <p class="text-gray-700">
+                            ✔️ This surplus has been successfully shared and picked up.
+                        </p>
+                    </div>
+                {% else %}
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                        <p class="text-red-800">
+                            ❌ This listing has expired or is no longer available.
+                        </p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

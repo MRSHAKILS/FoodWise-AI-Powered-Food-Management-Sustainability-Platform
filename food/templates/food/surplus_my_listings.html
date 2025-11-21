@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+
+{% block title %}My Surplus Listings{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="mb-8 flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">📦 My Surplus Listings</h1>
+            <p class="text-gray-600 mt-2">Manage your shared food items</p>
+        </div>
+        <a href="{% url 'food:surplus_create' %}"
+           class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition font-medium">
+            ➕ Add New Listing
+        </a>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+            <div class="text-green-600 text-sm font-medium mb-1">Available</div>
+            <div class="text-2xl font-bold text-green-700">{{ available_count }}</div>
+        </div>
+        <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+            <div class="text-yellow-600 text-sm font-medium mb-1">Reserved</div>
+            <div class="text-2xl font-bold text-yellow-700">{{ reserved_count }}</div>
+        </div>
+        <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <div class="text-blue-600 text-sm font-medium mb-1">Completed</div>
+            <div class="text-2xl font-bold text-blue-700">{{ completed_count }}</div>
+        </div>
+        <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
+            <div class="text-purple-600 text-sm font-medium mb-1">Total Impact</div>
+            <div class="text-2xl font-bold text-purple-700">{{ total_quantity|floatformat:0 }} items</div>
+        </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="bg-white rounded-lg shadow-md p-2 mb-6 flex gap-2">
+        <a href="?status=all" 
+           class="px-4 py-2 rounded {% if not status_filter or status_filter == 'all' %}bg-green-600 text-white{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
+            All
+        </a>
+        <a href="?status=available" 
+           class="px-4 py-2 rounded {% if status_filter == 'available' %}bg-green-600 text-white{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
+            Available
+        </a>
+        <a href="?status=reserved" 
+           class="px-4 py-2 rounded {% if status_filter == 'reserved' %}bg-yellow-500 text-white{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
+            Reserved
+        </a>
+        <a href="?status=completed" 
+           class="px-4 py-2 rounded {% if status_filter == 'completed' %}bg-blue-600 text-white{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
+            Completed
+        </a>
+    </div>
+
+    <!-- Listings Table -->
+    {% if listings %}
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Item</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantity</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Location</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Available Until</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Recipient</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for item in listings %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4">
+                            <div>
+                                <div class="font-medium text-gray-900">{{ item.item_name }}</div>
+                                <div class="text-sm text-gray-500">{{ item.get_category_display }}</div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-700">
+                            {{ item.quantity }} {{ item.unit }}
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold
+                                {% if item.status == 'available' %}bg-green-100 text-green-800
+                                {% elif item.status == 'reserved' %}bg-yellow-100 text-yellow-800
+                                {% elif item.status == 'completed' %}bg-blue-100 text-blue-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ item.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-700">
+                            {{ item.pickup_location }}
+                        </td>
+                        <td class="px-6 py-4 text-sm">
+                            <div class="text-gray-700">{{ item.available_until|date:"M d, Y" }}</div>
+                            <div class="text-xs text-gray-500">{{ item.available_until|date:"g:i A" }}</div>
+                            {% if item.is_available %}
+                            <div class="text-xs text-orange-600 mt-1">⏰ {{ item.time_remaining }}</div>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-700">
+                            {% if item.recipient %}
+                                {{ item.recipient.username }}
+                            {% else %}
+                                <span class="text-gray-400">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-sm">
+                            <div class="flex gap-2">
+                                <a href="{% url 'food:surplus_detail' item.pk %}"
+                                   class="text-blue-600 hover:text-blue-700 font-medium">
+                                    View
+                                </a>
+                                {% if item.status == 'reserved' %}
+                                <form method="post" action="{% url 'food:surplus_complete' item.pk %}" class="inline">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                            class="text-green-600 hover:text-green-700 font-medium">
+                                        Complete
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div class="bg-white rounded-lg shadow-md p-12 text-center">
+        <div class="text-6xl mb-4">📦</div>
+        <h3 class="text-xl font-semibold text-gray-800 mb-2">No listings yet</h3>
+        <p class="text-gray-600 mb-6">Start sharing surplus food to reduce waste and help your community!</p>
+        <a href="{% url 'food:surplus_create' %}"
+           class="inline-block bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition font-medium">
+            Create Your First Listing
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Impact Summary -->
+    {% if completed_count > 0 %}
+    <div class="mt-8 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 border border-green-200">
+        <h3 class="text-lg font-semibold text-gray-800 mb-3">🌍 Your Impact</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <div class="text-2xl font-bold text-green-600">{{ completed_count }}</div>
+                <div class="text-sm text-gray-600">Successful Shares</div>
+            </div>
+            <div>
+                <div class="text-2xl font-bold text-blue-600">{{ total_quantity|floatformat:1 }}</div>
+                <div class="text-sm text-gray-600">Total Items Shared</div>
+            </div>
+            <div>
+                <div class="text-2xl font-bold text-purple-600">~{{ completed_count|add:completed_count }} kg</div>
+                <div class="text-sm text-gray-600">Waste Prevented (est.)</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

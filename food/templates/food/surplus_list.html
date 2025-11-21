@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}Food Surplus Sharing{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">🌾 Food Surplus Sharing</h1>
+            <p class="text-gray-600 mt-2">Discover and share surplus food in your community</p>
+        </div>
+        <div class="space-x-3">
+            <a href="{% url 'food:surplus_create' %}" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition inline-block">
+                + Share Surplus
+            </a>
+            <a href="{% url 'food:surplus_my_listings' %}" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition inline-block">
+                My Listings
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h3 class="text-lg font-semibold mb-4">🔍 Filter Surplus</h3>
+        <form method="get" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                <select name="category" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                    <option value="">All Categories</option>
+                    {% for code, name in categories %}
+                    <option value="{{ code }}" {% if request.GET.category == code %}selected{% endif %}>{{ name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                <input type="text" name="location" value="{{ request.GET.location }}" 
+                       placeholder="Enter area/neighborhood" 
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+            </div>
+            
+            <div class="flex items-end">
+                <button type="submit" class="w-full bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition">
+                    Apply Filters
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg p-6 text-white">
+            <div class="text-3xl font-bold">{{ surplus_items.count }}</div>
+            <div class="text-green-100">Available Items</div>
+        </div>
+        <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-6 text-white">
+            <div class="text-3xl font-bold">{{ user_surplus.count }}</div>
+            <div class="text-blue-100">Your Listings</div>
+        </div>
+        <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg p-6 text-white">
+            <div class="text-3xl font-bold">🌱</div>
+            <div class="text-purple-100">Reduce Food Waste</div>
+        </div>
+    </div>
+
+    <!-- Surplus Listings -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-2xl font-bold mb-6">Available Surplus</h2>
+        
+        {% if surplus_items %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for surplus in surplus_items %}
+            <div class="border border-gray-200 rounded-lg p-5 hover:shadow-lg transition">
+                <div class="flex justify-between items-start mb-3">
+                    <h3 class="text-xl font-bold text-gray-800">{{ surplus.item_name }}</h3>
+                    <span class="px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full">
+                        {{ surplus.get_category_display }}
+                    </span>
+                </div>
+                
+                <div class="space-y-2 mb-4">
+                    <div class="flex items-center text-gray-600">
+                        <span class="font-semibold mr-2">📦 Quantity:</span>
+                        {{ surplus.quantity }} {{ surplus.unit }}
+                    </div>
+                    
+                    <div class="flex items-center text-gray-600">
+                        <span class="font-semibold mr-2">📍 Location:</span>
+                        {{ surplus.pickup_location }}
+                    </div>
+                    
+                    <div class="flex items-center text-gray-600">
+                        <span class="font-semibold mr-2">👤 By:</span>
+                        {{ surplus.donor.username }}
+                    </div>
+                    
+                    <div class="flex items-center text-orange-600">
+                        <span class="font-semibold mr-2">⏰ Available:</span>
+                        {{ surplus.time_remaining }}
+                    </div>
+                </div>
+                
+                {% if surplus.description %}
+                <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ surplus.description }}</p>
+                {% endif %}
+                
+                <a href="{% url 'food:surplus_detail' surplus.pk %}" 
+                   class="block w-full text-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                    View Details & Claim
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-12">
+            <div class="text-6xl mb-4">🍽️</div>
+            <h3 class="text-xl font-semibold text-gray-700 mb-2">No Surplus Available</h3>
+            <p class="text-gray-600 mb-6">Be the first to share surplus food in your community!</p>
+            <a href="{% url 'food:surplus_create' %}" class="inline-block bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition">
+                Share Surplus Now
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Recent Activity -->
+    {% if user_surplus %}
+    <div class="mt-8 bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold mb-4">Your Recent Listings</h2>
+        <div class="space-y-3">
+            {% for item in user_surplus %}
+            <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                <div>
+                    <div class="font-semibold">{{ item.item_name }}</div>
+                    <div class="text-sm text-gray-600">{{ item.quantity }} {{ item.unit }} - {{ item.get_status_display }}</div>
+                </div>
+                <a href="{% url 'food:surplus_detail' item.pk %}" class="text-green-600 hover:text-green-700">
+                    View →
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -275,10 +275,16 @@
                                     <span class="font-semibold text-sm">Expiration Risks</span>
                                 </span>
                             </a>
-                            <a href="{% url 'food:waste_logs_list' %}" class="block px-4 py-3 hover:bg-green-50 text-gray-700 hover:text-green-600 transition border-t border-gray-200">
+                            <a href="{% url 'food:waste_logs_list' %}" class="block px-4 py-3 hover:bg-green-50 text-gray-700 hover:text-green-600 transition">
                                 <span class="flex items-center space-x-2">
                                     <span>🗑️</span>
                                     <span class="font-semibold text-sm">Waste Logs</span>
+                                </span>
+                            </a>
+                            <a href="{% url 'food:surplus_list' %}" class="block px-4 py-3 hover:bg-green-50 text-gray-700 hover:text-green-600 transition border-t border-gray-200">
+                                <span class="flex items-center space-x-2">
+                                    <span>🌾</span>
+                                    <span class="font-semibold text-sm">Surplus Sharing</span>
                                 </span>
                             </a>
                         </div>
@@ -453,6 +459,12 @@
                         <span class="flex items-center space-x-3">
                             <span class="text-xl">🗑️</span>
                             <span>Waste Logs</span>
+                        </span>
+                    </a>
+                    <a href="{% url 'food:surplus_list' %}" class="block px-4 py-3 rounded-lg text-gray-700 hover:bg-green-50 hover:text-green-600 transition-all duration-200 font-semibold">
+                        <span class="flex items-center space-x-3">
+                            <span class="text-xl">🌾</span>
+                            <span>Surplus Sharing</span>
                         </span>
                     </a>
                 </div>
