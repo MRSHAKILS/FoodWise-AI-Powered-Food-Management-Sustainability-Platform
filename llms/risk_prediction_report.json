@@ -1,0 +1,546 @@
+{
+    "analysis_date": "2025-11-21",
+    "user_id": "user_001",
+    "user_name": "Rahul Ahmed",
+    "total_items": 15,
+    "season_factor": 1.0,
+    "summary": {
+        "critical": 2,
+        "high": 9,
+        "medium": 2,
+        "low": 2
+    },
+    "alerts": [
+        {
+            "type": "critical",
+            "title": "Critical Expiration Alert",
+            "message": "⚠️ URGENT: 2 item(s) need immediate attention!",
+            "items": [
+                "Broiler Chicken",
+                "Liquid Milk (Aarong)"
+            ],
+            "action": "Consume or discard immediately"
+        },
+        {
+            "type": "high",
+            "title": "High Risk Alert",
+            "message": "⚡ WARNING: 9 item(s) expiring soon!",
+            "items": [
+                "Red Spinach (Lal Shak)",
+                "Sweet Yogurt (Mishti Doi)",
+                "Sagor Kola (Banana)",
+                "Chicken Egg (Farm)",
+                "Tomato"
+            ],
+            "action": "Plan to use within next 1-2 days"
+        }
+    ],
+    "priority_list": [
+        {
+            "item_id": 5,
+            "item_name": "Broiler Chicken",
+            "category": "Fish/Meat",
+            "quantity": 1.5,
+            "unit": "kg",
+            "purchase_date": "2025-11-20",
+            "days_until_expiry": 1,
+            "risk_score": 80.0,
+            "risk_level": "Critical",
+            "reason": "Expires tomorrow | Highly perishable category",
+            "breakdown": {
+                "expiry_score": 35,
+                "category_score": 25.0,
+                "frequency_score": 20,
+                "seasonal_score": 0.0
+            }
+        },
+        {
+            "item_id": 1,
+            "item_name": "Liquid Milk (Aarong)",
+            "category": "Dairy",
+            "quantity": 2,
+            "unit": "liter",
+            "purchase_date": "2025-11-20",
+            "days_until_expiry": 1,
+            "risk_score": 72.5,
+            "risk_level": "Critical",
+            "reason": "Expires tomorrow | Highly perishable category",
+            "breakdown": {
+                "expiry_score": 35,
+                "category_score": 22.5,
+                "frequency_score": 15,
+                "seasonal_score": 0.0
+            }
+        },
+        {
+            "item_id": 4,
+            "item_name": "Red Spinach (Lal Shak)",
+            "category": "Vegetable",
+            "quantity": 2,
+            "unit": "bundle",
+            "purchase_date": "2025-11-21",
+            "days_until_expiry": 2,
+            "risk_score": 68.75,
+            "risk_level": "High",
+            "reason": "Expires in 2 days",
+            "breakdown": {
+                "expiry_score": 30,
+                "category_score": 18.75,
+                "frequency_score": 20,
+                "seasonal_score": 0.0
+            }
+        },
+        {
+            "item_id": 8,
+            "item_name": "Sweet Yogurt (Mishti Doi)",
+            "category": "Dairy",
+            "quantity": 0.5,
+            "unit": "kg",
+            "purchase_date": "2025-11-20",
+            "days_until_expiry": 3,
+            "risk_score": 67.5,
+            "risk_level": "High",
+            "reason": "Expires in 3 days | Highly perishable category",
+            "breakdown": {
+                "expiry_score": 25,
+                "category_score": 22.5,
+                "frequency_score": 20,
+                "seasonal_score": 0.0
+            }
+        },
+        {
+            "item_id": 2,
+            "item_name": "Sagor Kola (Banana)",
+            "category": "Fruit",
+            "quantity": 6,
+            "unit": "pcs",
+            "purchase_date": "2025-11-19",
+            "days_until_expiry": 2,
+            "risk_score": 65.0,
+            "risk_level": "High",
+            "reason": "Expires in 2 days",
+            "breakdown": {
+                "expiry_score": 30,
+                "category_score": 20.0,
+                "frequency_score": 15,
+                "seasonal_score": 0.0
+            }
+        },
+        {
+            "item_id": 3,
+            "item_name": "Chicken Egg (Farm)",
+            "category": "Dairy/Poultry",
+            "quantity": 12,
+            "unit": "pcs",
+            "purchase_date": "2025-11-18",
+            "days_until_expiry": 14,
+            "risk_score": 64.25,
+            "risk_level": "High",
+            "reason": "Highly perishable category",
+            "breakdown": {
+                "expiry_score": 33.0,
+                "category_score": 21.25,
+                "frequency_score": 10,
+                "seasonal_score": 0
+            }
+        },
+        {
+            "item_id": 6,
+            "item_name": "Tomato",
+            "category": "Vegetable",
+            "quantity": 2,
+            "unit": "kg",
+            "purchase_date": "2025-11-17",
+            "days_until_expiry": 2,
+            "risk_score": 63.75,
+            "risk_level": "High",
+            "reason": "Expires in 2 days",
+            "breakdown": {
+                "expiry_score": 30,
+                "category_score": 18.75,
+                "frequency_score": 15,
+                "seasonal_score": 0.0
+            }
+        },
+        {
+            "item_id": 9,
+            "item_name": "Potato (Diamond)",
+            "category": "Vegetable",
+            "quantity": 5,
+            "unit": "kg",
+            "purchase_date": "2025-11-15",
+            "days_until_expiry": 24,
+            "risk_score": 61.75,
+            "risk_level": "High",
+            "reason": "Monitor for freshness",
+            "breakdown": {
+                "expiry_score": 28.0,
+                "category_score": 18.75,
+                "frequency_score": 15,
+                "seasonal_score": 0.0
+            }
+        },
+        {
+            "item_id": 10,
+            "item_name": "Onion (Deshi)",
+            "category": "Vegetable",
+            "quantity": 3,
+            "unit": "kg",
+            "purchase_date": "2025-11-15",
+            "days_until_expiry": 24,
+            "risk_score": 61.75,
+            "risk_level": "High",
+            "reason": "Monitor for freshness",
+            "breakdown": {
+                "expiry_score": 28.0,
+                "category_score": 18.75,
+                "frequency_score": 15,
+                "seasonal_score": 0.0
+            }
+        },
+        {
+            "item_id": 7,
+            "item_name": "Bread (Sliced)",
+            "category": "Grain/Snack",
+            "quantity": 2,
+            "unit": "packet",
+            "purchase_date": "2025-11-19",
+            "days_until_expiry": 2,
+            "risk_score": 60.0,
+            "risk_level": "High",
+            "reason": "Expires in 2 days",
+            "breakdown": {
+                "expiry_score": 30,
+                "category_score": 15.0,
+                "frequency_score": 15,
+                "seasonal_score": 0
+            }
+        },
+        {
+            "item_id": 13,
+            "item_name": "Green Chili",
+            "category": "Vegetable",
+            "quantity": 0.5,
+            "unit": "kg",
+            "purchase_date": "2025-11-18",
+            "days_until_expiry": 4,
+            "risk_score": 53.75,
+            "risk_level": "High",
+            "reason": "Expires in 4 days",
+            "breakdown": {
+                "expiry_score": 20,
+                "category_score": 18.75,
+                "frequency_score": 15,
+                "seasonal_score": 0.0
+            }
+        },
+        {
+            "item_id": 15,
+            "item_name": "Garlic (Imported)",
+            "category": "Spice",
+            "quantity": 0.5,
+            "unit": "kg",
+            "purchase_date": "2025-11-16",
+            "days_until_expiry": 55,
+            "risk_score": 42.5,
+            "risk_level": "Medium",
+            "reason": "Monitor for freshness",
+            "breakdown": {
+                "expiry_score": 12.5,
+                "category_score": 10.0,
+                "frequency_score": 20,
+                "seasonal_score": 0
+            }
+        },
+        {
+            "item_id": 14,
+            "item_name": "Atta (Flour)",
+            "category": "Grain",
+            "quantity": 5,
+            "unit": "kg",
+            "purchase_date": "2025-11-12",
+            "days_until_expiry": 81,
+            "risk_score": 32.5,
+            "risk_level": "Medium",
+            "reason": "Monitor for freshness",
+            "breakdown": {
+                "expiry_score": 0,
+                "category_score": 12.5,
+                "frequency_score": 20,
+                "seasonal_score": 0
+            }
+        }
+    ],
+    "all_items": [
+        {
+            "item_id": 5,
+            "item_name": "Broiler Chicken",
+            "category": "Fish/Meat",
+            "quantity": 1.5,
+            "unit": "kg",
+            "purchase_date": "2025-11-20",
+            "days_until_expiry": 1,
+            "risk_score": 80.0,
+            "risk_level": "Critical",
+            "reason": "Expires tomorrow | Highly perishable category",
+            "breakdown": {
+                "expiry_score": 35,
+                "category_score": 25.0,
+                "frequency_score": 20,
+                "seasonal_score": 0.0
+            }
+        },
+        {
+            "item_id": 1,
+            "item_name": "Liquid Milk (Aarong)",
+            "category": "Dairy",
+            "quantity": 2,
+            "unit": "liter",
+            "purchase_date": "2025-11-20",
+            "days_until_expiry": 1,
+            "risk_score": 72.5,
+            "risk_level": "Critical",
+            "reason": "Expires tomorrow | Highly perishable category",
+            "breakdown": {
+                "expiry_score": 35,
+                "category_score": 22.5,
+                "frequency_score": 15,
+                "seasonal_score": 0.0
+            }
+        },
+        {
+            "item_id": 4,
+            "item_name": "Red Spinach (Lal Shak)",
+            "category": "Vegetable",
+            "quantity": 2,
+            "unit": "bundle",
+            "purchase_date": "2025-11-21",
+            "days_until_expiry": 2,
+            "risk_score": 68.75,
+            "risk_level": "High",
+            "reason": "Expires in 2 days",
+            "breakdown": {
+                "expiry_score": 30,
+                "category_score": 18.75,
+                "frequency_score": 20,
+                "seasonal_score": 0.0
+            }
+        },
+        {
+            "item_id": 8,
+            "item_name": "Sweet Yogurt (Mishti Doi)",
+            "category": "Dairy",
+            "quantity": 0.5,
+            "unit": "kg",
+            "purchase_date": "2025-11-20",
+            "days_until_expiry": 3,
+            "risk_score": 67.5,
+            "risk_level": "High",
+            "reason": "Expires in 3 days | Highly perishable category",
+            "breakdown": {
+                "expiry_score": 25,
+                "category_score": 22.5,
+                "frequency_score": 20,
+                "seasonal_score": 0.0
+            }
+        },
+        {
+            "item_id": 2,
+            "item_name": "Sagor Kola (Banana)",
+            "category": "Fruit",
+            "quantity": 6,
+            "unit": "pcs",
+            "purchase_date": "2025-11-19",
+            "days_until_expiry": 2,
+            "risk_score": 65.0,
+            "risk_level": "High",
+            "reason": "Expires in 2 days",
+            "breakdown": {
+                "expiry_score": 30,
+                "category_score": 20.0,
+                "frequency_score": 15,
+                "seasonal_score": 0.0
+            }
+        },
+        {
+            "item_id": 3,
+            "item_name": "Chicken Egg (Farm)",
+            "category": "Dairy/Poultry",
+            "quantity": 12,
+            "unit": "pcs",
+            "purchase_date": "2025-11-18",
+            "days_until_expiry": 14,
+            "risk_score": 64.25,
+            "risk_level": "High",
+            "reason": "Highly perishable category",
+            "breakdown": {
+                "expiry_score": 33.0,
+                "category_score": 21.25,
+                "frequency_score": 10,
+                "seasonal_score": 0
+            }
+        },
+        {
+            "item_id": 6,
+            "item_name": "Tomato",
+            "category": "Vegetable",
+            "quantity": 2,
+            "unit": "kg",
+            "purchase_date": "2025-11-17",
+            "days_until_expiry": 2,
+            "risk_score": 63.75,
+            "risk_level": "High",
+            "reason": "Expires in 2 days",
+            "breakdown": {
+                "expiry_score": 30,
+                "category_score": 18.75,
+                "frequency_score": 15,
+                "seasonal_score": 0.0
+            }
+        },
+        {
+            "item_id": 9,
+            "item_name": "Potato (Diamond)",
+            "category": "Vegetable",
+            "quantity": 5,
+            "unit": "kg",
+            "purchase_date": "2025-11-15",
+            "days_until_expiry": 24,
+            "risk_score": 61.75,
+            "risk_level": "High",
+            "reason": "Monitor for freshness",
+            "breakdown": {
+                "expiry_score": 28.0,
+                "category_score": 18.75,
+                "frequency_score": 15,
+                "seasonal_score": 0.0
+            }
+        },
+        {
+            "item_id": 10,
+            "item_name": "Onion (Deshi)",
+            "category": "Vegetable",
+            "quantity": 3,
+            "unit": "kg",
+            "purchase_date": "2025-11-15",
+            "days_until_expiry": 24,
+            "risk_score": 61.75,
+            "risk_level": "High",
+            "reason": "Monitor for freshness",
+            "breakdown": {
+                "expiry_score": 28.0,
+                "category_score": 18.75,
+                "frequency_score": 15,
+                "seasonal_score": 0.0
+            }
+        },
+        {
+            "item_id": 7,
+            "item_name": "Bread (Sliced)",
+            "category": "Grain/Snack",
+            "quantity": 2,
+            "unit": "packet",
+            "purchase_date": "2025-11-19",
+            "days_until_expiry": 2,
+            "risk_score": 60.0,
+            "risk_level": "High",
+            "reason": "Expires in 2 days",
+            "breakdown": {
+                "expiry_score": 30,
+                "category_score": 15.0,
+                "frequency_score": 15,
+                "seasonal_score": 0
+            }
+        },
+        {
+            "item_id": 13,
+            "item_name": "Green Chili",
+            "category": "Vegetable",
+            "quantity": 0.5,
+            "unit": "kg",
+            "purchase_date": "2025-11-18",
+            "days_until_expiry": 4,
+            "risk_score": 53.75,
+            "risk_level": "High",
+            "reason": "Expires in 4 days",
+            "breakdown": {
+                "expiry_score": 20,
+                "category_score": 18.75,
+                "frequency_score": 15,
+                "seasonal_score": 0.0
+            }
+        },
+        {
+            "item_id": 15,
+            "item_name": "Garlic (Imported)",
+            "category": "Spice",
+            "quantity": 0.5,
+            "unit": "kg",
+            "purchase_date": "2025-11-16",
+            "days_until_expiry": 55,
+            "risk_score": 42.5,
+            "risk_level": "Medium",
+            "reason": "Monitor for freshness",
+            "breakdown": {
+                "expiry_score": 12.5,
+                "category_score": 10.0,
+                "frequency_score": 20,
+                "seasonal_score": 0
+            }
+        },
+        {
+            "item_id": 14,
+            "item_name": "Atta (Flour)",
+            "category": "Grain",
+            "quantity": 5,
+            "unit": "kg",
+            "purchase_date": "2025-11-12",
+            "days_until_expiry": 81,
+            "risk_score": 32.5,
+            "risk_level": "Medium",
+            "reason": "Monitor for freshness",
+            "breakdown": {
+                "expiry_score": 0,
+                "category_score": 12.5,
+                "frequency_score": 20,
+                "seasonal_score": 0
+            }
+        },
+        {
+            "item_id": 12,
+            "item_name": "Soybean Oil",
+            "category": "Oil/Fat",
+            "quantity": 2,
+            "unit": "liter",
+            "purchase_date": "2025-11-10",
+            "days_until_expiry": 354,
+            "risk_score": 28.75,
+            "risk_level": "Low",
+            "reason": "Monitor for freshness",
+            "breakdown": {
+                "expiry_score": 0,
+                "category_score": 8.75,
+                "frequency_score": 20,
+                "seasonal_score": 0
+            }
+        },
+        {
+            "item_id": 11,
+            "item_name": "Minikit Rice",
+            "category": "Grain",
+            "quantity": 10,
+            "unit": "kg",
+            "purchase_date": "2025-11-10",
+            "days_until_expiry": 354,
+            "risk_score": 27.5,
+            "risk_level": "Low",
+            "reason": "Monitor for freshness",
+            "breakdown": {
+                "expiry_score": 0,
+                "category_score": 12.5,
+                "frequency_score": 15,
+                "seasonal_score": 0
+            }
+        }
+    ]
+}

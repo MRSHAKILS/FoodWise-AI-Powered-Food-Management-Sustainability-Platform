@@ -1,0 +1,94 @@
+{
+  "consumption_logs": [
+    {
+      "log_id": 1,
+      "item_name": "Chicken Egg (Farm)",
+      "user": "user_001",
+      "quantity": 4,
+      "unit": "pcs",
+      "category": "Dairy/Poultry",
+      "consumption_date": "2025-11-19"
+    },
+    {
+      "log_id": 2,
+      "item_name": "Sagor Kola (Banana)",
+      "user": "user_001",
+      "quantity": 2,
+      "unit": "pcs",
+      "category": "Fruit",
+      "consumption_date": "2025-11-20"
+    },
+    {
+      "log_id": 3,
+      "item_name": "Liquid Milk (Aarong)",
+      "user": "user_001",
+      "quantity": 0.5,
+      "unit": "liter",
+      "category": "Dairy",
+      "consumption_date": "2025-11-20"
+    },
+    {
+      "log_id": 4,
+      "item_name": "Bread (Sliced)",
+      "user": "user_001",
+      "quantity": 1,
+      "unit": "packet",
+      "category": "Grain/Snack",
+      "consumption_date": "2025-11-20"
+    },
+    {
+      "log_id": 5,
+      "item_name": "Tomato",
+      "user": "user_001",
+      "quantity": 0.5,
+      "unit": "kg",
+      "category": "Vegetable",
+      "consumption_date": "2025-11-18"
+    },
+    {
+      "log_id": 6,
+      "item_name": "Onion (Deshi)",
+      "user": "user_001",
+      "quantity": 0.3,
+      "unit": "kg",
+      "category": "Vegetable",
+      "consumption_date": "2025-11-19"
+    },
+    {
+      "log_id": 7,
+      "item_name": "Potato (Diamond)",
+      "user": "user_001",
+      "quantity": 0.5,
+      "unit": "kg",
+      "category": "Vegetable",
+      "consumption_date": "2025-11-19"
+    },
+    {
+      "log_id": 8,
+      "item_name": "Minikit Rice",
+      "user": "user_001",
+      "quantity": 1,
+      "unit": "kg",
+      "category": "Grain",
+      "consumption_date": "2025-11-18"
+    },
+    {
+      "log_id": 9,
+      "item_name": "Chicken Egg (Farm)",
+      "user": "user_001",
+      "quantity": 2,
+      "unit": "pcs",
+      "category": "Dairy/Poultry",
+      "consumption_date": "2025-11-21"
+    },
+    {
+      "log_id": 10,
+      "item_name": "Green Chili",
+      "user": "user_001",
+      "quantity": 0.1,
+      "unit": "kg",
+      "category": "Vegetable",
+      "consumption_date": "2025-11-20"
+    }
+  ]
+}
