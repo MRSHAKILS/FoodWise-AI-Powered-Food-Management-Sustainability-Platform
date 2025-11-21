@@ -60,7 +60,7 @@ def inventory_edit(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, f'{item.name} updated successfully!')
-            return redirect('users:profile')
+            return redirect('food:inventory_list')
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
