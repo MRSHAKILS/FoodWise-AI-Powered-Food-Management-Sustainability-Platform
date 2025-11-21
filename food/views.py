@@ -1,11 +1,16 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
+from django.db.models import Sum, Q
+from django.utils import timezone
+from datetime import timedelta
+import json
 from .models import FoodItem, ConsumptionLog, FoodItemDatabase
 from users.forms import FoodItemForm, ConsumptionLogForm
 from .utils import calculate_dashboard_summary, generate_recommendations
 from .risk_predictor import FoodRiskPredictor
+from .waste_estimator import WasteEstimator
 
 
 # Inventory Views
@@ -19,10 +24,26 @@ def inventory_list(request):
     if category:
         items = items.filter(category=category)
     
+    # Calculate total inventory value
+    total_value = items.aggregate(total=Sum('price'))['total'] or 0
+    
+    # Calculate last week's expense (items purchased in last 7 days)
+    last_week = timezone.now() - timedelta(days=7)
+    last_week_items = FoodItem.objects.filter(
+        user=request.user,
+        purchase_date__gte=last_week.date()
+    )
+    last_week_expense = last_week_items.aggregate(total=Sum('price'))['total'] or 0
+    last_week_count = last_week_items.count()
+    
     # Get risk predictions for all items
     predictor = FoodRiskPredictor(request.user)
     risk_items = predictor.predict_risks_for_inventory()
     summary_stats = predictor.get_summary_stats(risk_items)
+    
+    # Get waste estimations
+    waste_estimator = WasteEstimator(request.user)
+    waste_projections = waste_estimator.predict_waste_projection(risk_items)
     
     # Create a risk data dictionary keyed by item ID for easy template lookup
     risk_data_by_id = {risk_item['item'].id: risk_item for risk_item in risk_items}
@@ -32,6 +53,10 @@ def inventory_list(request):
         'categories': FoodItem.CATEGORY_CHOICES,
         'risk_data_by_id': risk_data_by_id,
         'summary_stats': summary_stats,
+        'total_value': total_value,
+        'last_week_expense': last_week_expense,
+        'last_week_count': last_week_count,
+        'waste_projections': waste_projections,
     }
     return render(request, 'food/inventory_list.html', context)
 
@@ -519,3 +544,412 @@ def enhanced_dashboard(request):
     }
     
     return render(request, 'dashboard.html', context)
+
+
+@login_required
+def waste_analytics(request):
+    """
+    Comprehensive waste analytics dashboard
+    Shows actual waste, projections, and community comparison
+    """
+    # Get risk predictions
+    predictor = FoodRiskPredictor(request.user)
+    risk_items = predictor.predict_risks_for_inventory()
+    
+    # Get waste estimations
+    waste_estimator = WasteEstimator(request.user)
+    waste_report = waste_estimator.generate_waste_report(risk_items)
+    
+    context = {
+        'waste_report': waste_report,
+        'page_title': 'Waste Analytics',
+    }
+    
+    return render(request, 'food/waste_analytics.html', context)
+
+
+@login_required
+def priority_consumption(request):
+    """
+    AI Priority Consumption Guide
+    Combines FIFO + AI risk scoring to prioritize what to eat first
+    """
+    # Get risk predictions
+    predictor = FoodRiskPredictor(request.user)
+    risk_items = predictor.predict_risks_for_inventory()
+    
+    # Calculate priority scores (FIFO + AI Risk + Expiry urgency)
+    priority_items = []
+    
+    for risk_item in risk_items:
+        item = risk_item['item']
+        risk_score = risk_item['risk_score']
+        days_until_expiry = risk_item.get('days_until_expiry')
+        
+        # Calculate FIFO score (older items = higher priority)
+        days_since_purchase = (timezone.now().date() - item.purchase_date).days if item.purchase_date else 0
+        fifo_score = min(days_since_purchase * 2, 40)  # Max 40 points
+        
+        # Calculate urgency multiplier based on expiry
+        if days_until_expiry is not None:
+            if days_until_expiry <= 0:
+                urgency_multiplier = 1.5
+            elif days_until_expiry <= 1:
+                urgency_multiplier = 1.4
+            elif days_until_expiry <= 2:
+                urgency_multiplier = 1.3
+            elif days_until_expiry <= 3:
+                urgency_multiplier = 1.2
+            elif days_until_expiry <= 7:
+                urgency_multiplier = 1.1
+            else:
+                urgency_multiplier = 1.0
+        else:
+            urgency_multiplier = 1.0
+        
+        # Combined priority score: (FIFO + AI Risk) * Urgency
+        priority_score = (fifo_score + risk_score) * urgency_multiplier
+        priority_score = min(priority_score, 100)  # Cap at 100
+        
+        # Determine priority level
+        if priority_score >= 80 or (days_until_expiry is not None and days_until_expiry <= 1):
+            priority_level = 'critical'
+        elif priority_score >= 60 or (days_until_expiry is not None and days_until_expiry <= 3):
+            priority_level = 'high'
+        elif priority_score >= 40 or (days_until_expiry is not None and days_until_expiry <= 7):
+            priority_level = 'medium'
+        else:
+            priority_level = 'low'
+        
+        priority_items.append({
+            'item': item,
+            'risk_data': risk_item,
+            'priority_score': priority_score,
+            'priority_level': priority_level,
+            'fifo_score': fifo_score,
+            'urgency_multiplier': urgency_multiplier,
+        })
+    
+    # Sort by priority score (highest first)
+    priority_items.sort(key=lambda x: x['priority_score'], reverse=True)
+    
+    # Calculate statistics
+    priority_stats = {
+        'eat_today': len([x for x in priority_items if x['priority_level'] == 'critical']),
+        'this_week': len([x for x in priority_items if x['priority_level'] == 'high']),
+        'soon': len([x for x in priority_items if x['priority_level'] == 'medium']),
+        'good': len([x for x in priority_items if x['priority_level'] == 'low']),
+    }
+    
+    context = {
+        'priority_items': priority_items,
+        'priority_stats': priority_stats,
+    }
+    
+    return render(request, 'food/priority_consumption.html', context)
+
+
+@login_required
+def mark_consumed(request, pk):
+    """Quick mark item as consumed and delete from inventory"""
+    if request.method == 'POST':
+        item = get_object_or_404(FoodItem, pk=pk, user=request.user)
+        
+        # Create consumption log
+        ConsumptionLog.objects.create(
+            user=request.user,
+            item_name=item.name,
+            quantity=item.quantity,
+            unit=item.unit,
+            category=item.category,
+            consumption_date=timezone.now().date(),
+            notes=f"Consumed via priority guide"
+        )
+        
+        item_name = item.name
+        item.delete()
+        
+        messages.success(request, f'✅ {item_name} marked as consumed!')
+        return redirect('food:priority_consumption')
+    
+    return redirect('food:priority_consumption')
+
+
+
+@login_required
+def export_waste_analytics(request, format='json'):
+    """
+    Export waste analytics data for RAG chatbot or external use
+    Supports JSON and text formats
+    """
+    from django.http import HttpResponse
+    import json
+    from datetime import datetime
+    
+    # Get risk predictions
+    predictor = FoodRiskPredictor(request.user)
+    risk_items = predictor.predict_risks_for_inventory()
+    
+    # Get waste estimations
+    waste_estimator = WasteEstimator(request.user)
+    waste_report = waste_estimator.generate_waste_report(risk_items)
+    
+    # Prepare detailed inventory data
+    inventory_details = []
+    for risk_item in risk_items:
+        item = risk_item['item']
+        inventory_details.append({
+            'name': item.name,
+            'category': item.get_category_display(),
+            'quantity': float(item.quantity),
+            'unit': item.unit,
+            'price': float(item.price) if item.price else 0,
+            'purchase_date': item.purchase_date.isoformat() if item.purchase_date else None,
+            'expiration_date': item.expiration_date.isoformat() if item.expiration_date else None,
+            'days_until_expiry': risk_item.get('days_until_expiry'),
+            'risk_score': risk_item['risk_score'],
+            'risk_level': risk_item['risk_level'],
+            'recommendation': risk_item['recommendation'],
+        })
+    
+    # Prepare export data
+    export_data = {
+        'user': {
+            'username': request.user.username,
+            'export_date': datetime.now().isoformat(),
+        },
+        'summary': {
+            'total_inventory_items': len(risk_items),
+            'critical_risk_items': len([x for x in risk_items if x['risk_level'] == 'critical']),
+            'high_risk_items': len([x for x in risk_items if x['risk_level'] == 'high']),
+            'medium_risk_items': len([x for x in risk_items if x['risk_level'] == 'medium']),
+            'low_risk_items': len([x for x in risk_items if x['risk_level'] == 'low']),
+        },
+        'actual_waste': {
+            'last_7_days': {
+                'total_grams': waste_report['actual_waste']['last_7_days']['total_grams'],
+                'total_money': waste_report['actual_waste']['last_7_days']['total_money'],
+                'by_category': waste_report['actual_waste']['last_7_days']['by_category'],
+            },
+            'last_30_days': {
+                'total_grams': waste_report['actual_waste']['last_30_days']['total_grams'],
+                'total_money': waste_report['actual_waste']['last_30_days']['total_money'],
+                'by_category': waste_report['actual_waste']['last_30_days']['by_category'],
+            }
+        },
+        'projections': {
+            'weekly': {
+                'grams': waste_report['projections']['weekly']['grams'],
+                'money': waste_report['projections']['weekly']['money'],
+                'by_category': waste_report['projections']['weekly']['by_category'],
+            },
+            'monthly': {
+                'grams': waste_report['projections']['monthly']['grams'],
+                'money': waste_report['projections']['monthly']['money'],
+                'by_category': waste_report['projections']['monthly']['by_category'],
+            }
+        },
+        'community_comparison': {
+            'performance': waste_report['community_comparison']['performance'],
+            'message': waste_report['community_comparison']['message'],
+            'weekly': waste_report['community_comparison']['weekly'],
+            'monthly': waste_report['community_comparison']['monthly'],
+            'savings_potential': waste_report['community_comparison']['savings_potential'],
+        },
+        'insights': {
+            'total_at_risk_items': waste_report['insights']['total_at_risk_items'],
+            'potential_monthly_savings': waste_report['insights']['potential_monthly_savings'],
+            'waste_trend': waste_report['insights']['waste_trend'],
+        },
+        'recommendations': waste_report['recommendations'],
+        'inventory_details': inventory_details,
+    }
+    
+    if format == 'json':
+        response = HttpResponse(
+            json.dumps(export_data, indent=2),
+            content_type='application/json'
+        )
+        response['Content-Disposition'] = f'attachment; filename="waste_analytics_{request.user.username}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json"'
+        return response
+    
+    elif format == 'txt':
+        # Create human-readable text format for RAG chatbot
+        text_content = f"""
+FOOD WASTE ANALYTICS REPORT
+User: {request.user.username}
+Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+
+========================================
+SUMMARY STATISTICS
+========================================
+Total Inventory Items: {export_data['summary']['total_inventory_items']}
+Critical Risk Items: {export_data['summary']['critical_risk_items']}
+High Risk Items: {export_data['summary']['high_risk_items']}
+Medium Risk Items: {export_data['summary']['medium_risk_items']}
+Low Risk Items: {export_data['summary']['low_risk_items']}
+
+========================================
+ACTUAL WASTE (LAST 7 DAYS)
+========================================
+Total Money Lost: ${export_data['actual_waste']['last_7_days']['total_money']:.2f}
+Total Grams Wasted: {export_data['actual_waste']['last_7_days']['total_grams']:.0f}g
+
+========================================
+ACTUAL WASTE (LAST 30 DAYS)
+========================================
+Total Money Lost: ${export_data['actual_waste']['last_30_days']['total_money']:.2f}
+Total Grams Wasted: {export_data['actual_waste']['last_30_days']['total_grams']:.0f}g
+
+========================================
+WASTE PROJECTIONS - NEXT 7 DAYS
+========================================
+Projected Money Loss: ${export_data['projections']['weekly']['money']:.2f}
+Projected Grams Waste: {export_data['projections']['weekly']['grams']:.0f}g
+
+========================================
+WASTE PROJECTIONS - NEXT 30 DAYS
+========================================
+Projected Money Loss: ${export_data['projections']['monthly']['money']:.2f}
+Projected Grams Waste: {export_data['projections']['monthly']['grams']:.0f}g
+
+========================================
+COMMUNITY COMPARISON
+========================================
+Performance Level: {export_data['community_comparison']['performance'].upper()}
+Status: {export_data['community_comparison']['message']}
+
+Weekly:
+  Your Projection: ${export_data['community_comparison']['weekly']['user']:.2f}
+  Community Average: ${export_data['community_comparison']['weekly']['community']:.2f}
+  Difference: {export_data['community_comparison']['weekly']['difference_percent']:.1f}%
+
+Monthly:
+  Your Projection: ${export_data['community_comparison']['monthly']['user']:.2f}
+  Community Average: ${export_data['community_comparison']['monthly']['community']:.2f}
+  Difference: {export_data['community_comparison']['monthly']['difference_percent']:.1f}%
+
+Annual Savings Potential: ${export_data['community_comparison']['savings_potential']:.2f}
+
+========================================
+INSIGHTS
+========================================
+Items at Risk (High/Critical): {export_data['insights']['total_at_risk_items']}
+Potential Monthly Savings: ${export_data['insights']['potential_monthly_savings']:.2f}
+Waste Trend: {export_data['insights']['waste_trend'].upper()}
+
+========================================
+AI RECOMMENDATIONS
+========================================
+"""
+        for i, rec in enumerate(export_data['recommendations'], 1):
+            text_content += f"{i}. [{rec['priority'].upper()}] {rec['action']}\n"
+            text_content += f"   Impact: {rec['impact']}\n\n"
+        
+        text_content += """
+========================================
+DETAILED INVENTORY ANALYSIS
+========================================
+"""
+        for item in export_data['inventory_details']:
+            text_content += f"\nItem: {item['name']}\n"
+            text_content += f"  Category: {item['category']}\n"
+            text_content += f"  Quantity: {item['quantity']} {item['unit']}\n"
+            text_content += f"  Price: ${item['price']:.2f}\n"
+            if item['expiration_date']:
+                text_content += f"  Expiration: {item['expiration_date']}\n"
+                text_content += f"  Days Until Expiry: {item['days_until_expiry']}\n"
+            text_content += f"  Risk Score: {item['risk_score']:.1f}%\n"
+            text_content += f"  Risk Level: {item['risk_level'].upper()}\n"
+            text_content += f"  Recommendation: {item['recommendation']}\n"
+        
+        response = HttpResponse(text_content, content_type='text/plain')
+        response['Content-Disposition'] = f'attachment; filename="waste_analytics_{request.user.username}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.txt"'
+        return response
+    
+    else:
+        return JsonResponse({'error': 'Invalid format. Use json or txt'}, status=400)
+
+
+@login_required
+def priority_alerts_api(request):
+    """API endpoint to fetch high-priority items for navbar notifications"""
+    items = FoodItem.objects.filter(user=request.user)
+    
+    if not items:
+        return JsonResponse({'alerts': []})
+    
+    # Initialize predictor
+    predictor = FoodRiskPredictor()
+    
+    # Calculate priority scores for all items
+    alerts = []
+    for item in items:
+        today = timezone.now().date()
+        
+        # Calculate FIFO score (days since purchase)
+        days_since_purchase = (today - item.purchase_date).days
+        fifo_score = min(days_since_purchase * 2, 40)  # Cap at 40
+        
+        # Get AI risk score
+        ai_risk = predictor.predict_risk(item)
+        
+        # Calculate urgency multiplier
+        if item.expiration_date:
+            days_until_expiry = (item.expiration_date - today).days
+            if days_until_expiry <= 1:
+                urgency_multiplier = 1.5
+            elif days_until_expiry <= 3:
+                urgency_multiplier = 1.3
+            elif days_until_expiry <= 7:
+                urgency_multiplier = 1.1
+            else:
+                urgency_multiplier = 1.0
+        else:
+            days_until_expiry = 999
+            urgency_multiplier = 1.0
+        
+        # Calculate final priority score
+        priority_score = (fifo_score + ai_risk) * urgency_multiplier
+        priority_score = min(priority_score, 100)  # Cap at 100
+        
+        # Determine priority level
+        if priority_score >= 80:
+            priority_level = 'critical'
+        elif priority_score >= 60:
+            priority_level = 'high'
+        elif priority_score >= 40:
+            priority_level = 'medium'
+        else:
+            priority_level = 'low'
+        
+        # Only include critical and high priority items in alerts
+        if priority_level in ['critical', 'high']:
+            message = f"Expires in {days_until_expiry} day{'s' if days_until_expiry != 1 else ''}. "
+            if priority_level == 'critical':
+                message += "⚠️ Consume immediately!"
+            else:
+                message += "Consume soon to avoid waste."
+            
+            alerts.append({
+                'id': item.id,
+                'name': item.name,
+                'priority_score': priority_score,
+                'priority_level': priority_level,
+                'days_until_expiry': days_until_expiry,
+                'message': message,
+                'category': item.category,
+                'quantity': f"{item.quantity} {item.unit}"
+            })
+    
+    # Sort by priority score (highest first)
+    alerts = sorted(alerts, key=lambda x: x['priority_score'], reverse=True)
+    
+    # Limit to top 10 alerts
+    alerts = alerts[:10]
+    
+    return JsonResponse({
+        'alerts': alerts,
+        'count': len(alerts)
+    })
+

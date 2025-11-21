@@ -18,6 +18,17 @@ urlpatterns = [
     # History & Analytics (Phase 4 requirement)
     path('history/', views.consumption_history, name='history'),
     
+    # Waste Analytics (AI Waste Estimation Model)
+    path('waste-analytics/', views.waste_analytics, name='waste_analytics'),
+    path('waste-analytics/export/<str:format>/', views.export_waste_analytics, name='export_waste_analytics'),
+    
+    # Priority Consumption (AI Expiration Risk Prediction)
+    path('priority-consumption/', views.priority_consumption, name='priority_consumption'),
+    path('inventory/<int:pk>/mark-consumed/', views.mark_consumed, name='mark_consumed'),
+    
+    # API Endpoints
+    path('api/priority-alerts/', views.priority_alerts_api, name='priority_alerts_api'),
+    
     # Food Items Database (PART 4)
     path('food-items/', views.food_items_list, name='food_items_list'),
     path('food-items/<int:id>/', views.food_item_detail, name='food_item_detail'),
