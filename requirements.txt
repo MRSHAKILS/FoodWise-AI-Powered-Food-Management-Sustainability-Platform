@@ -64,3 +64,8 @@ langsmith==0.4.37
 # psycopg2-binary>=2.9.0  # PostgreSQL support
 # django-cors-headers>=4.0.0
 # djangorestframework>=3.14.0
+
+# Authentication & OAuth
+# Django Allauth provides pluggable authentication (including Google OAuth)
+django-allauth
+requests-oauthlib
