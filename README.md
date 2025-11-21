@@ -207,6 +207,14 @@ DEBUG=True
 SECRET_KEY=your-secret-key-here-change-in-production
 DATABASE_URL=sqlite:///db.sqlite3
 
+# Google OAuth (django-allauth)
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+
+# Google Gemini AI (for OCR food item extraction)
+# Get your API key from: https://makersuite.google.com/app/apikey
+GEMINI_API_KEY=your-gemini-api-key-here
+
 # Email Configuration (Optional for Part 1)
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
@@ -224,6 +232,12 @@ MEDIA_URL=/media/
 ```python
 python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 ```
+
+**Get Gemini API Key:**
+
+1. Visit https://makersuite.google.com/app/apikey
+2. Create a new API key
+3. Copy and add to `.env` as `GEMINI_API_KEY`
 
 ---
 
@@ -399,10 +413,21 @@ mkdir -p media/uploads
 - Upload receipts or food labels (JPG/PNG only, max 5MB)
 - View image preview before upload
 - Add file type (receipt/food_label/other) and notes
+- **🤖 NEW: Check "Process with AI" to automatically extract food items using Google Gemini Vision**
+- AI will detect food items, quantities, expiration dates, and automatically add them to your inventory
 - View uploads list with filters and statistics
 - Manually link uploads to inventory items or consumption logs
 - Delete uploads with confirmation
-- (OCR/AI extraction coming in Part 2)
+- Process uploaded images anytime from detail view
+
+**AI OCR Features:**
+
+- **Automatic Food Detection:** Gemini AI recognizes food items in images
+- **Quantity Extraction:** Detects amounts and units (kg, liters, pieces, etc.)
+- **Expiration Date Recognition:** Reads expiry dates from labels
+- **Category Classification:** Auto-categorizes items (dairy, vegetable, fruit, etc.)
+- **Instant Inventory:** Creates `FoodItem` entries automatically
+- **Processing Status:** See which uploads have been AI-processed
 
 ---
 
@@ -860,7 +885,7 @@ For questions or issues:
 
 ### **Part 2 - Upcoming AI Features:**
 
-- [ ] **AI-Powered OCR** - Extract data from receipt images using Tesseract/Google Vision
+- [x] **AI-Powered OCR** - Extract food data from images using Google Gemini Vision ✅
 - [ ] **Smart Recipe Generation** - GPT-based recipes from current inventory
 - [ ] **Expiry Prediction ML** - Predict waste patterns using historical data
 - [ ] **Smart Expiry Alerts** - Email/SMS notifications for urgent items

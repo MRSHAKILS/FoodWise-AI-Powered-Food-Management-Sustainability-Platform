@@ -3,192 +3,89 @@ from food.models import FoodItemDatabase
 
 
 class Command(BaseCommand):
-    help = 'Seeds the FoodItemDatabase with 20+ common food items'
+    help = 'Seeds the FoodItemDatabase with 60+ diverse food items across all categories'
 
     def handle(self, *args, **kwargs):
         self.stdout.write(self.style.WARNING('Starting to seed food items database...'))
         
         food_items = [
-            {
-                'item_name': 'Milk',
-                'category': 'dairy',
-                'typical_expiration_days': 7,
-                'sample_cost_per_unit': 350,
-                'unit': 'liter',
-                'storage_instructions': 'Keep refrigerated at 4°C',
-                'nutritional_info': {'calories': 150, 'protein': 8, 'carbs': 12, 'fat': 8}
-            },
-            {
-                'item_name': 'Eggs',
-                'category': 'protein',
-                'typical_expiration_days': 21,
-                'sample_cost_per_unit': 400,
-                'unit': 'dozen',
-                'storage_instructions': 'Store in refrigerator',
-                'nutritional_info': {'calories': 70, 'protein': 6, 'carbs': 1, 'fat': 5}
-            },
-            {
-                'item_name': 'Chicken Breast',
-                'category': 'protein',
-                'typical_expiration_days': 2,
-                'sample_cost_per_unit': 800,
-                'unit': 'kg',
-                'storage_instructions': 'Keep frozen or use within 2 days',
-                'nutritional_info': {'calories': 165, 'protein': 31, 'carbs': 0, 'fat': 3.6}
-            },
-            {
-                'item_name': 'Rice (White)',
-                'category': 'grain',
-                'typical_expiration_days': 365,
-                'sample_cost_per_unit': 200,
-                'unit': 'kg',
-                'storage_instructions': 'Store in cool, dry place',
-                'nutritional_info': {'calories': 130, 'protein': 2.7, 'carbs': 28, 'fat': 0.3}
-            },
-            {
-                'item_name': 'Bananas',
-                'category': 'fruit',
-                'typical_expiration_days': 5,
-                'sample_cost_per_unit': 150,
-                'unit': 'kg',
-                'storage_instructions': 'Store at room temperature',
-                'nutritional_info': {'calories': 89, 'protein': 1.1, 'carbs': 23, 'fat': 0.3}
-            },
-            {
-                'item_name': 'Apples',
-                'category': 'fruit',
-                'typical_expiration_days': 30,
-                'sample_cost_per_unit': 300,
-                'unit': 'kg',
-                'storage_instructions': 'Refrigerate for longer life',
-                'nutritional_info': {'calories': 52, 'protein': 0.3, 'carbs': 14, 'fat': 0.2}
-            },
-            {
-                'item_name': 'Tomatoes',
-                'category': 'vegetable',
-                'typical_expiration_days': 7,
-                'sample_cost_per_unit': 100,
-                'unit': 'kg',
-                'storage_instructions': 'Store at room temperature',
-                'nutritional_info': {'calories': 18, 'protein': 0.9, 'carbs': 3.9, 'fat': 0.2}
-            },
-            {
-                'item_name': 'Potatoes',
-                'category': 'vegetable',
-                'typical_expiration_days': 30,
-                'sample_cost_per_unit': 80,
-                'unit': 'kg',
-                'storage_instructions': 'Store in cool, dark place',
-                'nutritional_info': {'calories': 77, 'protein': 2, 'carbs': 17, 'fat': 0.1}
-            },
-            {
-                'item_name': 'Onions',
-                'category': 'vegetable',
-                'typical_expiration_days': 30,
-                'sample_cost_per_unit': 70,
-                'unit': 'kg',
-                'storage_instructions': 'Store in cool, dry place',
-                'nutritional_info': {'calories': 40, 'protein': 1.1, 'carbs': 9, 'fat': 0.1}
-            },
-            {
-                'item_name': 'Carrots',
-                'category': 'vegetable',
-                'typical_expiration_days': 21,
-                'sample_cost_per_unit': 90,
-                'unit': 'kg',
-                'storage_instructions': 'Refrigerate in plastic bag',
-                'nutritional_info': {'calories': 41, 'protein': 0.9, 'carbs': 10, 'fat': 0.2}
-            },
-            {
-                'item_name': 'Bread (Whole Wheat)',
-                'category': 'grain',
-                'typical_expiration_days': 5,
-                'sample_cost_per_unit': 60,
-                'unit': 'loaf',
-                'storage_instructions': 'Store in cool, dry place or freeze',
-                'nutritional_info': {'calories': 247, 'protein': 13, 'carbs': 41, 'fat': 3.4}
-            },
-            {
-                'item_name': 'Yogurt',
-                'category': 'dairy',
-                'typical_expiration_days': 14,
-                'sample_cost_per_unit': 120,
-                'unit': '500g',
-                'storage_instructions': 'Keep refrigerated',
-                'nutritional_info': {'calories': 59, 'protein': 10, 'carbs': 3.6, 'fat': 0.4}
-            },
-            {
-                'item_name': 'Cheese (Cheddar)',
-                'category': 'dairy',
-                'typical_expiration_days': 30,
-                'sample_cost_per_unit': 500,
-                'unit': '500g',
-                'storage_instructions': 'Wrap tightly and refrigerate',
-                'nutritional_info': {'calories': 403, 'protein': 25, 'carbs': 1.3, 'fat': 33}
-            },
-            {
-                'item_name': 'Lentils (Red)',
-                'category': 'protein',
-                'typical_expiration_days': 365,
-                'sample_cost_per_unit': 180,
-                'unit': 'kg',
-                'storage_instructions': 'Store in airtight container',
-                'nutritional_info': {'calories': 116, 'protein': 9, 'carbs': 20, 'fat': 0.4}
-            },
-            {
-                'item_name': 'Pasta',
-                'category': 'grain',
-                'typical_expiration_days': 730,
-                'sample_cost_per_unit': 150,
-                'unit': '500g',
-                'storage_instructions': 'Store in cool, dry place',
-                'nutritional_info': {'calories': 371, 'protein': 13, 'carbs': 75, 'fat': 1.5}
-            },
-            {
-                'item_name': 'Cooking Oil',
-                'category': 'other',
-                'typical_expiration_days': 180,
-                'sample_cost_per_unit': 300,
-                'unit': 'liter',
-                'storage_instructions': 'Store in cool place away from light',
-                'nutritional_info': {'calories': 884, 'protein': 0, 'carbs': 0, 'fat': 100}
-            },
-            {
-                'item_name': 'Spinach',
-                'category': 'vegetable',
-                'typical_expiration_days': 5,
-                'sample_cost_per_unit': 60,
-                'unit': 'bunch',
-                'storage_instructions': 'Refrigerate in plastic bag',
-                'nutritional_info': {'calories': 23, 'protein': 2.9, 'carbs': 3.6, 'fat': 0.4}
-            },
-            {
-                'item_name': 'Cucumber',
-                'category': 'vegetable',
-                'typical_expiration_days': 7,
-                'sample_cost_per_unit': 40,
-                'unit': 'kg',
-                'storage_instructions': 'Refrigerate',
-                'nutritional_info': {'calories': 15, 'protein': 0.7, 'carbs': 3.6, 'fat': 0.1}
-            },
-            {
-                'item_name': 'Orange Juice',
-                'category': 'beverages',
-                'typical_expiration_days': 7,
-                'sample_cost_per_unit': 200,
-                'unit': 'liter',
-                'storage_instructions': 'Keep refrigerated after opening',
-                'nutritional_info': {'calories': 45, 'protein': 0.7, 'carbs': 10, 'fat': 0.2}
-            },
-            {
-                'item_name': 'Butter',
-                'category': 'dairy',
-                'typical_expiration_days': 90,
-                'sample_cost_per_unit': 350,
-                'unit': '500g',
-                'storage_instructions': 'Keep refrigerated',
-                'nutritional_info': {'calories': 717, 'protein': 0.9, 'carbs': 0.1, 'fat': 81}
-            },
+            # DAIRY (10 items)
+            {'item_name': 'Milk (Whole)', 'category': 'dairy', 'typical_expiration_days': 7, 'sample_cost_per_unit': 350.00, 'unit': 'liter', 'storage_instructions': 'Keep refrigerated at 4°C. Do not freeze.', 'nutritional_info': {'calories': 150, 'protein': 8, 'carbs': 12, 'fat': 8}, 'image_url': 'https://images.unsplash.com/photo-1550583724-b2692b85b150'},
+            {'item_name': 'Yogurt (Plain)', 'category': 'dairy', 'typical_expiration_days': 14, 'sample_cost_per_unit': 120.00, 'unit': '500g', 'storage_instructions': 'Keep refrigerated. Once opened, consume within 5 days.', 'nutritional_info': {'calories': 59, 'protein': 10, 'carbs': 3.6, 'fat': 0.4}, 'image_url': 'https://images.unsplash.com/photo-1488477181946-6428a0291777'},
+            {'item_name': 'Cheese (Cheddar)', 'category': 'dairy', 'typical_expiration_days': 30, 'sample_cost_per_unit': 500.00, 'unit': '500g', 'storage_instructions': 'Wrap tightly in wax paper. Store in cheese drawer.', 'nutritional_info': {'calories': 403, 'protein': 25, 'carbs': 1.3, 'fat': 33}, 'image_url': 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d'},
+            {'item_name': 'Butter (Salted)', 'category': 'dairy', 'typical_expiration_days': 90, 'sample_cost_per_unit': 350.00, 'unit': '500g', 'storage_instructions': 'Keep refrigerated in original wrapper or airtight container.', 'nutritional_info': {'calories': 717, 'protein': 0.9, 'carbs': 0.1, 'fat': 81}, 'image_url': 'https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d'},
+            {'item_name': 'Cream (Heavy)', 'category': 'dairy', 'typical_expiration_days': 10, 'sample_cost_per_unit': 280.00, 'unit': 'liter', 'storage_instructions': 'Store in coldest part of refrigerator. Shake before use.', 'nutritional_info': {'calories': 345, 'protein': 2.1, 'carbs': 2.8, 'fat': 37}, 'image_url': 'https://images.unsplash.com/photo-1628088062854-d1870b4553da'},
+            {'item_name': 'Cottage Cheese', 'category': 'dairy', 'typical_expiration_days': 7, 'sample_cost_per_unit': 180.00, 'unit': '500g', 'storage_instructions': 'Keep tightly sealed and refrigerated.', 'nutritional_info': {'calories': 98, 'protein': 11, 'carbs': 3.4, 'fat': 4.3}, 'image_url': 'https://images.unsplash.com/photo-1626200419199-391ae4be7a41'},
+            {'item_name': 'Mozzarella', 'category': 'dairy', 'typical_expiration_days': 21, 'sample_cost_per_unit': 420.00, 'unit': '500g', 'storage_instructions': 'Keep in original brine or wrap tightly.', 'nutritional_info': {'calories': 280, 'protein': 22, 'carbs': 2.2, 'fat': 21}, 'image_url': 'https://images.unsplash.com/photo-1618164436241-4473940d1f5c'},
+            {'item_name': 'Greek Yogurt', 'category': 'dairy', 'typical_expiration_days': 14, 'sample_cost_per_unit': 150.00, 'unit': '500g', 'storage_instructions': 'Keep refrigerated at all times.', 'nutritional_info': {'calories': 97, 'protein': 9, 'carbs': 3.6, 'fat': 5}, 'image_url': 'https://images.unsplash.com/photo-1571212515416-fca2ce42c764'},
+            {'item_name': 'Paneer', 'category': 'dairy', 'typical_expiration_days': 5, 'sample_cost_per_unit': 380.00, 'unit': '500g', 'storage_instructions': 'Store in water in airtight container. Change water daily.', 'nutritional_info': {'calories': 265, 'protein': 18, 'carbs': 1.2, 'fat': 20}, 'image_url': 'https://images.unsplash.com/photo-1631452180539-96aca7d48617'},
+            {'item_name': 'Sour Cream', 'category': 'dairy', 'typical_expiration_days': 14, 'sample_cost_per_unit': 200.00, 'unit': '500g', 'storage_instructions': 'Keep tightly sealed and refrigerated.', 'nutritional_info': {'calories': 193, 'protein': 2.4, 'carbs': 4.6, 'fat': 19}, 'image_url': 'https://images.unsplash.com/photo-1605464315542-bda3e2f4e80a'},
+            
+            # PROTEIN (12 items)
+            {'item_name': 'Eggs (Large)', 'category': 'protein', 'typical_expiration_days': 21, 'sample_cost_per_unit': 400.00, 'unit': 'dozen', 'storage_instructions': 'Store in original carton in main body of refrigerator.', 'nutritional_info': {'calories': 70, 'protein': 6, 'carbs': 1, 'fat': 5}, 'image_url': 'https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f'},
+            {'item_name': 'Chicken Breast', 'category': 'protein', 'typical_expiration_days': 2, 'sample_cost_per_unit': 800.00, 'unit': 'kg', 'storage_instructions': 'Keep frozen or use within 2 days if refrigerated.', 'nutritional_info': {'calories': 165, 'protein': 31, 'carbs': 0, 'fat': 3.6}, 'image_url': 'https://images.unsplash.com/photo-1604503468506-a8da13d82791'},
+            {'item_name': 'Ground Beef', 'category': 'protein', 'typical_expiration_days': 2, 'sample_cost_per_unit': 950.00, 'unit': 'kg', 'storage_instructions': 'Use within 1-2 days or freeze. Cook to minimum 71°C.', 'nutritional_info': {'calories': 250, 'protein': 26, 'carbs': 0, 'fat': 15}, 'image_url': 'https://images.unsplash.com/photo-1603048297172-c92544798d5a'},
+            {'item_name': 'Salmon Fillet', 'category': 'protein', 'typical_expiration_days': 2, 'sample_cost_per_unit': 1200.00, 'unit': 'kg', 'storage_instructions': 'Store on ice in refrigerator. Use within 1-2 days.', 'nutritional_info': {'calories': 208, 'protein': 20, 'carbs': 0, 'fat': 13}, 'image_url': 'https://images.unsplash.com/photo-1485921325833-c519f76c4927'},
+            {'item_name': 'Lentils (Red)', 'category': 'protein', 'typical_expiration_days': 365, 'sample_cost_per_unit': 180.00, 'unit': 'kg', 'storage_instructions': 'Store in airtight container in cool, dry place.', 'nutritional_info': {'calories': 116, 'protein': 9, 'carbs': 20, 'fat': 0.4}, 'image_url': 'https://images.unsplash.com/photo-1583742617605-9a9b42bb1d07'},
+            {'item_name': 'Chickpeas (Dried)', 'category': 'protein', 'typical_expiration_days': 365, 'sample_cost_per_unit': 160.00, 'unit': 'kg', 'storage_instructions': 'Store in sealed container. Soak before cooking.', 'nutritional_info': {'calories': 164, 'protein': 8.9, 'carbs': 27, 'fat': 2.6}, 'image_url': 'https://images.unsplash.com/photo-1615485925249-53e3f73ca969'},
+            {'item_name': 'Tofu (Firm)', 'category': 'protein', 'typical_expiration_days': 7, 'sample_cost_per_unit': 220.00, 'unit': '500g', 'storage_instructions': 'Keep refrigerated in water. Change water daily.', 'nutritional_info': {'calories': 144, 'protein': 17, 'carbs': 3, 'fat': 9}, 'image_url': 'https://images.unsplash.com/photo-1541167760496-1628856ab772'},
+            {'item_name': 'Turkey Breast', 'category': 'protein', 'typical_expiration_days': 2, 'sample_cost_per_unit': 750.00, 'unit': 'kg', 'storage_instructions': 'Refrigerate at 4°C or below. Use within 1-2 days.', 'nutritional_info': {'calories': 135, 'protein': 30, 'carbs': 0, 'fat': 0.7}, 'image_url': 'https://images.unsplash.com/photo-1587593810167-a84920ea0781'},
+            {'item_name': 'Pork Chops', 'category': 'protein', 'typical_expiration_days': 3, 'sample_cost_per_unit': 850.00, 'unit': 'kg', 'storage_instructions': 'Refrigerate promptly. Cook to internal temp of 63°C.', 'nutritional_info': {'calories': 231, 'protein': 25, 'carbs': 0, 'fat': 14}, 'image_url': 'https://images.unsplash.com/photo-1602470520998-f4a52199a3d6'},
+            {'item_name': 'Black Beans (Canned)', 'category': 'protein', 'typical_expiration_days': 730, 'sample_cost_per_unit': 120.00, 'unit': '500g', 'storage_instructions': 'Store in cool, dry place. Refrigerate after opening.', 'nutritional_info': {'calories': 132, 'protein': 8.9, 'carbs': 24, 'fat': 0.5}, 'image_url': 'https://images.unsplash.com/photo-1585501425273-34da2f2fe7b5'},
+            {'item_name': 'Tuna (Canned)', 'category': 'protein', 'typical_expiration_days': 1095, 'sample_cost_per_unit': 250.00, 'unit': '500g', 'storage_instructions': 'Store in pantry. Refrigerate after opening.', 'nutritional_info': {'calories': 116, 'protein': 26, 'carbs': 0, 'fat': 0.8}, 'image_url': 'https://images.unsplash.com/photo-1600686110467-6c3c48801d1e'},
+            {'item_name': 'Shrimp (Frozen)', 'category': 'protein', 'typical_expiration_days': 180, 'sample_cost_per_unit': 1100.00, 'unit': 'kg', 'storage_instructions': 'Keep frozen at -18°C. Thaw in refrigerator.', 'nutritional_info': {'calories': 99, 'protein': 24, 'carbs': 0.2, 'fat': 0.3}, 'image_url': 'https://images.unsplash.com/photo-1565680018434-b513d5e5fd47'},
+            
+            # FRUIT (12 items)
+            {'item_name': 'Bananas', 'category': 'fruit', 'typical_expiration_days': 5, 'sample_cost_per_unit': 150.00, 'unit': 'kg', 'storage_instructions': 'Store at room temperature away from direct sunlight.', 'nutritional_info': {'calories': 89, 'protein': 1.1, 'carbs': 23, 'fat': 0.3}, 'image_url': 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e'},
+            {'item_name': 'Apples (Red Delicious)', 'category': 'fruit', 'typical_expiration_days': 30, 'sample_cost_per_unit': 300.00, 'unit': 'kg', 'storage_instructions': 'Refrigerate for longer shelf life.', 'nutritional_info': {'calories': 52, 'protein': 0.3, 'carbs': 14, 'fat': 0.2}, 'image_url': 'https://images.unsplash.com/photo-1568702846914-96b305d2aaeb'},
+            {'item_name': 'Oranges', 'category': 'fruit', 'typical_expiration_days': 14, 'sample_cost_per_unit': 200.00, 'unit': 'kg', 'storage_instructions': 'Store at room temperature or refrigerate for up to 2 weeks.', 'nutritional_info': {'calories': 47, 'protein': 0.9, 'carbs': 12, 'fat': 0.1}, 'image_url': 'https://images.unsplash.com/photo-1580052614034-c55d20bfee3b'},
+            {'item_name': 'Strawberries', 'category': 'fruit', 'typical_expiration_days': 3, 'sample_cost_per_unit': 350.00, 'unit': 'kg', 'storage_instructions': 'Do not wash until ready to eat. Store in refrigerator.', 'nutritional_info': {'calories': 32, 'protein': 0.7, 'carbs': 7.7, 'fat': 0.3}, 'image_url': 'https://images.unsplash.com/photo-1464965911861-746a04b4bca6'},
+            {'item_name': 'Grapes (Green)', 'category': 'fruit', 'typical_expiration_days': 7, 'sample_cost_per_unit': 280.00, 'unit': 'kg', 'storage_instructions': 'Store unwashed in refrigerator.', 'nutritional_info': {'calories': 69, 'protein': 0.7, 'carbs': 18, 'fat': 0.2}, 'image_url': 'https://images.unsplash.com/photo-1599819177959-2d2bc891df5e'},
+            {'item_name': 'Watermelon', 'category': 'fruit', 'typical_expiration_days': 7, 'sample_cost_per_unit': 80.00, 'unit': 'kg', 'storage_instructions': 'Store whole at room temperature. Refrigerate after cutting.', 'nutritional_info': {'calories': 30, 'protein': 0.6, 'carbs': 7.6, 'fat': 0.2}, 'image_url': 'https://images.unsplash.com/photo-1589984662646-e7b2e4962f18'},
+            {'item_name': 'Mangoes', 'category': 'fruit', 'typical_expiration_days': 5, 'sample_cost_per_unit': 200.00, 'unit': 'kg', 'storage_instructions': 'Ripen at room temperature. Refrigerate when ripe.', 'nutritional_info': {'calories': 60, 'protein': 0.8, 'carbs': 15, 'fat': 0.4}, 'image_url': 'https://images.unsplash.com/photo-1553279768-865429fa0078'},
+            {'item_name': 'Blueberries', 'category': 'fruit', 'typical_expiration_days': 5, 'sample_cost_per_unit': 450.00, 'unit': 'kg', 'storage_instructions': 'Store unwashed in refrigerator.', 'nutritional_info': {'calories': 57, 'protein': 0.7, 'carbs': 14, 'fat': 0.3}, 'image_url': 'https://images.unsplash.com/photo-1498557850523-fd3d118b962e'},
+            {'item_name': 'Pineapple', 'category': 'fruit', 'typical_expiration_days': 3, 'sample_cost_per_unit': 150.00, 'unit': 'piece', 'storage_instructions': 'Store whole at room temperature.', 'nutritional_info': {'calories': 50, 'protein': 0.5, 'carbs': 13, 'fat': 0.1}, 'image_url': 'https://images.unsplash.com/photo-1550258987-190a2d41d0d0'},
+            {'item_name': 'Avocado', 'category': 'fruit', 'typical_expiration_days': 4, 'sample_cost_per_unit': 250.00, 'unit': 'piece', 'storage_instructions': 'Ripen at room temperature. Refrigerate when ripe.', 'nutritional_info': {'calories': 160, 'protein': 2, 'carbs': 8.5, 'fat': 15}, 'image_url': 'https://images.unsplash.com/photo-1523049673857-eb18f1d7b578'},
+            {'item_name': 'Lemons', 'category': 'fruit', 'typical_expiration_days': 14, 'sample_cost_per_unit': 180.00, 'unit': 'kg', 'storage_instructions': 'Store in refrigerator crisper drawer.', 'nutritional_info': {'calories': 29, 'protein': 1.1, 'carbs': 9.3, 'fat': 0.3}, 'image_url': 'https://images.unsplash.com/photo-1590502593747-42a996133562'},
+            {'item_name': 'Kiwi', 'category': 'fruit', 'typical_expiration_days': 7, 'sample_cost_per_unit': 320.00, 'unit': 'kg', 'storage_instructions': 'Ripen at room temperature. Store ripe kiwi in refrigerator.', 'nutritional_info': {'calories': 61, 'protein': 1.1, 'carbs': 15, 'fat': 0.5}, 'image_url': 'https://images.unsplash.com/photo-1612524303995-0819f8bc6a8b'},
+            
+            # VEGETABLE (12 items)
+            {'item_name': 'Tomatoes', 'category': 'vegetable', 'typical_expiration_days': 7, 'sample_cost_per_unit': 100.00, 'unit': 'kg', 'storage_instructions': 'Store at room temperature away from direct sunlight.', 'nutritional_info': {'calories': 18, 'protein': 0.9, 'carbs': 3.9, 'fat': 0.2}, 'image_url': 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea'},
+            {'item_name': 'Potatoes (White)', 'category': 'vegetable', 'typical_expiration_days': 30, 'sample_cost_per_unit': 80.00, 'unit': 'kg', 'storage_instructions': 'Store in cool, dark, well-ventilated place.', 'nutritional_info': {'calories': 77, 'protein': 2, 'carbs': 17, 'fat': 0.1}, 'image_url': 'https://images.unsplash.com/photo-1518977676601-b53f82aba655'},
+            {'item_name': 'Onions (Yellow)', 'category': 'vegetable', 'typical_expiration_days': 30, 'sample_cost_per_unit': 70.00, 'unit': 'kg', 'storage_instructions': 'Store in cool, dry, dark place with good air circulation.', 'nutritional_info': {'calories': 40, 'protein': 1.1, 'carbs': 9, 'fat': 0.1}, 'image_url': 'https://images.unsplash.com/photo-1508747703725-719777637510'},
+            {'item_name': 'Carrots', 'category': 'vegetable', 'typical_expiration_days': 21, 'sample_cost_per_unit': 90.00, 'unit': 'kg', 'storage_instructions': 'Remove greens. Store in plastic bag in refrigerator.', 'nutritional_info': {'calories': 41, 'protein': 0.9, 'carbs': 10, 'fat': 0.2}, 'image_url': 'https://images.unsplash.com/photo-1522184216316-3c25379f9760'},
+            {'item_name': 'Broccoli', 'category': 'vegetable', 'typical_expiration_days': 7, 'sample_cost_per_unit': 120.00, 'unit': 'kg', 'storage_instructions': 'Store unwashed in refrigerator in perforated plastic bag.', 'nutritional_info': {'calories': 34, 'protein': 2.8, 'carbs': 7, 'fat': 0.4}, 'image_url': 'https://images.unsplash.com/photo-1459411621453-7b03977f4bfc'},
+            {'item_name': 'Spinach (Fresh)', 'category': 'vegetable', 'typical_expiration_days': 5, 'sample_cost_per_unit': 60.00, 'unit': 'bunch', 'storage_instructions': 'Store loosely in plastic bag in refrigerator.', 'nutritional_info': {'calories': 23, 'protein': 2.9, 'carbs': 3.6, 'fat': 0.4}, 'image_url': 'https://images.unsplash.com/photo-1576045057995-568f588f82fb'},
+            {'item_name': 'Bell Peppers (Red)', 'category': 'vegetable', 'typical_expiration_days': 7, 'sample_cost_per_unit': 180.00, 'unit': 'kg', 'storage_instructions': 'Store in refrigerator crisper drawer in plastic bag.', 'nutritional_info': {'calories': 31, 'protein': 1, 'carbs': 6, 'fat': 0.3}, 'image_url': 'https://images.unsplash.com/photo-1563565375-f3fdfdbefa83'},
+            {'item_name': 'Cucumber', 'category': 'vegetable', 'typical_expiration_days': 7, 'sample_cost_per_unit': 40.00, 'unit': 'kg', 'storage_instructions': 'Store in refrigerator wrapped in paper towel.', 'nutritional_info': {'calories': 15, 'protein': 0.7, 'carbs': 3.6, 'fat': 0.1}, 'image_url': 'https://images.unsplash.com/photo-1604977042946-1eecc30f269e'},
+            {'item_name': 'Lettuce (Romaine)', 'category': 'vegetable', 'typical_expiration_days': 7, 'sample_cost_per_unit': 80.00, 'unit': 'piece', 'storage_instructions': 'Store in crisper drawer wrapped in damp paper towel.', 'nutritional_info': {'calories': 17, 'protein': 1.2, 'carbs': 3.3, 'fat': 0.3}, 'image_url': 'https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1'},
+            {'item_name': 'Cauliflower', 'category': 'vegetable', 'typical_expiration_days': 7, 'sample_cost_per_unit': 100.00, 'unit': 'piece', 'storage_instructions': 'Store unwashed in perforated plastic bag.', 'nutritional_info': {'calories': 25, 'protein': 1.9, 'carbs': 5, 'fat': 0.3}, 'image_url': 'https://images.unsplash.com/photo-1568584711075-3d021a7c3ca3'},
+            {'item_name': 'Garlic', 'category': 'vegetable', 'typical_expiration_days': 60, 'sample_cost_per_unit': 120.00, 'unit': 'kg', 'storage_instructions': 'Store in cool, dry place with good air circulation.', 'nutritional_info': {'calories': 149, 'protein': 6.4, 'carbs': 33, 'fat': 0.5}, 'image_url': 'https://images.unsplash.com/photo-1588514727390-91fd5ebaef81'},
+            {'item_name': 'Mushrooms (White)', 'category': 'vegetable', 'typical_expiration_days': 5, 'sample_cost_per_unit': 250.00, 'unit': 'kg', 'storage_instructions': 'Store in paper bag in refrigerator. Do not wash until use.', 'nutritional_info': {'calories': 22, 'protein': 3.1, 'carbs': 3.3, 'fat': 0.3}, 'image_url': 'https://images.unsplash.com/photo-1565557623262-b51c2513a641'},
+            
+            # GRAIN (8 items)
+            {'item_name': 'Rice (White, Long Grain)', 'category': 'grain', 'typical_expiration_days': 365, 'sample_cost_per_unit': 200.00, 'unit': 'kg', 'storage_instructions': 'Store in airtight container in cool, dry place.', 'nutritional_info': {'calories': 130, 'protein': 2.7, 'carbs': 28, 'fat': 0.3}, 'image_url': 'https://images.unsplash.com/photo-1586201375761-83865001e31c'},
+            {'item_name': 'Bread (Whole Wheat)', 'category': 'grain', 'typical_expiration_days': 5, 'sample_cost_per_unit': 60.00, 'unit': 'loaf', 'storage_instructions': 'Store in cool, dry place or freeze for longer storage.', 'nutritional_info': {'calories': 247, 'protein': 13, 'carbs': 41, 'fat': 3.4}, 'image_url': 'https://images.unsplash.com/photo-1509440159596-0249088772ff'},
+            {'item_name': 'Pasta (Spaghetti)', 'category': 'grain', 'typical_expiration_days': 730, 'sample_cost_per_unit': 150.00, 'unit': '500g', 'storage_instructions': 'Store in original packaging or airtight container.', 'nutritional_info': {'calories': 371, 'protein': 13, 'carbs': 75, 'fat': 1.5}, 'image_url': 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9'},
+            {'item_name': 'Oats (Rolled)', 'category': 'grain', 'typical_expiration_days': 365, 'sample_cost_per_unit': 180.00, 'unit': 'kg', 'storage_instructions': 'Store in airtight container in cool, dry, dark place.', 'nutritional_info': {'calories': 389, 'protein': 17, 'carbs': 66, 'fat': 7}, 'image_url': 'https://images.unsplash.com/photo-1574856344991-aaa31b6f4ce3'},
+            {'item_name': 'Quinoa', 'category': 'grain', 'typical_expiration_days': 365, 'sample_cost_per_unit': 420.00, 'unit': 'kg', 'storage_instructions': 'Store in sealed container in pantry.', 'nutritional_info': {'calories': 120, 'protein': 4.4, 'carbs': 21, 'fat': 1.9}, 'image_url': 'https://images.unsplash.com/photo-1586201375761-83865001e31c'},
+            {'item_name': 'Brown Rice', 'category': 'grain', 'typical_expiration_days': 180, 'sample_cost_per_unit': 220.00, 'unit': 'kg', 'storage_instructions': 'Store in airtight container. Refrigerate for longer shelf life.', 'nutritional_info': {'calories': 112, 'protein': 2.6, 'carbs': 24, 'fat': 0.9}, 'image_url': 'https://images.unsplash.com/photo-1536304929831-aac6c2f9e7b2'},
+            {'item_name': 'Cornmeal', 'category': 'grain', 'typical_expiration_days': 365, 'sample_cost_per_unit': 140.00, 'unit': 'kg', 'storage_instructions': 'Store in airtight container. Refrigerate to prevent rancidity.', 'nutritional_info': {'calories': 362, 'protein': 8.1, 'carbs': 77, 'fat': 3.6}, 'image_url': 'https://images.unsplash.com/photo-1621943192583-05e68d601c3e'},
+            {'item_name': 'Couscous', 'category': 'grain', 'typical_expiration_days': 365, 'sample_cost_per_unit': 190.00, 'unit': '500g', 'storage_instructions': 'Store in sealed container in cool, dry place.', 'nutritional_info': {'calories': 112, 'protein': 3.8, 'carbs': 23, 'fat': 0.2}, 'image_url': 'https://images.unsplash.com/photo-1607963162203-f8e9ac8a2b83'},
+            
+            # BEVERAGES (4 items)
+            {'item_name': 'Orange Juice (Fresh)', 'category': 'beverages', 'typical_expiration_days': 7, 'sample_cost_per_unit': 200.00, 'unit': 'liter', 'storage_instructions': 'Keep refrigerated at all times. Shake well before serving.', 'nutritional_info': {'calories': 45, 'protein': 0.7, 'carbs': 10, 'fat': 0.2}, 'image_url': 'https://images.unsplash.com/photo-1600271886742-f049cd451bba'},
+            {'item_name': 'Apple Juice', 'category': 'beverages', 'typical_expiration_days': 7, 'sample_cost_per_unit': 180.00, 'unit': 'liter', 'storage_instructions': 'Refrigerate after opening.', 'nutritional_info': {'calories': 46, 'protein': 0.1, 'carbs': 11, 'fat': 0.1}, 'image_url': 'https://images.unsplash.com/photo-1600271886742-f049cd451bba'},
+            {'item_name': 'Green Tea (Bags)', 'category': 'beverages', 'typical_expiration_days': 730, 'sample_cost_per_unit': 250.00, 'unit': '500g', 'storage_instructions': 'Store in airtight container away from light, heat, and moisture.', 'nutritional_info': {'calories': 2, 'protein': 0.2, 'carbs': 0, 'fat': 0}, 'image_url': 'https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9'},
+            {'item_name': 'Coffee (Ground)', 'category': 'beverages', 'typical_expiration_days': 90, 'sample_cost_per_unit': 450.00, 'unit': '500g', 'storage_instructions': 'Store in airtight container in cool, dark place.', 'nutritional_info': {'calories': 2, 'protein': 0.3, 'carbs': 0, 'fat': 0}, 'image_url': 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e'},
+            
+            # SNACKS (2 items)
+            {'item_name': 'Almonds (Raw)', 'category': 'snacks', 'typical_expiration_days': 365, 'sample_cost_per_unit': 800.00, 'unit': 'kg', 'storage_instructions': 'Store in airtight container. Refrigerate for extended storage.', 'nutritional_info': {'calories': 579, 'protein': 21, 'carbs': 22, 'fat': 50}, 'image_url': 'https://images.unsplash.com/photo-1508747703725-719777637510'},
+            {'item_name': 'Dark Chocolate (70%)', 'category': 'snacks', 'typical_expiration_days': 365, 'sample_cost_per_unit': 600.00, 'unit': '500g', 'storage_instructions': 'Store in cool, dry place away from strong odors.', 'nutritional_info': {'calories': 599, 'protein': 7.8, 'carbs': 46, 'fat': 43}, 'image_url': 'https://images.unsplash.com/photo-1511381939415-e44015466834'},
+            
+            # OTHER (2 items)
+            {'item_name': 'Cooking Oil (Vegetable)', 'category': 'other', 'typical_expiration_days': 180, 'sample_cost_per_unit': 300.00, 'unit': 'liter', 'storage_instructions': 'Store in cool, dark place away from heat and light.', 'nutritional_info': {'calories': 884, 'protein': 0, 'carbs': 0, 'fat': 100}, 'image_url': 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5'},
+            {'item_name': 'Honey', 'category': 'other', 'typical_expiration_days': 3650, 'sample_cost_per_unit': 550.00, 'unit': 'kg', 'storage_instructions': 'Store at room temperature in sealed container. Never expires if stored properly.', 'nutritional_info': {'calories': 304, 'protein': 0.3, 'carbs': 82, 'fat': 0}, 'image_url': 'https://images.unsplash.com/photo-1587049352846-4a222e784538'},
         ]
         
         created_count = 0
@@ -204,6 +101,7 @@ class Command(BaseCommand):
                     'unit': item_data['unit'],
                     'storage_instructions': item_data['storage_instructions'],
                     'nutritional_info': item_data.get('nutritional_info'),
+                    'image_url': item_data.get('image_url', ''),
                 }
             )
             
@@ -222,5 +120,5 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(f'Food items seeding completed!'))
         self.stdout.write(self.style.SUCCESS(f'Created: {created_count} items'))
         self.stdout.write(self.style.WARNING(f'Existing: {existing_count} items'))
-        self.stdout.write(self.style.SUCCESS(f'Total: {created_count + existing_count} items'))
+        self.stdout.write(self.style.SUCCESS(f'Total in database: {created_count + existing_count} items'))
         self.stdout.write(self.style.SUCCESS('='*60))

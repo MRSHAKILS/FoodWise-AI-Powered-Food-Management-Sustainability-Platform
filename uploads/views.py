@@ -6,6 +6,7 @@ from django.views.decorators.http import require_POST
 from .models import Upload
 from .forms import UploadForm
 from food.models import FoodItem, ConsumptionLog
+from .ocr_utils import process_upload_with_ocr
 
 
 @login_required
@@ -32,12 +33,51 @@ def upload_form(request):
                 upload.mime_type = mime_types.get(file_extension, 'application/octet-stream')
             
             upload.save()
-            messages.success(
-                request,
-                f'✅ Image "{upload.file_name}" uploaded successfully! '
-                f'({upload.get_file_size_display()})'
-            )
-            return redirect('uploads:upload_list')
+            
+            # Always process images with AI automatically
+            if upload.mime_type and upload.mime_type.startswith('image/'):
+                messages.info(request, f'🔄 Processing image with AI...')
+                
+                try:
+                    result = process_upload_with_ocr(upload)
+                    
+                    if result['success']:
+                        messages.success(
+                            request,
+                            f'✅ {result["message"]}! Added {result["created_count"]} items to your inventory.'
+                        )
+                        # Redirect to inventory instead of upload list
+                        return redirect('food:inventory_list')
+                    else:
+                        messages.warning(
+                            request,
+                            f'⚠️ {result["message"]}'
+                        )
+                        if result.get('errors'):
+                            for error in result['errors']:
+                                messages.error(request, error)
+                        return redirect('uploads:upload_detail', pk=upload.pk)
+                except Exception as e:
+                    error_msg = str(e)
+                    if 'quota' in error_msg.lower() or 'limit' in error_msg.lower() or '429' in error_msg:
+                        messages.error(
+                            request,
+                            f'⚠️ API Quota Exceeded: Your Gemini API free tier limit may have been reached. '
+                            f'Check your usage at https://makersuite.google.com/'
+                        )
+                    elif 'GEMINI_API_KEY' in error_msg:
+                        messages.error(request, f'🔑 API Key Error: {error_msg}')
+                    else:
+                        messages.error(request, f'❌ AI processing failed: {error_msg}')
+                    
+                    return redirect('uploads:upload_detail', pk=upload.pk)
+            else:
+                messages.success(
+                    request,
+                    f'✅ File "{upload.file_name}" uploaded successfully! '
+                    f'({upload.get_file_size_display()})'
+                )
+                return redirect('uploads:upload_list')
         else:
             messages.error(request, '❌ Upload failed. Please check the errors below.')
     else:
@@ -74,7 +114,7 @@ def upload_list(request):
         'total_uploads': total_uploads,
         'total_size_mb': total_size_mb,
     }
-    return render(request, 'uploads/upload_list.html', context)
+    return render(request, 'uploads/uploads_list.html', context)
 
 
 @login_required
@@ -90,8 +130,65 @@ def upload_detail(request, pk):
         'upload': upload,
         'inventory_items': inventory_items,
         'consumption_logs': consumption_logs,
+        'can_process_ocr': upload.mime_type and upload.mime_type.startswith('image/'),
     }
     return render(request, 'uploads/upload_detail.html', context)
+
+
+@login_required
+def process_ocr_view(request, pk):
+    """Manually trigger OCR processing for an uploaded image"""
+    upload = get_object_or_404(Upload, pk=pk, user=request.user)
+    
+    # Check if it's an image
+    if not upload.mime_type or not upload.mime_type.startswith('image/'):
+        messages.error(request, '❌ Only image files can be processed with OCR.')
+        return redirect('uploads:upload_detail', pk=pk)
+    
+    # Check if already processed
+    if upload.processed:
+        messages.info(request, 'ℹ️ This image has already been processed.')
+        return redirect('uploads:upload_detail', pk=pk)
+    
+    messages.info(request, f'🔄 Processing "{upload.file_name}" with AI...')
+    
+    try:
+        result = process_upload_with_ocr(upload)
+        
+        if result['success']:
+            messages.success(
+                request,
+                f'✅ {result["message"]}! Added {result["created_count"]} items to your inventory.'
+            )
+        else:
+            messages.warning(
+                request,
+                f'⚠️ {result["message"]}'
+            )
+            if result.get('errors'):
+                for error in result['errors']:
+                    messages.error(request, error)
+    except Exception as e:
+        error_msg = str(e)
+        # Check for quota/limit errors
+        if 'quota' in error_msg.lower() or 'limit' in error_msg.lower() or '429' in error_msg:
+            messages.error(
+                request,
+                f'⚠️ API Quota Exceeded: Your Gemini API free tier limit may have been reached. '
+                f'Check your usage at https://makersuite.google.com/ or wait a few minutes and try again.'
+            )
+        elif 'GEMINI_API_KEY' in error_msg:
+            messages.error(
+                request,
+                f'🔑 API Key Error: {error_msg}'
+            )
+        else:
+            messages.error(
+                request,
+                f'❌ AI processing failed: {error_msg}'
+            )
+    
+    return redirect('uploads:upload_detail', pk=pk)
 
 
 @login_required

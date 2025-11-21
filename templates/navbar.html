@@ -99,13 +99,17 @@
         display: none;
     }
     
-    @media (max-width: 768px) {
+    @media (max-width: 1024px) {
         .mobile-menu-btn {
             display: block;
         }
         
         .nav-links-desktop {
-            display: none;
+            display: none !important;
+        }
+        
+        .auth-buttons-desktop {
+            display: none !important;
         }
     }
     
@@ -140,24 +144,24 @@
         <div class="flex justify-between items-center py-4">
             <!-- Logo -->
             <div class="flex items-center space-x-3">
-                <a href="{% url 'dashboard' %}" class="flex items-center space-x-3 group">
+                <a href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'landing' %}{% endif %}" class="flex items-center space-x-2 sm:space-x-3 group">
                     <div class="relative logo-glow">
-                        <svg class="w-11 h-11 text-green-600 transform group-hover:rotate-12 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-9 h-9 sm:w-11 sm:h-11 text-green-600 transform group-hover:rotate-12 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
                         </svg>
                         <div class="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full badge-pulse"></div>
                     </div>
                     <div class="flex flex-col">
-                        <span class="text-2xl font-bold text-gray-800 tracking-tight" style="font-family: 'Inter', sans-serif; letter-spacing: -0.5px;">
+                        <span class="text-xl sm:text-2xl font-bold text-gray-800 tracking-tight" style="font-family: 'Inter', sans-serif; letter-spacing: -0.5px;">
                             FoodWise<span class="text-green-600">AI</span>
                         </span>
-                        <span class="text-xs text-green-600 font-semibold -mt-1 tracking-wide">Smart Food Management</span>
+                        <span class="text-xs text-green-600 font-semibold -mt-1 tracking-wide hidden sm:block">Smart Food Management</span>
                     </div>
                 </a>
             </div>
             
             <!-- Desktop Navigation -->
-            <div class="hidden md:flex items-center space-x-2 nav-links-desktop">
+            <div class="hidden lg:flex items-center space-x-2 nav-links-desktop">
                 <a href="{% url 'landing' %}" class="nav-link px-5 py-2.5 rounded-lg text-gray-700 hover:text-green-600 transition-all duration-300 font-semibold text-sm relative z-10 {% if request.resolver_match.url_name == 'landing' %}active{% endif %}">
                     <span class="flex items-center space-x-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -225,7 +229,7 @@
             </div>
             
             <!-- Auth Buttons -->
-            <div class="hidden md:flex items-center space-x-3">
+            <div class="hidden lg:flex items-center space-x-3 auth-buttons-desktop">
                 {% if user.is_authenticated or request.session.test_user_logged_in %}
                     <!-- Authenticated User -->
                     <div class="flex items-center space-x-2 px-4 py-2 bg-green-50 rounded-lg border border-green-200">
@@ -281,7 +285,7 @@
         </div>
         
         <!-- Mobile Menu -->
-        <div class="mobile-menu md:hidden" id="mobileMenu">
+        <div class="mobile-menu lg:hidden" id="mobileMenu">
             <div class="py-4 space-y-2">
                 <a href="{% url 'landing' %}" class="block px-4 py-3 rounded-lg text-gray-700 hover:bg-green-50 hover:text-green-600 transition-all duration-200 font-semibold {% if request.resolver_match.url_name == 'landing' %}border-l-4 border-green-600 bg-green-50 text-green-600{% endif %}">
                     <span class="flex items-center space-x-3">

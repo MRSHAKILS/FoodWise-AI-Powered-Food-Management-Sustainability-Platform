@@ -1,0 +1,256 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Food Database{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold text-gray-900 mb-8 text-center">🔍 Search Food Database</h1>
+
+    <!-- Search Form -->
+    <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-8 mb-8">
+        <form method="GET" action="{% url 'food:food_database_search' %}" class="space-y-6">
+            <!-- Search Query -->
+            <div>
+                <label for="q" class="block text-sm font-medium text-gray-700 mb-2">
+                    Search for food items
+                </label>
+                <input type="text" 
+                       id="q" 
+                       name="q" 
+                       value="{{ query|default:'' }}"
+                       placeholder="e.g., chicken, rice, milk, apple..."
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+            </div>
+
+            <!-- Filter Options -->
+            <div class="grid md:grid-cols-2 gap-4">
+                <!-- Category Filter -->
+                <div>
+                    <label for="category" class="block text-sm font-medium text-gray-700 mb-2">
+                        Category
+                    </label>
+                    <select id="category" 
+                            name="category" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                        <option value="">All Categories</option>
+                        <option value="fruit" {% if category == 'fruit' %}selected{% endif %}>🍎 Fruit</option>
+                        <option value="vegetable" {% if category == 'vegetable' %}selected{% endif %}>🥬 Vegetable</option>
+                        <option value="dairy" {% if category == 'dairy' %}selected{% endif %}>🥛 Dairy</option>
+                        <option value="protein" {% if category == 'protein' %}selected{% endif %}>🍗 Protein</option>
+                        <option value="grain" {% if category == 'grain' %}selected{% endif %}>🌾 Grain</option>
+                        <option value="beverages" {% if category == 'beverages' %}selected{% endif %}>☕ Beverages</option>
+                        <option value="snacks" {% if category == 'snacks' %}selected{% endif %}>🍿 Snacks</option>
+                        <option value="other" {% if category == 'other' %}selected{% endif %}>🍽️ Other</option>
+                    </select>
+                </div>
+
+                <!-- Sort Options -->
+                <div>
+                    <label for="sort" class="block text-sm font-medium text-gray-700 mb-2">
+                        Sort By
+                    </label>
+                    <select id="sort" 
+                            name="sort" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                        <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Name (A-Z)</option>
+                        <option value="-name" {% if sort_by == '-name' %}selected{% endif %}>Name (Z-A)</option>
+                        <option value="sample_cost_per_unit" {% if sort_by == 'sample_cost_per_unit' %}selected{% endif %}>Price (Low to High)</option>
+                        <option value="-sample_cost_per_unit" {% if sort_by == '-sample_cost_per_unit' %}selected{% endif %}>Price (High to Low)</option>
+                        <option value="typical_expiration_days" {% if sort_by == 'typical_expiration_days' %}selected{% endif %}>Shelf Life (Short to Long)</option>
+                        <option value="-typical_expiration_days" {% if sort_by == '-typical_expiration_days' %}selected{% endif %}>Shelf Life (Long to Short)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Advanced Filters -->
+            <div class="border-t pt-6">
+                <h3 class="text-sm font-medium text-gray-700 mb-3">Advanced Filters</h3>
+                <div class="grid md:grid-cols-3 gap-4">
+                    <!-- Price Range -->
+                    <div>
+                        <label for="max_price" class="block text-sm text-gray-600 mb-1">
+                            Max Price (৳)
+                        </label>
+                        <input type="number" 
+                               id="max_price" 
+                               name="max_price" 
+                               value="{{ max_price|default:'' }}"
+                               placeholder="e.g., 100"
+                               min="0"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                    </div>
+
+                    <!-- Min Shelf Life -->
+                    <div>
+                        <label for="min_shelf_life" class="block text-sm text-gray-600 mb-1">
+                            Min Shelf Life (days)
+                        </label>
+                        <input type="number" 
+                               id="min_shelf_life" 
+                               name="min_shelf_life" 
+                               value="{{ min_shelf_life|default:'' }}"
+                               placeholder="e.g., 7"
+                               min="0"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                    </div>
+
+                    <!-- Unit Filter -->
+                    <div>
+                        <label for="unit" class="block text-sm text-gray-600 mb-1">
+                            Unit Type
+                        </label>
+                        <select id="unit" 
+                                name="unit" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                            <option value="">All Units</option>
+                            <option value="kg" {% if unit == 'kg' %}selected{% endif %}>Kilograms</option>
+                            <option value="grams" {% if unit == 'grams' %}selected{% endif %}>Grams</option>
+                            <option value="liters" {% if unit == 'liters' %}selected{% endif %}>Liters</option>
+                            <option value="ml" {% if unit == 'ml' %}selected{% endif %}>Milliliters</option>
+                            <option value="pieces" {% if unit == 'pieces' %}selected{% endif %}>Pieces</option>
+                            <option value="dozen" {% if unit == 'dozen' %}selected{% endif %}>Dozen</option>
+                            <option value="cups" {% if unit == 'cups' %}selected{% endif %}>Cups</option>
+                            <option value="tbsp" {% if unit == 'tbsp' %}selected{% endif %}>Tablespoons</option>
+                            <option value="tsp" {% if unit == 'tsp' %}selected{% endif %}>Teaspoons</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-4">
+                <button type="submit" 
+                        class="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold">
+                    🔍 Search
+                </button>
+                <a href="{% url 'food:food_database_search' %}" 
+                   class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-semibold">
+                    Clear Filters
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Section -->
+    {% if results is not None %}
+    <div class="max-w-6xl mx-auto">
+        <!-- Results Header -->
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-900">
+                {% if query %}
+                    Search Results for "{{ query }}"
+                {% else %}
+                    All Food Items
+                {% endif %}
+            </h2>
+            <span class="text-gray-600">{{ results.count }} item{{ results.count|pluralize }}</span>
+        </div>
+
+        {% if results %}
+        <!-- Results Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for item in results %}
+            <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow overflow-hidden">
+                <!-- Image -->
+                <div class="h-48 bg-gradient-to-r from-green-400 to-blue-500 relative">
+                    {% if item.image_url %}
+                    <img src="{{ item.image_url }}" 
+                         alt="{{ item.item_name }}" 
+                         class="w-full h-full object-cover">
+                    {% else %}
+                    <div class="w-full h-full flex items-center justify-center">
+                        <span class="text-8xl">
+                            {% if item.category == 'fruit' %}🍎
+                            {% elif item.category == 'vegetable' %}🥬
+                            {% elif item.category == 'dairy' %}🥛
+                            {% elif item.category == 'protein' %}🍗
+                            {% elif item.category == 'grain' %}🌾
+                            {% elif item.category == 'beverages' %}☕
+                            {% elif item.category == 'snacks' %}🍿
+                            {% else %}🍽️{% endif %}
+                        </span>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Category Badge -->
+                    <span class="absolute top-2 right-2 px-3 py-1 text-xs font-semibold rounded-full bg-white/90
+                                {% if item.category == 'fruit' %}text-red-800
+                                {% elif item.category == 'vegetable' %}text-green-800
+                                {% elif item.category == 'dairy' %}text-blue-800
+                                {% elif item.category == 'protein' %}text-purple-800
+                                {% elif item.category == 'grain' %}text-yellow-800
+                                {% else %}text-gray-800{% endif %}">
+                        {{ item.get_category_display }}
+                    </span>
+                </div>
+
+                <!-- Content -->
+                <div class="p-4">
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">{{ item.item_name }}</h3>
+                    
+                    <div class="space-y-2 mb-4">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">💰 Price:</span>
+                            <span class="font-semibold text-green-600">৳{{ item.sample_cost_per_unit }}/{{ item.get_unit_display }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">📅 Shelf Life:</span>
+                            <span class="font-semibold">{{ item.typical_expiration_days }} days</span>
+                        </div>
+                    </div>
+
+                    <a href="{% url 'food:food_database_detail' item.pk %}" 
+                       class="block w-full text-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                        View Details →
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- No Results -->
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-6 rounded-lg text-center">
+            <div class="text-6xl mb-4">🔍</div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">No items found</h3>
+            <p class="text-gray-600 mb-4">Try adjusting your search criteria or filters</p>
+            <a href="{% url 'food:food_database_list' %}" 
+               class="inline-block px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                Browse All Items
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    {% else %}
+    <!-- Initial State (No Search Yet) -->
+    <div class="max-w-4xl mx-auto text-center">
+        <div class="text-8xl mb-6">🍽️</div>
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">Discover Food Items</h2>
+        <p class="text-lg text-gray-600 mb-8">
+            Search our comprehensive database of {{ total_items }} food items with nutritional information, 
+            pricing, and storage guidelines.
+        </p>
+        
+        <!-- Quick Search Suggestions -->
+        <div class="bg-green-50 rounded-lg p-6">
+            <h3 class="font-semibold text-gray-900 mb-3">Popular Searches:</h3>
+            <div class="flex flex-wrap justify-center gap-3">
+                <a href="?q=chicken" class="px-4 py-2 bg-white rounded-full hover:bg-green-100 transition-colors">🍗 Chicken</a>
+                <a href="?q=rice" class="px-4 py-2 bg-white rounded-full hover:bg-green-100 transition-colors">🌾 Rice</a>
+                <a href="?q=milk" class="px-4 py-2 bg-white rounded-full hover:bg-green-100 transition-colors">🥛 Milk</a>
+                <a href="?q=apple" class="px-4 py-2 bg-white rounded-full hover:bg-green-100 transition-colors">🍎 Apple</a>
+                <a href="?q=tomato" class="px-4 py-2 bg-white rounded-full hover:bg-green-100 transition-colors">🍅 Tomato</a>
+                <a href="?category=protein" class="px-4 py-2 bg-white rounded-full hover:bg-green-100 transition-colors">💪 All Proteins</a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Back to Browse -->
+    <div class="text-center mt-12">
+        <a href="{% url 'food:food_database_list' %}" 
+           class="inline-flex items-center text-green-600 hover:text-green-700 font-semibold">
+            ← Back to Browse All Items
+        </a>
+    </div>
+</div>
+{% endblock %}

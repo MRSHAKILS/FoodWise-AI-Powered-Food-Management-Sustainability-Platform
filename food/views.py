@@ -5,12 +5,13 @@ from django.http import JsonResponse
 from .models import FoodItem, ConsumptionLog, FoodItemDatabase
 from users.forms import FoodItemForm, ConsumptionLogForm
 from .utils import calculate_dashboard_summary, generate_recommendations
+from .risk_predictor import FoodRiskPredictor
 
 
 # Inventory Views
 @login_required
 def inventory_list(request):
-    """List all inventory items with filters"""
+    """List all inventory items with filters and risk predictions"""
     items = FoodItem.objects.filter(user=request.user)
     
     # Apply filters if provided
@@ -18,9 +19,19 @@ def inventory_list(request):
     if category:
         items = items.filter(category=category)
     
+    # Get risk predictions for all items
+    predictor = FoodRiskPredictor(request.user)
+    risk_items = predictor.predict_risks_for_inventory()
+    summary_stats = predictor.get_summary_stats(risk_items)
+    
+    # Create a risk data dictionary keyed by item ID for easy template lookup
+    risk_data_by_id = {risk_item['item'].id: risk_item for risk_item in risk_items}
+    
     context = {
         'items': items,
         'categories': FoodItem.CATEGORY_CHOICES,
+        'risk_data_by_id': risk_data_by_id,
+        'summary_stats': summary_stats,
     }
     return render(request, 'food/inventory_list.html', context)
 
@@ -41,7 +52,13 @@ def inventory_form(request):
     else:
         form = FoodItemForm()
     
-    return render(request, 'food/inventory_form.html', {'form': form})
+    # Get all food database items for quick selection
+    food_database_items = FoodItemDatabase.objects.all().order_by('item_name')
+    
+    return render(request, 'food/inventory_form.html', {
+        'form': form,
+        'food_database_items': food_database_items
+    })
 
 
 @login_required
@@ -65,11 +82,26 @@ def inventory_edit(request, pk):
 
 @login_required
 def inventory_delete(request, pk):
-    """Delete inventory item"""
+    """Delete inventory item and create consumption log"""
     item = get_object_or_404(FoodItem, pk=pk, user=request.user)
+    
+    # Create consumption log before deleting
+    ConsumptionLog.objects.create(
+        user=request.user,
+        item_name=item.name,
+        quantity=item.quantity,
+        unit=item.unit,
+        category=item.category,
+        consumption_date=timezone.now().date(),
+        notes=f"Consumed from inventory (deleted item)"
+    )
+    
     item_name = item.name
+    quantity = item.quantity
+    unit = item.unit
     item.delete()
-    messages.success(request, f'{item_name} removed from inventory.')
+    
+    messages.success(request, f'{item_name} ({quantity} {unit}) removed from inventory and logged as consumed.')
     return redirect('users:profile')
 
 
@@ -127,8 +159,11 @@ def consumption_history(request):
     from datetime import datetime, timedelta
     from django.utils import timezone
     
-    # Get base queryset
-    logs = ConsumptionLog.objects.filter(user=request.user)
+    # Get consumption logs
+    consumption_logs = ConsumptionLog.objects.filter(user=request.user)
+    
+    # Get inventory items (for "added" history)
+    inventory_items = FoodItem.objects.filter(user=request.user)
     
     # Apply filters
     category = request.GET.get('category')
@@ -136,25 +171,64 @@ def consumption_history(request):
     end_date = request.GET.get('end_date')
     
     if category:
-        logs = logs.filter(category=category)
+        consumption_logs = consumption_logs.filter(category=category)
+        inventory_items = inventory_items.filter(category=category)
     if start_date:
-        logs = logs.filter(consumption_date__gte=start_date)
+        consumption_logs = consumption_logs.filter(consumption_date__gte=start_date)
+        inventory_items = inventory_items.filter(created_at__date__gte=start_date)
     if end_date:
-        logs = logs.filter(consumption_date__lte=end_date)
+        consumption_logs = consumption_logs.filter(consumption_date__lte=end_date)
+        inventory_items = inventory_items.filter(created_at__date__lte=end_date)
+    
+    # Combine both into a unified history (limit to recent 50)
+    combined_history = []
+    
+    # Add consumption logs
+    for log in consumption_logs[:25]:
+        combined_history.append({
+            'type': 'consumed',
+            'date': log.consumption_date,
+            'item_name': log.item_name,
+            'category': log.get_category_display(),
+            'quantity': f"{log.quantity} {log.unit}",
+            'notes': log.notes,
+            'id': log.id,
+            'created_at': log.created_at,
+        })
+    
+    # Add inventory additions (recent items)
+    for item in inventory_items[:25]:
+        combined_history.append({
+            'type': 'added',
+            'date': item.created_at.date(),
+            'item_name': item.name,
+            'category': item.get_category_display(),
+            'quantity': f"{item.quantity} {item.unit}",
+            'notes': f"Added to inventory - Expires: {item.expiration_date}" if item.expiration_date else "Added to inventory",
+            'id': item.id,
+            'created_at': item.created_at,
+        })
+    
+    # Sort by date (most recent first)
+    combined_history.sort(key=lambda x: x['created_at'], reverse=True)
+    combined_history = combined_history[:50]  # Limit to 50 items
     
     # Calculate statistics
-    total_logs = logs.count()
+    total_logs = consumption_logs.count()
+    total_added = inventory_items.count()
     
     # This week logs
     week_ago = timezone.now().date() - timedelta(days=7)
-    week_logs = logs.filter(consumption_date__gte=week_ago).count()
+    week_logs = consumption_logs.filter(consumption_date__gte=week_ago).count()
+    week_added = inventory_items.filter(created_at__date__gte=week_ago).count()
     
     # This month logs
     month_ago = timezone.now().date() - timedelta(days=30)
-    month_logs = logs.filter(consumption_date__gte=month_ago).count()
+    month_logs = consumption_logs.filter(consumption_date__gte=month_ago).count()
+    month_added = inventory_items.filter(created_at__date__gte=month_ago).count()
     
-    # Category breakdown
-    category_stats = logs.values('category').annotate(count=Count('id')).order_by('-count')
+    # Category breakdown (consumption only)
+    category_stats = consumption_logs.values('category').annotate(count=Count('id')).order_by('-count')
     category_breakdown = []
     
     if total_logs > 0:
@@ -171,13 +245,15 @@ def consumption_history(request):
     top_category = category_breakdown[0]['category__display'] if category_breakdown else None
     
     context = {
-        'logs': logs.order_by('-consumption_date', '-created_at'),
+        'logs': combined_history,
         'categories': ConsumptionLog.CATEGORY_CHOICES,
-        'total_logs': total_logs,
-        'week_logs': week_logs,
-        'month_logs': month_logs,
+        'total_logs': total_logs + total_added,
+        'week_logs': week_logs + week_added,
+        'month_logs': month_logs + month_added,
         'top_category': top_category,
         'category_breakdown': category_breakdown,
+        'total_consumed': total_logs,
+        'total_added': total_added,
     }
     return render(request, 'food/history.html', context)
 
@@ -222,6 +298,135 @@ def food_item_detail(request, id):
         'item': item,
     }
     return render(request, 'food/food_item_detail.html', context)
+
+
+# Food Database Views (PART 4 - Enhanced)
+def food_database_list(request):
+    """Browse food database with advanced filtering"""
+    items = FoodItemDatabase.objects.all()
+    
+    # Category filter
+    category = request.GET.get('category')
+    if category:
+        items = items.filter(category=category)
+    
+    # Unit filter
+    unit = request.GET.get('unit')
+    if unit:
+        items = items.filter(unit=unit)
+    
+    # Search filter
+    search = request.GET.get('search')
+    if search:
+        items = items.filter(
+            Q(item_name__icontains=search) | 
+            Q(storage_instructions__icontains=search)
+        )
+    
+    # Sort option
+    sort_by = request.GET.get('sort', 'item_name')
+    if sort_by == 'expiration':
+        items = items.order_by('typical_expiration_days')
+    elif sort_by == 'price':
+        items = items.order_by('sample_cost_per_unit')
+    else:
+        items = items.order_by('item_name')
+    
+    context = {
+        'items': items,
+        'categories': FoodItemDatabase.CATEGORY_CHOICES,
+        'units': FoodItemDatabase.UNIT_CHOICES,
+        'selected_category': category,
+        'selected_unit': unit,
+        'search_query': search,
+        'sort_by': sort_by,
+    }
+    return render(request, 'food/food_database_list.html', context)
+
+
+def food_database_detail(request, pk):
+    """Show detailed view of a single food database item"""
+    item = get_object_or_404(FoodItemDatabase, pk=pk)
+    
+    # Get related inventory items (items user added based on this database item)
+    if request.user.is_authenticated:
+        related_inventory = FoodItem.objects.filter(
+            user=request.user,
+            name__icontains=item.item_name
+        )[:5]
+    else:
+        related_inventory = None
+    
+    context = {
+        'item': item,
+        'related_inventory': related_inventory,
+    }
+    return render(request, 'food/food_database_detail.html', context)
+
+
+def food_database_search(request):
+    """Advanced search interface for food database"""
+    results = None
+    total_items = FoodItemDatabase.objects.count()
+    
+    # Check if any search parameter is provided
+    if any(request.GET.get(param) for param in ['q', 'category', 'max_price', 'min_shelf_life', 'unit', 'sort']):
+        query = request.GET.get('q', '')
+        category = request.GET.get('category', '')
+        max_price = request.GET.get('max_price', '')
+        min_shelf_life = request.GET.get('min_shelf_life', '')
+        unit = request.GET.get('unit', '')
+        sort_by = request.GET.get('sort', 'item_name')
+        
+        results = FoodItemDatabase.objects.all()
+        
+        # Text search
+        if query:
+            results = results.filter(
+                Q(item_name__icontains=query) |
+                Q(storage_instructions__icontains=query)
+            )
+        
+        # Category filter
+        if category:
+            results = results.filter(category=category)
+        
+        # Price filter
+        if max_price:
+            try:
+                results = results.filter(sample_cost_per_unit__lte=float(max_price))
+            except ValueError:
+                pass
+        
+        # Shelf life filter
+        if min_shelf_life:
+            try:
+                results = results.filter(typical_expiration_days__gte=int(min_shelf_life))
+            except ValueError:
+                pass
+        
+        # Unit filter
+        if unit:
+            results = results.filter(unit=unit)
+        
+        # Sort results
+        if sort_by in ['item_name', '-item_name', 'sample_cost_per_unit', '-sample_cost_per_unit', 
+                       'typical_expiration_days', '-typical_expiration_days']:
+            results = results.order_by(sort_by)
+        else:
+            results = results.order_by('item_name')
+    
+    context = {
+        'results': results,
+        'total_items': total_items,
+        'query': request.GET.get('q', ''),
+        'category': request.GET.get('category', ''),
+        'max_price': request.GET.get('max_price', ''),
+        'min_shelf_life': request.GET.get('min_shelf_life', ''),
+        'unit': request.GET.get('unit', ''),
+        'sort_by': request.GET.get('sort', 'item_name'),
+    }
+    return render(request, 'food/food_database_search.html', context)
 
 
 # Dashboard and Recommendations API (PART 6)
