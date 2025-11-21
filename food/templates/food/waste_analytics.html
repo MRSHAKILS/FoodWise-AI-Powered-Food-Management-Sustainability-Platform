@@ -1,0 +1,282 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Waste Analytics - FoodWiseAI{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-8 px-6 sm:px-8 lg:px-12 xl:px-16 bg-gradient-to-br from-gray-50 to-amber-50">
+    <div class="max-w-7xl mx-auto">
+        
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h1 class="text-4xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent mb-2">
+                        🗑️ AI Waste Analytics Dashboard
+                    </h1>
+                    <p class="text-gray-600 text-lg">Track, analyze, and reduce your food waste with AI-powered insights</p>
+                </div>
+                
+                <!-- Export Buttons -->
+                <div class="flex flex-wrap gap-3">
+                    <a href="{% url 'food:export_waste_analytics' 'json' %}" class="inline-flex items-center px-5 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Export JSON
+                    </a>
+                    <a href="{% url 'food:export_waste_analytics' 'txt' %}" class="inline-flex items-center px-5 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Export TXT
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Export Info Banner -->
+            <div class="mt-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 border-l-4 border-purple-500 rounded-lg">
+                <div class="flex items-start">
+                    <svg class="w-6 h-6 text-purple-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-semibold text-purple-900 mb-1">📄 Export for RAG Chatbot</p>
+                        <p class="text-xs text-purple-800">
+                            Download your complete waste analytics data in JSON (structured data) or TXT (human-readable) format. 
+                            Perfect for training AI chatbots, generating personalized suggestions, or external analysis tools.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Community Comparison Banner -->
+        <div class="mb-8 bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 rounded-xl p-6 shadow-lg">
+            <div class="flex items-start">
+                <div class="p-3 bg-blue-100 rounded-xl mr-4">
+                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">
+                        {{ waste_report.community_comparison.message }}
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <p class="text-sm text-gray-600 mb-1">Weekly Comparison</p>
+                            <div class="flex items-end justify-between">
+                                <div>
+                                    <p class="text-2xl font-bold text-gray-900">${{ waste_report.community_comparison.weekly.user|floatformat:2 }}</p>
+                                    <p class="text-xs text-gray-500">Your projection</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-lg font-semibold text-gray-600">${{ waste_report.community_comparison.weekly.community|floatformat:2 }}</p>
+                                    <p class="text-xs text-gray-500">Community avg</p>
+                                </div>
+                            </div>
+                            <div class="mt-2 flex items-center">
+                                {% if waste_report.community_comparison.weekly.difference_percent < 0 %}
+                                <span class="text-green-600 font-bold">↓ {{ waste_report.community_comparison.weekly.difference_percent|floatformat:1 }}%</span>
+                                <span class="text-xs text-green-600 ml-2">Below average 🎉</span>
+                                {% else %}
+                                <span class="text-red-600 font-bold">↑ {{ waste_report.community_comparison.weekly.difference_percent|floatformat:1 }}%</span>
+                                <span class="text-xs text-red-600 ml-2">Above average</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <p class="text-sm text-gray-600 mb-1">Monthly Comparison</p>
+                            <div class="flex items-end justify-between">
+                                <div>
+                                    <p class="text-2xl font-bold text-gray-900">${{ waste_report.community_comparison.monthly.user|floatformat:2 }}</p>
+                                    <p class="text-xs text-gray-500">Your projection</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-lg font-semibold text-gray-600">${{ waste_report.community_comparison.monthly.community|floatformat:2 }}</p>
+                                    <p class="text-xs text-gray-500">Community avg</p>
+                                </div>
+                            </div>
+                            <div class="mt-2 flex items-center">
+                                {% if waste_report.community_comparison.monthly.difference_percent < 0 %}
+                                <span class="text-green-600 font-bold">↓ {{ waste_report.community_comparison.monthly.difference_percent|floatformat:1 }}%</span>
+                                <span class="text-xs text-green-600 ml-2">Below average 🎉</span>
+                                {% else %}
+                                <span class="text-red-600 font-bold">↑ {{ waste_report.community_comparison.monthly.difference_percent|floatformat:1 }}%</span>
+                                <span class="text-xs text-red-600 ml-2">Above average</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if waste_report.community_comparison.savings_potential > 0 %}
+                    <div class="bg-green-50 p-3 rounded-lg border border-green-200">
+                        <p class="text-sm text-green-800">
+                            <strong>💰 Savings Potential:</strong> If you reduce waste to community average, you could save 
+                            <strong>${{ waste_report.community_comparison.savings_potential|floatformat:2 }}/year</strong>!
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Actual Waste Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- Last 7 Days -->
+            <div class="bg-white rounded-2xl p-6 shadow-lg border-2 border-red-200">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <span class="text-2xl mr-2">📅</span>
+                    Actual Waste - Last 7 Days
+                </h3>
+                <div class="space-y-3">
+                    <div class="p-4 bg-red-50 rounded-lg">
+                        <p class="text-sm text-gray-600 mb-1">Total Money Lost</p>
+                        <p class="text-3xl font-bold text-red-600">${{ waste_report.actual_waste.last_7_days.total_money|floatformat:2 }}</p>
+                    </div>
+                    <div class="p-4 bg-orange-50 rounded-lg">
+                        <p class="text-sm text-gray-600 mb-1">Total Grams Wasted</p>
+                        <p class="text-2xl font-bold text-orange-600">{{ waste_report.actual_waste.last_7_days.total_grams|floatformat:0 }}g</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Last 30 Days -->
+            <div class="bg-white rounded-2xl p-6 shadow-lg border-2 border-orange-200">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <span class="text-2xl mr-2">📊</span>
+                    Actual Waste - Last 30 Days
+                </h3>
+                <div class="space-y-3">
+                    <div class="p-4 bg-red-50 rounded-lg">
+                        <p class="text-sm text-gray-600 mb-1">Total Money Lost</p>
+                        <p class="text-3xl font-bold text-red-600">${{ waste_report.actual_waste.last_30_days.total_money|floatformat:2 }}</p>
+                    </div>
+                    <div class="p-4 bg-orange-50 rounded-lg">
+                        <p class="text-sm text-gray-600 mb-1">Total Grams Wasted</p>
+                        <p class="text-2xl font-bold text-orange-600">{{ waste_report.actual_waste.last_30_days.total_grams|floatformat:0 }}g</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Future Projections -->
+        <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 shadow-lg border-2 border-purple-200 mb-8">
+            <h3 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+                <span class="text-2xl mr-2">🔮</span>
+                AI Waste Projections
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl p-5 shadow-md">
+                    <h4 class="text-lg font-bold text-purple-700 mb-3">Next 7 Days</h4>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+                            <span class="text-sm font-semibold">Projected Loss</span>
+                            <span class="text-xl font-bold text-red-600">${{ waste_report.projections.weekly.money|floatformat:2 }}</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+                            <span class="text-sm font-semibold">Projected Waste</span>
+                            <span class="text-lg font-bold text-orange-600">{{ waste_report.projections.weekly.grams|floatformat:0 }}g</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-5 shadow-md">
+                    <h4 class="text-lg font-bold text-pink-700 mb-3">Next 30 Days</h4>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center p-3 bg-pink-50 rounded-lg">
+                            <span class="text-sm font-semibold">Projected Loss</span>
+                            <span class="text-xl font-bold text-red-600">${{ waste_report.projections.monthly.money|floatformat:2 }}</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-pink-50 rounded-lg">
+                            <span class="text-sm font-semibold">Projected Waste</span>
+                            <span class="text-lg font-bold text-orange-600">{{ waste_report.projections.monthly.grams|floatformat:0 }}g</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Insights -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+                <div class="flex items-center mb-3">
+                    <span class="text-3xl mr-3">⚠️</span>
+                    <h4 class="text-lg font-bold text-gray-800">At Risk Items</h4>
+                </div>
+                <p class="text-4xl font-bold text-red-600">{{ waste_report.insights.total_at_risk_items }}</p>
+                <p class="text-sm text-gray-600 mt-2">Items with High/Critical risk</p>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+                <div class="flex items-center mb-3">
+                    <span class="text-3xl mr-3">💵</span>
+                    <h4 class="text-lg font-bold text-gray-800">Monthly Savings Potential</h4>
+                </div>
+                <p class="text-4xl font-bold text-green-600">${{ waste_report.insights.potential_monthly_savings|floatformat:2 }}</p>
+                <p class="text-sm text-gray-600 mt-2">By consuming high-risk items</p>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+                <div class="flex items-center mb-3">
+                    <span class="text-3xl mr-3">📈</span>
+                    <h4 class="text-lg font-bold text-gray-800">Waste Trend</h4>
+                </div>
+                <p class="text-3xl font-bold 
+                    {% if waste_report.insights.waste_trend == 'improving' %}text-green-600
+                    {% elif waste_report.insights.waste_trend == 'worsening' %}text-red-600
+                    {% else %}text-yellow-600{% endif %}">
+                    {% if waste_report.insights.waste_trend == 'improving' %}↓ Improving
+                    {% elif waste_report.insights.waste_trend == 'worsening' %}↑ Worsening
+                    {% else %}→ Stable{% endif %}
+                </p>
+                <p class="text-sm text-gray-600 mt-2">Compared to last week</p>
+            </div>
+        </div>
+
+        <!-- AI Recommendations -->
+        <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 shadow-lg border-2 border-green-200">
+            <h3 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+                <span class="text-2xl mr-2">💡</span>
+                AI-Powered Recommendations
+            </h3>
+            
+            <div class="space-y-3">
+                {% for rec in waste_report.recommendations %}
+                <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 
+                    {% if rec.priority == 'high' %}border-red-500
+                    {% else %}border-yellow-500{% endif %}">
+                    <div class="flex items-start">
+                        <span class="text-2xl mr-3">
+                            {% if rec.priority == 'high' %}🔴{% else %}🟡{% endif %}
+                        </span>
+                        <div class="flex-1">
+                            <p class="font-bold text-gray-900 mb-1">{{ rec.action }}</p>
+                            <p class="text-sm text-gray-600">Impact: {{ rec.impact }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="bg-green-100 rounded-xl p-4 text-center">
+                    <p class="text-green-800 font-semibold">🎉 Great job! No immediate actions needed.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Back Button -->
+        <div class="mt-8 text-center">
+            <a href="{% url 'food:inventory_list' %}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold hover:from-green-700 hover:to-emerald-700 transition-all duration-300 shadow-lg">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Back to Inventory
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

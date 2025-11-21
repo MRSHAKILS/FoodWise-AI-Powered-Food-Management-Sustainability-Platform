@@ -121,6 +121,9 @@ def profile_view(request):
     """Show logged-in user's profile with inventory and consumption logs"""
     from food.models import FoodItem, ConsumptionLog
     from .forms import ProfileEditForm, FoodItemForm, ConsumptionLogForm
+    from django.db.models import Sum, Count, Q
+    from django.utils import timezone
+    from datetime import timedelta
     
     # Handle profile edit form submission
     if request.method == 'POST':
@@ -135,8 +138,37 @@ def profile_view(request):
         profile_form = ProfileEditForm(instance=request.user)
     
     # Get user's data
-    food_items = FoodItem.objects.filter(user=request.user).order_by('-created_at')[:10]
-    consumption_logs = ConsumptionLog.objects.filter(user=request.user).order_by('-consumption_date', '-created_at')[:10]
+    food_items = FoodItem.objects.filter(user=request.user).order_by('-created_at')
+    consumption_logs = ConsumptionLog.objects.filter(user=request.user).order_by('-consumption_date', '-created_at')
+    
+    # Calculate statistics
+    today = timezone.now().date()
+    last_30_days = today - timedelta(days=30)
+    
+    # Inventory statistics
+    total_items = food_items.count()
+    total_value = food_items.aggregate(Sum('price'))['price__sum'] or 0
+    expiring_soon = food_items.filter(
+        expiration_date__lte=today + timedelta(days=7),
+        expiration_date__gte=today
+    ).count()
+    expired_items = food_items.filter(expiration_date__lt=today).count()
+    
+    # Consumption statistics
+    total_logs = consumption_logs.count()
+    recent_logs = consumption_logs.filter(consumption_date__gte=last_30_days).count()
+    
+    # Category breakdown
+    category_stats = food_items.values('category').annotate(
+        count=Count('id')
+    ).order_by('-count')[:5]
+    
+    # Recent activity (last 10 items and logs)
+    recent_items = food_items[:5]
+    recent_consumption = consumption_logs[:5]
+    
+    # Member since
+    member_since_days = (today - request.user.date_joined.date()).days
     
     # Initialize other forms
     food_form = FoodItemForm()
@@ -146,8 +178,20 @@ def profile_view(request):
         'profile_form': profile_form,
         'food_form': food_form,
         'log_form': log_form,
-        'food_items': food_items,
-        'consumption_logs': consumption_logs,
+        'food_items': food_items[:10],
+        'consumption_logs': consumption_logs[:10],
+        'stats': {
+            'total_items': total_items,
+            'total_value': total_value,
+            'expiring_soon': expiring_soon,
+            'expired_items': expired_items,
+            'total_logs': total_logs,
+            'recent_logs': recent_logs,
+            'member_since_days': member_since_days,
+        },
+        'category_stats': category_stats,
+        'recent_items': recent_items,
+        'recent_consumption': recent_consumption,
     }
     
     return render(request, "users/profile.html", context)

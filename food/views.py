@@ -1,25 +1,16 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from django.views.decorators.http import require_http_methods
-from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Q
-from datetime import datetime, timedelta
+from django.http import JsonResponse, HttpResponse
+from django.db.models import Sum, Q
 from django.utils import timezone
+from datetime import timedelta
 import json
-
-from .models import FoodItem, ConsumptionLog, FoodItemDatabase, MealPlan, SDGScore, WasteLog, ChatSession
+from .models import FoodItem, ConsumptionLog, FoodItemDatabase
 from users.forms import FoodItemForm, ConsumptionLogForm
 from .utils import calculate_dashboard_summary, generate_recommendations
 from .risk_predictor import FoodRiskPredictor
-from .ai_services import (
-    analyze_consumption_patterns,
-    generate_meal_plan,
-    chat_with_nourish_bot,
-    calculate_sdg_score,
-    rule_based_consumption_analysis
-)
+from .waste_estimator import WasteEstimator
 
 
 # Inventory Views
@@ -34,12 +25,25 @@ def inventory_list(request):
         items = items.filter(category=category)
     
     # Calculate total inventory value
-    total_value = sum(item.quantity * (item.price or 0) for item in items)
+    total_value = items.aggregate(total=Sum('price'))['total'] or 0
+    
+    # Calculate last week's expense (items purchased in last 7 days)
+    last_week = timezone.now() - timedelta(days=7)
+    last_week_items = FoodItem.objects.filter(
+        user=request.user,
+        purchase_date__gte=last_week.date()
+    )
+    last_week_expense = last_week_items.aggregate(total=Sum('price'))['total'] or 0
+    last_week_count = last_week_items.count()
     
     # Get risk predictions for all items
     predictor = FoodRiskPredictor(request.user)
     risk_items = predictor.predict_risks_for_inventory()
     summary_stats = predictor.get_summary_stats(risk_items)
+    
+    # Get waste estimations
+    waste_estimator = WasteEstimator(request.user)
+    waste_projections = waste_estimator.predict_waste_projection(risk_items)
     
     # Create a risk data dictionary keyed by item ID for easy template lookup
     risk_data_by_id = {risk_item['item'].id: risk_item for risk_item in risk_items}
@@ -50,6 +54,9 @@ def inventory_list(request):
         'risk_data_by_id': risk_data_by_id,
         'summary_stats': summary_stats,
         'total_value': total_value,
+        'last_week_expense': last_week_expense,
+        'last_week_count': last_week_count,
+        'waste_projections': waste_projections,
     }
     return render(request, 'food/inventory_list.html', context)
 
@@ -539,567 +546,619 @@ def enhanced_dashboard(request):
     return render(request, 'dashboard.html', context)
 
 
-# ==================== AI-POWERED FEATURES (Part 2) ====================
-
 @login_required
-@require_http_methods(["POST"])
-def analyze_consumption_api(request):
+def waste_analytics(request):
     """
-    API: Analyze consumption patterns using AI
-    POST /api/analyze/consumption
-    
-    Returns trends, flags, waste predictions, and insights
+    Comprehensive waste analytics dashboard
+    Shows actual waste, projections, and community comparison
     """
-    try:
-        # Get last 30 days of consumption data
-        thirty_days_ago = timezone.now().date() - timedelta(days=30)
-        consumption_logs = ConsumptionLog.objects.filter(
-            user=request.user,
-            consumption_date__gte=thirty_days_ago
-        ).values('item_name', 'quantity', 'unit', 'category', 'consumption_date')
-        
-        consumption_data = list(consumption_logs)
-        
-        # Convert dates to strings for JSON serialization
-        for log in consumption_data:
-            log['consumption_date'] = log['consumption_date'].isoformat()
-        
-        if not consumption_data:
-            return JsonResponse({
-                'success': False,
-                'error': 'No consumption data found for the last 30 days'
-            }, status=404)
-        
-        # Analyze using AI
-        analysis_result = analyze_consumption_patterns(consumption_data)
-        
-        # Fallback to rule-based if AI fails
-        if not analysis_result:
-            analysis_result = rule_based_consumption_analysis(consumption_data)
-        
-        return JsonResponse({
-            'success': True,
-            'data': analysis_result,
-            'period': {
-                'start': thirty_days_ago.isoformat(),
-                'end': timezone.now().date().isoformat(),
-                'total_logs': len(consumption_data)
-            }
-        })
-        
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'error': str(e)
-        }, status=500)
-
-
-@login_required
-@require_http_methods(["POST"])
-def generate_meal_plan_api(request):
-    """
-    API: Generate AI-optimized meal plan
-    POST /api/optimize/meal-plan
-    
-    Body: {
-        "budget": float,
-        "days": int (optional, default 7),
-        "dietary_preferences": {}
-    }
-    """
-    try:
-        data = json.loads(request.body)
-        budget = float(data.get('budget', request.user.budget_limit or 100))
-        days = int(data.get('days', 7))
-        dietary_needs = data.get('dietary_preferences', {})
-        
-        # Get current inventory
-        inventory = FoodItem.objects.filter(user=request.user).values(
-            'id', 'name', 'quantity', 'unit', 'expiration_date', 'category', 'price'
-        )
-        
-        inventory_data = []
-        for item in inventory:
-            inventory_data.append({
-                'id': item['id'],
-                'name': item['name'],
-                'quantity': float(item['quantity']),
-                'unit': item['unit'],
-                'expiration_date': item['expiration_date'].isoformat() if item['expiration_date'] else None,
-                'category': item['category'],
-                'price': float(item['price']) if item['price'] else 0
-            })
-        
-        # Generate meal plan using AI
-        meal_plan_result = generate_meal_plan(budget, inventory_data, dietary_needs, days)
-        
-        if not meal_plan_result:
-            return JsonResponse({
-                'success': False,
-                'error': 'Failed to generate meal plan. Please try again.'
-            }, status=500)
-        
-        # Save meal plan to database
-        from datetime import date
-        meal_plan = MealPlan.objects.create(
-            user=request.user,
-            week_start_date=date.today(),
-            meals_data=meal_plan_result.get('mealPlan', []),
-            shopping_list=meal_plan_result.get('shoppingList', []),
-            total_cost=meal_plan_result.get('totalCost', 0),
-            budget_limit=budget,
-            nutrition_score=meal_plan_result.get('nutritionScore', 0),
-            waste_reduction_estimate=meal_plan_result.get('wasteReduction', ''),
-            generated_by='AI'
-        )
-        
-        return JsonResponse({
-            'success': True,
-            'data': meal_plan_result,
-            'meal_plan_id': meal_plan.id
-        })
-        
-    except json.JSONDecodeError:
-        return JsonResponse({
-            'success': False,
-            'error': 'Invalid JSON data'
-        }, status=400)
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'error': str(e)
-        }, status=500)
-
-
-@login_required
-@require_http_methods(["POST"])
-def nourish_bot_chat_api(request):
-    """
-    API: Chat with NourishBot
-    POST /api/chat/nourish-bot
-    
-    Body: {
-        "message": str,
-        "session_id": str (optional)
-    }
-    """
-    try:
-        data = json.loads(request.body)
-        user_message = data.get('message', '').strip()
-        session_id = data.get('session_id')
-        
-        if not user_message:
-            return JsonResponse({
-                'success': False,
-                'error': 'Message is required'
-            }, status=400)
-        
-        # Get or create chat session
-        if session_id:
-            chat_session = ChatSession.objects.filter(
-                user=request.user,
-                session_id=session_id,
-                is_active=True
-            ).first()
-        else:
-            # Create new session
-            import uuid
-            session_id = str(uuid.uuid4())
-            chat_session = ChatSession.objects.create(
-                user=request.user,
-                session_id=session_id
-            )
-        
-        # Prepare user context with detailed data
-        inventory = FoodItem.objects.filter(user=request.user).order_by('expiration_date')[:20]
-        recent_consumption = ConsumptionLog.objects.filter(user=request.user).order_by('-consumption_date')[:15]
-        
-        user_context = {
-            'inventory': [
-                {
-                    'name': item.name, 
-                    'quantity': float(item.quantity), 
-                    'expiring_days': item.days_until_expiration,
-                    'category': item.category
-                }
-                for item in inventory
-            ],
-            'recent_consumption': [
-                {
-                    'name': log.item_name, 
-                    'quantity': float(log.quantity), 
-                    'date': log.consumption_date.isoformat(),
-                    'category': log.category
-                }
-                for log in recent_consumption
-            ],
-            'budget': float(request.user.budget_limit) if request.user.budget_limit else None
-        }
-        
-        # Get chat history from session
-        chat_history = None
-        if chat_session and hasattr(chat_session, 'messages'):
-            try:
-                chat_history = json.loads(chat_session.messages) if chat_session.messages else []
-            except:
-                chat_history = []
-        
-        # Get AI response
-        bot_response = chat_with_nourish_bot(user_message, user_context, chat_history)
-        
-        if not bot_response:
-            bot_response = "I'm sorry, I'm having trouble connecting right now. Please try again in a moment."
-        
-        # Save messages to session
-        chat_session.add_message('user', user_message)
-        chat_session.add_message('assistant', bot_response)
-        
-        return JsonResponse({
-            'success': True,
-            'response': bot_response,
-            'session_id': session_id
-        })
-        
-    except json.JSONDecodeError:
-        return JsonResponse({
-            'success': False,
-            'error': 'Invalid JSON data'
-        }, status=400)
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'error': str(e)
-        }, status=500)
-
-
-@login_required
-def waste_estimation_api(request):
-    """
-    API: Get waste estimation and projections
-    GET /api/estimate/waste
-    """
-    try:
-        # Get waste logs
-        waste_logs = WasteLog.objects.filter(user=request.user)
-        
-        # Current week
-        week_start = timezone.now().date() - timedelta(days=timezone.now().date().weekday())
-        week_waste = waste_logs.filter(waste_date__gte=week_start)
-        
-        # Current month
-        month_start = timezone.now().date().replace(day=1)
-        month_waste = waste_logs.filter(waste_date__gte=month_start)
-        
-        # Calculate metrics
-        week_total_kg = sum(float(log.quantity) for log in week_waste)
-        week_total_cost = sum(float(log.estimated_cost or 0) for log in week_waste)
-        
-        month_total_kg = sum(float(log.quantity) for log in month_waste)
-        month_total_cost = sum(float(log.estimated_cost or 0) for log in month_waste)
-        
-        # Average community baseline (dummy data)
-        community_avg_waste_percent = 30
-        
-        # Calculate user's waste percentage
-        total_inventory_value = sum(
-            float(item.price or 0) * float(item.quantity)
-            for item in FoodItem.objects.filter(user=request.user)
-        )
-        
-        if total_inventory_value > 0:
-            user_waste_percent = (month_total_cost / total_inventory_value) * 100
-        else:
-            user_waste_percent = 0
-        
-        # Projection (simple linear projection)
-        avg_weekly_waste = month_total_kg / 4 if month_total_kg > 0 else 0
-        next_month_projection = avg_weekly_waste * 4
-        
-        return JsonResponse({
-            'success': True,
-            'data': {
-                'currentWeek': {
-                    'totalWasteKg': round(week_total_kg, 2),
-                    'totalWasteCost': round(week_total_cost, 2),
-                    'itemsWasted': week_waste.count()
-                },
-                'currentMonth': {
-                    'totalWasteKg': round(month_total_kg, 2),
-                    'totalWasteCost': round(month_total_cost, 2),
-                    'itemsWasted': month_waste.count(),
-                    'wastePercentage': round(user_waste_percent, 2)
-                },
-                'projection': {
-                    'nextMonthKg': round(next_month_projection, 2),
-                    'trend': 'stable'
-                },
-                'comparison': {
-                    'communityAverage': community_avg_waste_percent,
-                    'yourPerformance': round(community_avg_waste_percent - user_waste_percent, 2),
-                    'message': f"You're wasting {abs(community_avg_waste_percent - user_waste_percent):.1f}% {'less' if user_waste_percent < community_avg_waste_percent else 'more'} than average"
-                }
-            }
-        })
-        
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'error': str(e)
-        }, status=500)
-
-
-@login_required
-def sdg_score_api(request):
-    """
-    API: Get user's SDG impact score
-    GET /api/score/sdg
-    """
-    try:
-        # Get or calculate current week's score
-        current_date = timezone.now().date()
-        week_number = current_date.isocalendar()[1]
-        year = current_date.year
-        
-        # Check if score already calculated this week
-        existing_score = SDGScore.objects.filter(
-            user=request.user,
-            year=year,
-            week_number=week_number
-        ).first()
-        
-        if existing_score:
-            score_data = {
-                'totalScore': existing_score.score,
-                'breakdown': {
-                    'wasteReduction': float(existing_score.waste_reduction_score),
-                    'nutritionBalance': float(existing_score.nutrition_score),
-                    'budgetEfficiency': float(existing_score.budget_efficiency_score),
-                    'communityEngagement': float(existing_score.community_engagement_score)
-                },
-                'insights': existing_score.insights,
-                'recommendations': existing_score.recommendations
-            }
-        else:
-            # Calculate new score
-            # Get waste data
-            week_start = current_date - timedelta(days=current_date.weekday())
-            waste_logs = WasteLog.objects.filter(
-                user=request.user,
-                waste_date__gte=week_start
-            )
-            
-            waste_data = {
-                'total_waste_kg': sum(float(log.quantity) for log in waste_logs),
-                'total_cost': sum(float(log.estimated_cost or 0) for log in waste_logs)
-            }
-            
-            # Get nutrition data (simplified)
-            consumption_logs = ConsumptionLog.objects.filter(
-                user=request.user,
-                consumption_date__gte=week_start
-            )
-            
-            category_counts = {}
-            for log in consumption_logs:
-                category_counts[log.category] = category_counts.get(log.category, 0) + 1
-            
-            nutrition_data = {
-                'category_diversity': len(category_counts),
-                'total_items': consumption_logs.count()
-            }
-            
-            # Get budget data
-            budget_data = {
-                'budget_limit': float(request.user.budget_limit) if request.user.budget_limit else 100,
-                'actual_spend': sum(float(item.price or 0) for item in FoodItem.objects.filter(user=request.user))
-            }
-            
-            # Calculate using AI
-            score_result = calculate_sdg_score(waste_data, nutrition_data, budget_data)
-            
-            if score_result:
-                # Save to database
-                sdg_score = SDGScore.objects.create(
-                    user=request.user,
-                    score=score_result['totalScore'],
-                    waste_reduction_score=score_result['breakdown']['wasteReduction'],
-                    nutrition_score=score_result['breakdown']['nutritionBalance'],
-                    budget_efficiency_score=score_result['breakdown']['budgetEfficiency'],
-                    community_engagement_score=score_result['breakdown']['communityEngagement'],
-                    waste_reduced_kg=waste_data['total_waste_kg'],
-                    waste_cost_saved=waste_data['total_cost'],
-                    nutrition_balance=nutrition_data,
-                    budget_data=budget_data,
-                    insights=score_result.get('insights', ''),
-                    recommendations=score_result.get('recommendations', []),
-                    week_number=week_number,
-                    year=year
-                )
-                
-                score_data = score_result
-            else:
-                # Fallback calculation
-                score_data = {
-                    'totalScore': 50,
-                    'breakdown': {
-                        'wasteReduction': 50,
-                        'nutritionBalance': 50,
-                        'budgetEfficiency': 50,
-                        'communityEngagement': 50
-                    },
-                    'insights': 'Score calculated using basic metrics. Enable AI for detailed insights.',
-                    'recommendations': ['Track your food consumption regularly', 'Plan meals to reduce waste']
-                }
-        
-        return JsonResponse({
-            'success': True,
-            'data': score_data
-        })
-        
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'error': str(e)
-        }, status=500)
-
-
-# ==================== FRONTEND VIEWS FOR AI FEATURES ====================
-
-@login_required
-def consumption_analysis_view(request):
-    """Frontend view for consumption pattern analysis"""
-    return render(request, 'food/ai/consumption_analysis.html')
-
-
-@login_required
-def meal_planner_view(request):
-    """Frontend view for AI meal planner"""
-    # Get user's current inventory for display
-    inventory = FoodItem.objects.filter(user=request.user)
-    context = {
-        'inventory': inventory,
-        'user_budget': request.user.budget_limit or 100
-    }
-    return render(request, 'food/ai/meal_planner.html', context)
-
-
-@login_required
-def nourish_bot_view(request):
-    """Frontend view for NourishBot chatbot"""
-    return render(request, 'food/ai/nourish_bot.html')
-
-
-@login_required
-def sdg_score_view(request):
-    """Frontend view for SDG impact score dashboard"""
-    # Get historical scores
-    scores = SDGScore.objects.filter(user=request.user).order_by('-calculated_date')[:10]
-    context = {
-        'historical_scores': scores
-    }
-    return render(request, 'food/ai/sdg_score.html', context)
-
-
-@login_required
-def waste_estimation_view(request):
-    """Frontend view for waste estimation and analytics"""
-    # Get recent waste logs
-    waste_logs = WasteLog.objects.filter(user=request.user).order_by('-waste_date')[:20]
-    context = {
-        'recent_waste_logs': waste_logs
-    }
-    return render(request, 'food/ai/waste_estimation.html', context)
-
-
-@login_required
-def expiration_risks_view(request):
-    """Frontend view for expiration risk prediction"""
-    # Get risk predictions using existing predictor
+    # Get risk predictions
     predictor = FoodRiskPredictor(request.user)
     risk_items = predictor.predict_risks_for_inventory()
-    summary_stats = predictor.get_summary_stats(risk_items)
+    
+    # Get waste estimations
+    waste_estimator = WasteEstimator(request.user)
+    waste_report = waste_estimator.generate_waste_report(risk_items)
     
     context = {
-        'risk_items': risk_items,
-        'summary_stats': summary_stats
+        'waste_report': waste_report,
+        'page_title': 'Waste Analytics',
     }
-    return render(request, 'food/ai/expiration_risks.html', context)
-
-
-# ==================== WASTE LOG MANAGEMENT ====================
-
-@login_required
-def waste_logs_list(request):
-    """List all waste logs with filtering"""
-    logs = WasteLog.objects.filter(user=request.user)
     
-    # Apply filters if provided
-    category = request.GET.get('category')
-    reason = request.GET.get('reason')
-    
-    if category:
-        logs = logs.filter(category=category)
-    if reason:
-        logs = logs.filter(reason=reason)
-    
-    # Calculate summary stats
-    total_waste_kg = sum(float(log.quantity) for log in logs)
-    total_waste_cost = sum(float(log.estimated_cost or 0) for log in logs)
-    
-    context = {
-        'logs': logs,
-        'categories': WasteLog._meta.get_field('category').choices,
-        'reasons': WasteLog._meta.get_field('reason').choices,
-        'total_waste_kg': total_waste_kg,
-        'total_waste_cost': total_waste_cost,
-    }
-    return render(request, 'food/waste_logs_list.html', context)
+    return render(request, 'food/waste_analytics.html', context)
 
 
 @login_required
-def waste_log_form(request):
-    """Add new waste log"""
+def priority_consumption(request):
+    """
+    AI Priority Consumption Guide
+    Combines FIFO + AI risk scoring to prioritize what to eat first
+    """
+    # Get risk predictions
+    predictor = FoodRiskPredictor(request.user)
+    risk_items = predictor.predict_risks_for_inventory()
+    
+    # Calculate priority scores (FIFO + AI Risk + Expiry urgency)
+    priority_items = []
+    
+    for risk_item in risk_items:
+        item = risk_item['item']
+        risk_score = risk_item['risk_score']
+        days_until_expiry = risk_item.get('days_until_expiry')
+        
+        # Calculate FIFO score (older items = higher priority)
+        days_since_purchase = (timezone.now().date() - item.purchase_date).days if item.purchase_date else 0
+        fifo_score = min(days_since_purchase * 2, 40)  # Max 40 points
+        
+        # Calculate urgency multiplier based on expiry
+        if days_until_expiry is not None:
+            if days_until_expiry <= 0:
+                urgency_multiplier = 1.5
+            elif days_until_expiry <= 1:
+                urgency_multiplier = 1.4
+            elif days_until_expiry <= 2:
+                urgency_multiplier = 1.3
+            elif days_until_expiry <= 3:
+                urgency_multiplier = 1.2
+            elif days_until_expiry <= 7:
+                urgency_multiplier = 1.1
+            else:
+                urgency_multiplier = 1.0
+        else:
+            urgency_multiplier = 1.0
+        
+        # Combined priority score: (FIFO + AI Risk) * Urgency
+        priority_score = (fifo_score + risk_score) * urgency_multiplier
+        priority_score = min(priority_score, 100)  # Cap at 100
+        
+        # Determine priority level
+        if priority_score >= 80 or (days_until_expiry is not None and days_until_expiry <= 1):
+            priority_level = 'critical'
+        elif priority_score >= 60 or (days_until_expiry is not None and days_until_expiry <= 3):
+            priority_level = 'high'
+        elif priority_score >= 40 or (days_until_expiry is not None and days_until_expiry <= 7):
+            priority_level = 'medium'
+        else:
+            priority_level = 'low'
+        
+        priority_items.append({
+            'item': item,
+            'risk_data': risk_item,
+            'priority_score': priority_score,
+            'priority_level': priority_level,
+            'fifo_score': fifo_score,
+            'urgency_multiplier': urgency_multiplier,
+        })
+    
+    # Sort by priority score (highest first)
+    priority_items.sort(key=lambda x: x['priority_score'], reverse=True)
+    
+    # Calculate statistics
+    priority_stats = {
+        'eat_today': len([x for x in priority_items if x['priority_level'] == 'critical']),
+        'this_week': len([x for x in priority_items if x['priority_level'] == 'high']),
+        'soon': len([x for x in priority_items if x['priority_level'] == 'medium']),
+        'good': len([x for x in priority_items if x['priority_level'] == 'low']),
+    }
+    
+    context = {
+        'priority_items': priority_items,
+        'priority_stats': priority_stats,
+    }
+    
+    return render(request, 'food/priority_consumption.html', context)
+
+
+@login_required
+def mark_consumed(request, pk):
+    """Quick mark item as consumed and delete from inventory"""
     if request.method == 'POST':
-        # Create waste log from POST data
-        item_name = request.POST.get('item_name')
-        quantity = request.POST.get('quantity')
-        unit = request.POST.get('unit')
-        category = request.POST.get('category')
-        estimated_cost = request.POST.get('estimated_cost')
-        reason = request.POST.get('reason')
-        waste_date = request.POST.get('waste_date')
+        item = get_object_or_404(FoodItem, pk=pk, user=request.user)
+        
+        # Create consumption log
+        ConsumptionLog.objects.create(
+            user=request.user,
+            item_name=item.name,
+            quantity=item.quantity,
+            unit=item.unit,
+            category=item.category,
+            consumption_date=timezone.now().date(),
+            notes=f"Consumed via priority guide"
+        )
+        
+        item_name = item.name
+        item.delete()
+        
+        messages.success(request, f'✅ {item_name} marked as consumed!')
+        return redirect('food:priority_consumption')
+    
+    return redirect('food:priority_consumption')
+
+
+
+@login_required
+def export_waste_analytics(request, format='json'):
+    """
+    Export waste analytics data for RAG chatbot or external use
+    Supports JSON and text formats
+    """
+    from django.http import HttpResponse
+    import json
+    from datetime import datetime
+    
+    # Get risk predictions
+    predictor = FoodRiskPredictor(request.user)
+    risk_items = predictor.predict_risks_for_inventory()
+    
+    # Get waste estimations
+    waste_estimator = WasteEstimator(request.user)
+    waste_report = waste_estimator.generate_waste_report(risk_items)
+    
+    # Prepare detailed inventory data
+    inventory_details = []
+    for risk_item in risk_items:
+        item = risk_item['item']
+        inventory_details.append({
+            'name': item.name,
+            'category': item.get_category_display(),
+            'quantity': float(item.quantity),
+            'unit': item.unit,
+            'price': float(item.price) if item.price else 0,
+            'purchase_date': item.purchase_date.isoformat() if item.purchase_date else None,
+            'expiration_date': item.expiration_date.isoformat() if item.expiration_date else None,
+            'days_until_expiry': risk_item.get('days_until_expiry'),
+            'risk_score': risk_item['risk_score'],
+            'risk_level': risk_item['risk_level'],
+            'recommendation': risk_item['recommendation'],
+        })
+    
+    # Prepare export data
+    export_data = {
+        'user': {
+            'username': request.user.username,
+            'export_date': datetime.now().isoformat(),
+        },
+        'summary': {
+            'total_inventory_items': len(risk_items),
+            'critical_risk_items': len([x for x in risk_items if x['risk_level'] == 'critical']),
+            'high_risk_items': len([x for x in risk_items if x['risk_level'] == 'high']),
+            'medium_risk_items': len([x for x in risk_items if x['risk_level'] == 'medium']),
+            'low_risk_items': len([x for x in risk_items if x['risk_level'] == 'low']),
+        },
+        'actual_waste': {
+            'last_7_days': {
+                'total_grams': waste_report['actual_waste']['last_7_days']['total_grams'],
+                'total_money': waste_report['actual_waste']['last_7_days']['total_money'],
+                'by_category': waste_report['actual_waste']['last_7_days']['by_category'],
+            },
+            'last_30_days': {
+                'total_grams': waste_report['actual_waste']['last_30_days']['total_grams'],
+                'total_money': waste_report['actual_waste']['last_30_days']['total_money'],
+                'by_category': waste_report['actual_waste']['last_30_days']['by_category'],
+            }
+        },
+        'projections': {
+            'weekly': {
+                'grams': waste_report['projections']['weekly']['grams'],
+                'money': waste_report['projections']['weekly']['money'],
+                'by_category': waste_report['projections']['weekly']['by_category'],
+            },
+            'monthly': {
+                'grams': waste_report['projections']['monthly']['grams'],
+                'money': waste_report['projections']['monthly']['money'],
+                'by_category': waste_report['projections']['monthly']['by_category'],
+            }
+        },
+        'community_comparison': {
+            'performance': waste_report['community_comparison']['performance'],
+            'message': waste_report['community_comparison']['message'],
+            'weekly': waste_report['community_comparison']['weekly'],
+            'monthly': waste_report['community_comparison']['monthly'],
+            'savings_potential': waste_report['community_comparison']['savings_potential'],
+        },
+        'insights': {
+            'total_at_risk_items': waste_report['insights']['total_at_risk_items'],
+            'potential_monthly_savings': waste_report['insights']['potential_monthly_savings'],
+            'waste_trend': waste_report['insights']['waste_trend'],
+        },
+        'recommendations': waste_report['recommendations'],
+        'inventory_details': inventory_details,
+    }
+    
+    if format == 'json':
+        response = HttpResponse(
+            json.dumps(export_data, indent=2),
+            content_type='application/json'
+        )
+        response['Content-Disposition'] = f'attachment; filename="waste_analytics_{request.user.username}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json"'
+        return response
+    
+    elif format == 'txt':
+        # Create human-readable text format for RAG chatbot
+        text_content = f"""
+FOOD WASTE ANALYTICS REPORT
+User: {request.user.username}
+Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+
+========================================
+SUMMARY STATISTICS
+========================================
+Total Inventory Items: {export_data['summary']['total_inventory_items']}
+Critical Risk Items: {export_data['summary']['critical_risk_items']}
+High Risk Items: {export_data['summary']['high_risk_items']}
+Medium Risk Items: {export_data['summary']['medium_risk_items']}
+Low Risk Items: {export_data['summary']['low_risk_items']}
+
+========================================
+ACTUAL WASTE (LAST 7 DAYS)
+========================================
+Total Money Lost: ${export_data['actual_waste']['last_7_days']['total_money']:.2f}
+Total Grams Wasted: {export_data['actual_waste']['last_7_days']['total_grams']:.0f}g
+
+========================================
+ACTUAL WASTE (LAST 30 DAYS)
+========================================
+Total Money Lost: ${export_data['actual_waste']['last_30_days']['total_money']:.2f}
+Total Grams Wasted: {export_data['actual_waste']['last_30_days']['total_grams']:.0f}g
+
+========================================
+WASTE PROJECTIONS - NEXT 7 DAYS
+========================================
+Projected Money Loss: ${export_data['projections']['weekly']['money']:.2f}
+Projected Grams Waste: {export_data['projections']['weekly']['grams']:.0f}g
+
+========================================
+WASTE PROJECTIONS - NEXT 30 DAYS
+========================================
+Projected Money Loss: ${export_data['projections']['monthly']['money']:.2f}
+Projected Grams Waste: {export_data['projections']['monthly']['grams']:.0f}g
+
+========================================
+COMMUNITY COMPARISON
+========================================
+Performance Level: {export_data['community_comparison']['performance'].upper()}
+Status: {export_data['community_comparison']['message']}
+
+Weekly:
+  Your Projection: ${export_data['community_comparison']['weekly']['user']:.2f}
+  Community Average: ${export_data['community_comparison']['weekly']['community']:.2f}
+  Difference: {export_data['community_comparison']['weekly']['difference_percent']:.1f}%
+
+Monthly:
+  Your Projection: ${export_data['community_comparison']['monthly']['user']:.2f}
+  Community Average: ${export_data['community_comparison']['monthly']['community']:.2f}
+  Difference: {export_data['community_comparison']['monthly']['difference_percent']:.1f}%
+
+Annual Savings Potential: ${export_data['community_comparison']['savings_potential']:.2f}
+
+========================================
+INSIGHTS
+========================================
+Items at Risk (High/Critical): {export_data['insights']['total_at_risk_items']}
+Potential Monthly Savings: ${export_data['insights']['potential_monthly_savings']:.2f}
+Waste Trend: {export_data['insights']['waste_trend'].upper()}
+
+========================================
+AI RECOMMENDATIONS
+========================================
+"""
+        for i, rec in enumerate(export_data['recommendations'], 1):
+            text_content += f"{i}. [{rec['priority'].upper()}] {rec['action']}\n"
+            text_content += f"   Impact: {rec['impact']}\n\n"
+        
+        text_content += """
+========================================
+DETAILED INVENTORY ANALYSIS
+========================================
+"""
+        for item in export_data['inventory_details']:
+            text_content += f"\nItem: {item['name']}\n"
+            text_content += f"  Category: {item['category']}\n"
+            text_content += f"  Quantity: {item['quantity']} {item['unit']}\n"
+            text_content += f"  Price: ${item['price']:.2f}\n"
+            if item['expiration_date']:
+                text_content += f"  Expiration: {item['expiration_date']}\n"
+                text_content += f"  Days Until Expiry: {item['days_until_expiry']}\n"
+            text_content += f"  Risk Score: {item['risk_score']:.1f}%\n"
+            text_content += f"  Risk Level: {item['risk_level'].upper()}\n"
+            text_content += f"  Recommendation: {item['recommendation']}\n"
+        
+        response = HttpResponse(text_content, content_type='text/plain')
+        response['Content-Disposition'] = f'attachment; filename="waste_analytics_{request.user.username}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.txt"'
+        return response
+    
+    else:
+        return JsonResponse({'error': 'Invalid format. Use json or txt'}, status=400)
+
+
+@login_required
+def priority_alerts_api(request):
+    """API endpoint to fetch high-priority items for navbar notifications"""
+    items = FoodItem.objects.filter(user=request.user)
+    
+    if not items:
+        return JsonResponse({'alerts': []})
+    
+    # Initialize predictor
+    predictor = FoodRiskPredictor()
+    
+    # Calculate priority scores for all items
+    alerts = []
+    for item in items:
+        today = timezone.now().date()
+        
+        # Calculate FIFO score (days since purchase)
+        days_since_purchase = (today - item.purchase_date).days
+        fifo_score = min(days_since_purchase * 2, 40)  # Cap at 40
+        
+        # Get AI risk score
+        ai_risk = predictor.predict_risk(item)
+        
+        # Calculate urgency multiplier
+        if item.expiration_date:
+            days_until_expiry = (item.expiration_date - today).days
+            if days_until_expiry <= 1:
+                urgency_multiplier = 1.5
+            elif days_until_expiry <= 3:
+                urgency_multiplier = 1.3
+            elif days_until_expiry <= 7:
+                urgency_multiplier = 1.1
+            else:
+                urgency_multiplier = 1.0
+        else:
+            days_until_expiry = 999
+            urgency_multiplier = 1.0
+        
+        # Calculate final priority score
+        priority_score = (fifo_score + ai_risk) * urgency_multiplier
+        priority_score = min(priority_score, 100)  # Cap at 100
+        
+        # Determine priority level
+        if priority_score >= 80:
+            priority_level = 'critical'
+        elif priority_score >= 60:
+            priority_level = 'high'
+        elif priority_score >= 40:
+            priority_level = 'medium'
+        else:
+            priority_level = 'low'
+        
+        # Only include critical and high priority items in alerts
+        if priority_level in ['critical', 'high']:
+            message = f"Expires in {days_until_expiry} day{'s' if days_until_expiry != 1 else ''}. "
+            if priority_level == 'critical':
+                message += "⚠️ Consume immediately!"
+            else:
+                message += "Consume soon to avoid waste."
+            
+            alerts.append({
+                'id': item.id,
+                'name': item.name,
+                'priority_score': priority_score,
+                'priority_level': priority_level,
+                'days_until_expiry': days_until_expiry,
+                'message': message,
+                'category': item.category,
+                'quantity': f"{item.quantity} {item.unit}"
+            })
+    
+    # Sort by priority score (highest first)
+    alerts = sorted(alerts, key=lambda x: x['priority_score'], reverse=True)
+    
+    # Limit to top 10 alerts
+    alerts = alerts[:10]
+    
+    return JsonResponse({
+        'alerts': alerts,
+        'count': len(alerts)
+    })
+
+
+# =====================================================
+# MEAL PLANNING VIEWS (AI Meal Optimization Engine)
+# =====================================================
+
+@login_required
+def meal_plan_create(request):
+    """
+    Create a new AI-optimized meal plan
+    GET: Show form to input budget and preferences
+    POST: Generate optimized meal plan
+    """
+    from .meal_optimizer import MealOptimizer
+    from .models import MealPlan, Recipe
+    from datetime import datetime
+    
+    if request.method == 'POST':
+        # Get form data
+        budget = float(request.POST.get('budget', 5000))
+        week_start_str = request.POST.get('week_start', '')
         notes = request.POST.get('notes', '')
         
-        try:
-            WasteLog.objects.create(
-                user=request.user,
-                item_name=item_name,
-                quantity=quantity,
-                unit=unit,
-                category=category,
-                estimated_cost=estimated_cost if estimated_cost else None,
-                reason=reason,
-                waste_date=waste_date if waste_date else timezone.now().date(),
-                notes=notes
-            )
-            messages.success(request, f'Waste log for {item_name} added successfully!')
-            return redirect('food:waste_logs_list')
-        except Exception as e:
-            messages.error(request, f'Error creating waste log: {str(e)}')
+        # Parse week start date
+        if week_start_str:
+            week_start = datetime.strptime(week_start_str, '%Y-%m-%d').date()
+        else:
+            week_start = None
+        
+        # Create optimizer and generate plan
+        optimizer = MealOptimizer(request.user, budget, week_start)
+        result = optimizer.generate_meal_plan()
+        
+        # Save meal plan to database
+        meal_plan = MealPlan.objects.create(
+            user=request.user,
+            week_start=result['week_start'],
+            week_end=result['week_end'],
+            budget_limit=result['budget_limit'],
+            actual_cost=result['total_cost'],
+            meals=result['meal_plan'],
+            shopping_list=result['shopping_list'],
+            nutrition_summary=result['nutrition_summary'],
+            inventory_used=result['inventory_used'],
+            notes=notes
+        )
+        
+        messages.success(
+            request, 
+            f'✅ Meal plan created! {len(result["shopping_list"])} items to shop. Cost: ৳{result["total_cost"]:.2f}'
+        )
+        
+        return redirect('food:meal_plan_detail', pk=meal_plan.pk)
     
+    # GET request - show form
+    budget_limit = request.user.budget_limit if request.user.budget_limit else 5000
     context = {
-        'categories': WasteLog._meta.get_field('category').choices,
-        'reasons': WasteLog._meta.get_field('reason').choices,
-        'units': ['kg', 'g', 'liter', 'ml', 'piece', 'pcs'],
+        'user_budget': f'{budget_limit:.0f}',
+        'household_size': request.user.household_size,
+        'dietary_preference': request.user.dietary_preferences if request.user.dietary_preferences else 'any',
     }
-    return render(request, 'food/waste_log_form.html', context)
+    
+    return render(request, 'food/meal_plan_create.html', context)
 
 
 @login_required
-def waste_log_delete(request, pk):
-    """Delete waste log"""
-    log = get_object_or_404(WasteLog, pk=pk, user=request.user)
-    log_name = log.item_name
-    log.delete()
-    messages.success(request, f'Waste log for {log_name} deleted.')
-    return redirect('food:waste_logs_list')
+def meal_plan_list(request):
+    """List all meal plans for the user"""
+    from .models import MealPlan
+    
+    meal_plans = MealPlan.objects.filter(user=request.user)
+    
+    context = {
+        'meal_plans': meal_plans,
+    }
+    
+    return render(request, 'food/meal_plan_list.html', context)
+
+
+@login_required
+def meal_plan_detail(request, pk):
+    """View detailed meal plan with weekly calendar and shopping list"""
+    from .models import MealPlan, Recipe
+    
+    meal_plan = get_object_or_404(MealPlan, pk=pk, user=request.user)
+    
+    # Get recipe details for each meal
+    weekly_meals = {}
+    for day, meals_data in meal_plan.meals.items():
+        weekly_meals[day] = {
+            'date': meals_data.get('date'),
+            'breakfast': None,
+            'lunch': None,
+            'dinner': None
+        }
+        
+        for meal_type in ['breakfast', 'lunch', 'dinner']:
+            recipe_id = meals_data.get(meal_type)
+            if recipe_id:
+                try:
+                    recipe = Recipe.objects.get(id=recipe_id)
+                    weekly_meals[day][meal_type] = {
+                        'id': recipe.id,
+                        'name': recipe.name,
+                        'cost': recipe.estimated_cost,
+                        'nutrition': recipe.nutrition,
+                        'prep_time': recipe.prep_time,
+                        'tags': recipe.tags
+                    }
+                except Recipe.DoesNotExist:
+                    pass
+    
+    # Group shopping list by category
+    shopping_by_category = {}
+    for item in meal_plan.shopping_list:
+        category = item.get('category', 'other')
+        if category not in shopping_by_category:
+            shopping_by_category[category] = []
+        shopping_by_category[category].append(item)
+    
+    context = {
+        'meal_plan': meal_plan,
+        'weekly_meals': weekly_meals,
+        'shopping_by_category': shopping_by_category,
+        'days_of_week': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+    }
+    
+    return render(request, 'food/meal_plan_detail.html', context)
+
+
+@login_required
+def meal_plan_delete(request, pk):
+    """Delete a meal plan"""
+    from .models import MealPlan
+    
+    meal_plan = get_object_or_404(MealPlan, pk=pk, user=request.user)
+    
+    if request.method == 'POST':
+        meal_plan.delete()
+        messages.success(request, '🗑️ Meal plan deleted successfully')
+        return redirect('food:meal_plan_list')
+    
+    return redirect('food:meal_plan_detail', pk=pk)
+
+
+@login_required
+def recipe_list(request):
+    """Browse all available recipes"""
+    from .models import Recipe
+    
+    # Get filter parameters
+    meal_type = request.GET.get('meal_type', '')
+    max_cost = request.GET.get('max_cost', '')
+    max_prep_time = request.GET.get('max_prep_time', '')
+    tags = request.GET.get('tags', '')
+    search = request.GET.get('search', '')
+    
+    # Start with all recipes
+    recipes = Recipe.objects.all()
+    
+    # Apply filters
+    if meal_type:
+        recipes = recipes.filter(meal_type=meal_type)
+    
+    if max_cost:
+        recipes = recipes.filter(estimated_cost__lte=float(max_cost))
+    
+    if max_prep_time:
+        recipes = recipes.filter(prep_time__lte=int(max_prep_time))
+    
+    if tags:
+        recipes = recipes.filter(tags__contains=[tags])
+    
+    if search:
+        recipes = recipes.filter(
+            Q(name__icontains=search) | 
+            Q(description__icontains=search)
+        )
+    
+    # Count by meal type for filter display
+    meal_type_counts = {
+        'breakfast': Recipe.objects.filter(meal_type='breakfast').count(),
+        'lunch': Recipe.objects.filter(meal_type='lunch').count(),
+        'dinner': Recipe.objects.filter(meal_type='dinner').count(),
+        'snack': Recipe.objects.filter(meal_type='snack').count(),
+    }
+    
+    context = {
+        'recipes': recipes,
+        'meal_type_counts': meal_type_counts,
+        'selected_meal_type': meal_type,
+        'search_query': search,
+    }
+    
+    return render(request, 'food/recipe_list.html', context)
+
+
+@login_required
+def recipe_detail(request, pk):
+    """View detailed recipe information"""
+    from .models import Recipe
+    
+    recipe = get_object_or_404(Recipe, pk=pk)
+    
+    context = {
+        'recipe': recipe,
+    }
+    
+    return render(request, 'food/recipe_detail.html', context)
+

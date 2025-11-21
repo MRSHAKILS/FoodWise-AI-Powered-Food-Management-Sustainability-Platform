@@ -1,406 +1,405 @@
 {% extends 'base.html' %}
 
-{% block title %}Profile - Food Management{% endblock %}
+{% block title %}My Profile - FoodWiseAI{% endblock %}
+
+{% block extra_head %}
+<style>
+    .profile-card {
+        background: white;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .profile-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+    }
+    
+    .avatar-circle {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold text-gray-800 mb-6">My Profile</h1>
-    
-    <!-- Tab Navigation -->
-    <div class="mb-6 border-b border-gray-200">
-        <nav class="flex space-x-8" aria-label="Tabs">
-            <button onclick="showTab('profile')" id="tab-profile" class="tab-button active border-b-2 border-green-500 py-4 px-1 text-sm font-medium text-green-600">
-                Profile Details
-            </button>
-            <button onclick="showTab('inventory')" id="tab-inventory" class="tab-button border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                Food Inventory
-            </button>
-            <button onclick="showTab('consumption')" id="tab-consumption" class="tab-button border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                Consumption Logs
-            </button>
-        </nav>
-    </div>
-
-    <!-- Profile Details Tab -->
-    <div id="profile-tab" class="tab-content">
-        <div class="bg-white p-6 rounded-lg shadow-md">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-semibold text-gray-700">Profile Information</h2>
-                <button onclick="toggleEditMode()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
-                    Edit Profile
-                </button>
-            </div>
-            
-            <!-- View Mode -->
-            <div id="view-mode" class="space-y-4 {% if profile_form.errors %}hidden{% endif %}">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Full Name</label>
-                        <p class="text-lg text-gray-800">{{ user.full_name }}</p>
+<div class="min-h-screen bg-gradient-to-br from-gray-50 via-green-50 to-blue-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+        
+        <!-- Profile Header -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+            <div class="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 h-32 sm:h-40"></div>
+            <div class="px-6 sm:px-8 pb-8">
+                <div class="flex flex-col sm:flex-row items-center sm:items-end -mt-16 sm:-mt-20">
+                    <!-- Avatar -->
+                    <div class="avatar-circle w-32 h-32 sm:w-40 sm:h-40 rounded-full flex items-center justify-center text-white text-5xl sm:text-6xl font-bold border-4 border-white shadow-2xl">
+                        {{ user.full_name|first|upper|default:"U" }}
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Email</label>
-                        <p class="text-lg text-gray-800">{{ user.email }}</p>
+                    
+                    <!-- User Info -->
+                    <div class="sm:ml-8 mt-4 sm:mt-0 flex-1 text-center sm:text-left">
+                        <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">{{ user.full_name }}</h1>
+                        <p class="text-gray-600 text-lg mt-1">{{ user.email }}</p>
+                        <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3 mt-3">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                Active Member
+                            </span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                {{ stats.member_since_days }} days with us
+                            </span>
+                            {% if user.location %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                                {{ user.location }}
+                            </span>
+                            {% endif %}
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Household Size</label>
-                        <p class="text-lg text-gray-800">{{ user.household_size }} {% if user.household_size == 1 %}person{% else %}people{% endif %}</p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Location</label>
-                        <p class="text-lg text-gray-800">{{ user.location }}</p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Dietary Preferences</label>
-                        <p class="text-lg text-gray-800">{{ user.dietary_preferences|default:"Not specified" }}</p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Monthly Budget Limit</label>
-                        <p class="text-lg text-gray-800">${{ user.budget_limit|default:"Not set" }}</p>
+                    
+                    <!-- Edit Button -->
+                    <div class="mt-4 sm:mt-0">
+                        <button onclick="toggleEditMode()" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold hover:from-green-700 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                            </svg>
+                            Edit Profile
+                        </button>
                     </div>
                 </div>
             </div>
-            
-            <!-- Edit Mode -->
-            <div id="edit-mode" class="{% if profile_form.errors %}{% else %}hidden{% endif %}">
-                <form method="POST" class="space-y-4">
+        </div>
+
+        <!-- Statistics Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Total Items -->
+            <div class="stat-card rounded-2xl p-6 border border-gray-200">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-sm font-medium text-gray-600">Total Items</p>
+                <p class="text-3xl font-bold text-gray-900 mt-1">{{ stats.total_items }}</p>
+                <p class="text-xs text-gray-500 mt-2">In your inventory</p>
+            </div>
+
+            <!-- Total Value -->
+            <div class="stat-card rounded-2xl p-6 border border-gray-200">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-gradient-to-br from-green-100 to-emerald-100 rounded-xl">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-sm font-medium text-gray-600">Total Value</p>
+                <p class="text-3xl font-bold text-gray-900 mt-1">${{ stats.total_value|floatformat:2 }}</p>
+                <p class="text-xs text-gray-500 mt-2">Current inventory worth</p>
+            </div>
+
+            <!-- Expiring Soon -->
+            <div class="stat-card rounded-2xl p-6 border border-gray-200">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-gradient-to-br from-orange-100 to-red-100 rounded-xl">
+                        <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-sm font-medium text-gray-600">Expiring Soon</p>
+                <p class="text-3xl font-bold text-orange-600 mt-1">{{ stats.expiring_soon }}</p>
+                <p class="text-xs text-gray-500 mt-2">Within 7 days</p>
+            </div>
+
+            <!-- Consumption Logs -->
+            <div class="stat-card rounded-2xl p-6 border border-gray-200">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl">
+                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-sm font-medium text-gray-600">Total Logs</p>
+                <p class="text-3xl font-bold text-gray-900 mt-1">{{ stats.total_logs }}</p>
+                <p class="text-xs text-green-600 mt-2">+{{ stats.recent_logs }} this month</p>
+            </div>
+        </div>
+
+        <!-- Edit Profile Form -->
+        <div id="edit-mode" class="{% if not profile_form.errors %}hidden{% endif %} mb-8">
+            <div class="bg-white rounded-2xl shadow-lg p-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">Edit Profile</h2>
+                    <button onclick="toggleEditMode()" class="text-gray-500 hover:text-gray-700">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <form method="POST" class="space-y-6">
                     {% csrf_token %}
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ profile_form.full_name.label }}</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ profile_form.full_name.label }}</label>
                             {{ profile_form.full_name }}
                             {% if profile_form.full_name.errors %}
                                 <p class="text-red-500 text-sm mt-1">{{ profile_form.full_name.errors.0 }}</p>
                             {% endif %}
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ profile_form.email.label }}</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ profile_form.email.label }}</label>
                             {{ profile_form.email }}
                             {% if profile_form.email.errors %}
                                 <p class="text-red-500 text-sm mt-1">{{ profile_form.email.errors.0 }}</p>
                             {% endif %}
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ profile_form.household_size.label }}</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ profile_form.household_size.label }}</label>
                             {{ profile_form.household_size }}
                             {% if profile_form.household_size.errors %}
                                 <p class="text-red-500 text-sm mt-1">{{ profile_form.household_size.errors.0 }}</p>
                             {% endif %}
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ profile_form.location.label }}</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ profile_form.location.label }}</label>
                             {{ profile_form.location }}
                             {% if profile_form.location.errors %}
                                 <p class="text-red-500 text-sm mt-1">{{ profile_form.location.errors.0 }}</p>
                             {% endif %}
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ profile_form.dietary_preferences.label }}</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ profile_form.dietary_preferences.label }}</label>
                             {{ profile_form.dietary_preferences }}
                             {% if profile_form.dietary_preferences.errors %}
                                 <p class="text-red-500 text-sm mt-1">{{ profile_form.dietary_preferences.errors.0 }}</p>
                             {% endif %}
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ profile_form.budget_limit.label }}</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ profile_form.budget_limit.label }}</label>
                             {{ profile_form.budget_limit }}
                             {% if profile_form.budget_limit.errors %}
                                 <p class="text-red-500 text-sm mt-1">{{ profile_form.budget_limit.errors.0 }}</p>
                             {% endif %}
                         </div>
                     </div>
-                    <div class="flex space-x-4 pt-4">
-                        <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+                    <div class="flex space-x-4 pt-4 border-t border-gray-200">
+                        <button type="submit" class="flex-1 sm:flex-none px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold hover:from-green-700 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl">
                             Save Changes
                         </button>
-                        <button type="button" onclick="toggleEditMode()" class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400">
+                        <button type="button" onclick="toggleEditMode()" class="flex-1 sm:flex-none px-8 py-3 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-all duration-300">
                             Cancel
                         </button>
                     </div>
                 </form>
             </div>
         </div>
-    </div>
 
-    <!-- Inventory Tab -->
-    <div id="inventory-tab" class="tab-content hidden">
-        <div class="bg-white p-6 rounded-lg shadow-md">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-semibold text-gray-700">Food Inventory</h2>
-                <button onclick="toggleInventoryForm()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
-                    + Add Item
-                </button>
-            </div>
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            <!-- Add Inventory Form -->
-            <div id="inventory-form" class="hidden mb-6 p-4 bg-gray-50 rounded-lg">
-                <form method="POST" action="{% url 'food:inventory_form' %}">
-                    {% csrf_token %}
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ food_form.name.label }}</label>
-                            {{ food_form.name }}
+            <!-- Left Column - Profile Details & Category Stats -->
+            <div class="space-y-6">
+                <!-- Profile Details Card -->
+                <div class="bg-white rounded-2xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                        Profile Details
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center py-3 border-b border-gray-100">
+                            <span class="text-sm font-medium text-gray-600">Household Size</span>
+                            <span class="text-sm font-bold text-gray-900">{{ user.household_size|default:"Not set" }} {% if user.household_size %}{{ user.household_size|pluralize:"person,people" }}{% endif %}</span>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ food_form.category.label }}</label>
-                            {{ food_form.category }}
+                        <div class="flex justify-between items-center py-3 border-b border-gray-100">
+                            <span class="text-sm font-medium text-gray-600">Location</span>
+                            <span class="text-sm font-bold text-gray-900">{{ user.location|default:"Not set" }}</span>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ food_form.quantity.label }}</label>
-                            {{ food_form.quantity }}
+                        <div class="flex justify-between items-center py-3 border-b border-gray-100">
+                            <span class="text-sm font-medium text-gray-600">Dietary Preferences</span>
+                            <span class="text-sm font-bold text-gray-900">{{ user.dietary_preferences|default:"None" }}</span>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ food_form.unit.label }}</label>
-                            {{ food_form.unit }}
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ food_form.purchase_date.label }}</label>
-                            {{ food_form.purchase_date }}
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ food_form.expiration_date.label }}</label>
-                            {{ food_form.expiration_date }}
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ food_form.price.label }}</label>
-                            {{ food_form.price }}
+                        <div class="flex justify-between items-center py-3">
+                            <span class="text-sm font-medium text-gray-600">Monthly Budget</span>
+                            <span class="text-sm font-bold text-green-600">${{ user.budget_limit|default:"0"|floatformat:2 }}</span>
                         </div>
                     </div>
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ food_form.notes.label }}</label>
-                        {{ food_form.notes }}
-                    </div>
-                    <div class="flex space-x-4 mt-4">
-                        <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
-                            Add to Inventory
-                        </button>
-                        <button type="button" onclick="toggleInventoryForm()" class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400">
-                            Cancel
-                        </button>
-                    </div>
-                </form>
-            </div>
-            
-            <!-- Inventory List -->
-            <div class="overflow-x-auto">
-                {% if food_items %}
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expiration</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        {% for item in food_items %}
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">{{ item.name }}</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                    {{ item.get_category_display }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ item.quantity }} {{ item.unit }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {% if item.expiration_date %}
-                                    {{ item.expiration_date|date:"M d, Y" }}
-                                    {% if item.is_expired %}
-                                        <span class="text-red-600 font-semibold">(Expired)</span>
-                                    {% elif item.days_until_expiration <= 3 %}
-                                        <span class="text-orange-600 font-semibold">({{ item.days_until_expiration }} days)</span>
-                                    {% endif %}
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {% if item.price %}${{ item.price }}{% else %}-{% endif %}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <a href="{% url 'food:inventory_edit' item.pk %}" class="text-blue-600 hover:text-blue-900 mr-3">Edit</a>
-                                <a href="{% url 'food:inventory_delete' item.pk %}" onclick="return confirm('Are you sure?')" class="text-red-600 hover:text-red-900">Delete</a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                {% else %}
-                <p class="text-gray-500 text-center py-8">No items in inventory. Click "Add Item" to get started.</p>
-                {% endif %}
-            </div>
-        </div>
-    </div>
+                </div>
 
-    <!-- Consumption Tab -->
-    <div id="consumption-tab" class="tab-content hidden">
-        <div class="bg-white p-6 rounded-lg shadow-md">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-semibold text-gray-700">Consumption Logs</h2>
-                <div class="flex space-x-2">
-                    <a href="{% url 'food:history' %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <!-- Category Breakdown -->
+                <div class="bg-white rounded-2xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                         </svg>
-                        View Full History
-                    </a>
-                    <button onclick="toggleConsumptionForm()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
-                        + Log Usage
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Add Consumption Form -->
-            <div id="consumption-form" class="hidden mb-6 p-4 bg-gray-50 rounded-lg">
-                <form method="POST" action="{% url 'food:log_form' %}">
-                    {% csrf_token %}
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        Top Categories
+                    </h3>
+                    <div class="space-y-3">
+                        {% for cat in category_stats %}
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ log_form.item_name.label }}</label>
-                            {{ log_form.item_name }}
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-sm font-medium text-gray-700">{{ cat.category }}</span>
+                                <span class="text-sm font-bold text-gray-900">{{ cat.count }} items</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                {% widthratio cat.count stats.total_items 100 as percentage %}
+                                <div class="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full" style="width: {{ percentage }}%"></div>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ log_form.category.label }}</label>
-                            {{ log_form.category }}
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ log_form.quantity.label }}</label>
-                            {{ log_form.quantity }}
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ log_form.unit.label }}</label>
-                            {{ log_form.unit }}
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ log_form.consumption_date.label }}</label>
-                            {{ log_form.consumption_date }}
-                        </div>
-                    </div>
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ log_form.notes.label }}</label>
-                        {{ log_form.notes }}
-                    </div>
-                    <div class="flex space-x-4 mt-4">
-                        <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
-                            Log Consumption
-                        </button>
-                        <button type="button" onclick="toggleConsumptionForm()" class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400">
-                            Cancel
-                        </button>
-                    </div>
-                </form>
-            </div>
-            
-            <!-- Consumption List -->
-            <div class="overflow-x-auto">
-                {% if consumption_logs %}
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        {% for log in consumption_logs %}
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">{{ log.item_name }}</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                    {{ log.get_category_display }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ log.quantity }} {{ log.unit }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ log.consumption_date|date:"M d, Y" }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <a href="{% url 'food:log_delete' log.pk %}" onclick="return confirm('Are you sure?')" class="text-red-600 hover:text-red-900">Delete</a>
-                            </td>
-                        </tr>
+                        {% empty %}
+                        <p class="text-gray-500 text-sm text-center py-4">No items yet</p>
                         {% endfor %}
-                    </tbody>
-                </table>
-                {% else %}
-                <p class="text-gray-500 text-center py-8">No consumption logs yet. Click "Log Usage" to track your food consumption.</p>
-                {% endif %}
-            </div>
-            
-            <!-- Helper Card -->
-            <div class="mt-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm font-semibold text-blue-800">Quick Tip</p>
-                        <p class="text-xs text-blue-700 mt-1">Log your food consumption daily to track patterns and reduce waste. Click "View Full History" for detailed analytics, charts, and export options.</p>
                     </div>
                 </div>
+
+                <!-- Quick Actions -->
+                <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl shadow-lg p-6 border border-green-100">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
+                    <div class="space-y-2">
+                        <a href="{% url 'food:inventory_form' %}" class="block w-full px-4 py-3 bg-white text-gray-700 rounded-xl font-medium hover:bg-green-100 hover:text-green-700 transition-all duration-200 text-center shadow-sm">
+                            + Add Item
+                        </a>
+                        <a href="{% url 'food:priority_consumption' %}" class="block w-full px-4 py-3 bg-white text-gray-700 rounded-xl font-medium hover:bg-orange-100 hover:text-orange-700 transition-all duration-200 text-center shadow-sm">
+                            🎯 Priority Items
+                        </a>
+                        <a href="{% url 'food:waste_analytics' %}" class="block w-full px-4 py-3 bg-white text-gray-700 rounded-xl font-medium hover:bg-blue-100 hover:text-blue-700 transition-all duration-200 text-center shadow-sm">
+                            📊 Waste Analytics
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Recent Activity -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- Recent Inventory Items -->
+                <div class="bg-white rounded-2xl shadow-lg p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold text-gray-900 flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                            </svg>
+                            Recent Inventory
+                        </h3>
+                        <a href="{% url 'food:inventory_list' %}" class="text-sm font-semibold text-green-600 hover:text-green-700 hover:underline">
+                            View All →
+                        </a>
+                    </div>
+                    <div class="space-y-3">
+                        {% for item in recent_items %}
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg flex items-center justify-center">
+                                    <span class="text-2xl">{% if item.category == 'fruits' %}🍎{% elif item.category == 'vegetables' %}🥬{% elif item.category == 'dairy' %}🥛{% elif item.category == 'meat' %}🍖{% elif item.category == 'grains' %}🌾{% else %}🍽️{% endif %}</span>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-semibold text-gray-900">{{ item.name }}</h4>
+                                    <p class="text-xs text-gray-600">{{ item.quantity }} {{ item.unit }} • {{ item.category }}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                {% if item.price %}
+                                <p class="text-sm font-bold text-gray-900">${{ item.price }}</p>
+                                {% endif %}
+                                {% if item.expiration_date %}
+                                <p class="text-xs text-gray-600">Exp: {{ item.expiration_date|date:"M d" }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-12">
+                            <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                            </svg>
+                            <p class="text-gray-500 font-medium">No items in inventory</p>
+                            <a href="{% url 'food:inventory_form' %}" class="inline-block mt-4 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                Add Your First Item
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Recent Consumption Logs -->
+                <div class="bg-white rounded-2xl shadow-lg p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold text-gray-900 flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                            Recent Consumption
+                        </h3>
+                        <a href="{% url 'food:history' %}" class="text-sm font-semibold text-green-600 hover:text-green-700 hover:underline">
+                            View All →
+                        </a>
+                    </div>
+                    <div class="space-y-3">
+                        {% for log in recent_consumption %}
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-semibold text-gray-900">{{ log.item_name }}</h4>
+                                    <p class="text-xs text-gray-600">{{ log.quantity }} {{ log.unit }} • {{ log.category }}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs text-gray-600">{{ log.consumption_date|date:"M d, Y" }}</p>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-12">
+                            <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                            <p class="text-gray-500 font-medium">No consumption logs yet</p>
+                            <a href="{% url 'food:log_form' %}" class="inline-block mt-4 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                Add Your First Log
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    function showTab(tabName) {
-        // Hide all tabs
-        document.querySelectorAll('.tab-content').forEach(tab => {
-            tab.classList.add('hidden');
-        });
-        
-        // Remove active class from all buttons
-        document.querySelectorAll('.tab-button').forEach(btn => {
-            btn.classList.remove('active', 'border-green-500', 'text-green-600');
-            btn.classList.add('border-transparent', 'text-gray-500');
-        });
-        
-        // Show selected tab
-        document.getElementById(tabName + '-tab').classList.remove('hidden');
-        
-        // Add active class to selected button
-        const activeBtn = document.getElementById('tab-' + tabName);
-        activeBtn.classList.add('active', 'border-green-500', 'text-green-600');
-        activeBtn.classList.remove('border-transparent', 'text-gray-500');
-    }
-    
     function toggleEditMode() {
-        const viewMode = document.getElementById('view-mode');
         const editMode = document.getElementById('edit-mode');
+        editMode.classList.toggle('hidden');
         
-        if (viewMode.classList.contains('hidden')) {
-            viewMode.classList.remove('hidden');
-            editMode.classList.add('hidden');
-        } else {
-            viewMode.classList.add('hidden');
-            editMode.classList.remove('hidden');
+        if (!editMode.classList.contains('hidden')) {
+            editMode.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-    }
-    
-    function toggleInventoryForm() {
-        const form = document.getElementById('inventory-form');
-        form.classList.toggle('hidden');
-    }
-    
-    function toggleConsumptionForm() {
-        const form = document.getElementById('consumption-form');
-        form.classList.toggle('hidden');
     }
 </script>
 {% endblock %}

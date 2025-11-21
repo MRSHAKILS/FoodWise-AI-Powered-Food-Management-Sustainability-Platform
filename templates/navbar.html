@@ -137,6 +137,62 @@
             transform: scale(1.1);
         }
     }
+    
+    .dropdown {
+        position: relative;
+    }
+    
+    .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        min-width: 280px;
+        max-height: 80vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+        margin-top: 8px;
+        z-index: 1000;
+    }
+    
+    .dropdown-menu::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .dropdown-menu::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    
+    .dropdown-menu::-webkit-scrollbar-thumb {
+        background: #10b981;
+        border-radius: 10px;
+    }
+    
+    .dropdown-menu::-webkit-scrollbar-thumb:hover {
+        background: #059669;
+    }
+    
+    .dropdown:hover .dropdown-menu {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+    
+    .dropdown-item {
+        transition: all 0.2s ease;
+    }
+    
+    .dropdown-item:hover {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
+        padding-left: 20px;
+    }
 </style>
 
 <nav class="navbar sticky top-0 z-50 shadow-lg" id="mainNav">
@@ -194,14 +250,6 @@
                         <span>Logs</span>
                     </span>
                 </a>
-                <a href="{% url 'food:history' %}" class="nav-link px-5 py-2.5 rounded-lg text-gray-700 hover:text-green-600 transition-all duration-300 font-semibold text-sm relative z-10 {% if 'food/history' in request.path %}active{% endif %}">
-                    <span class="flex items-center space-x-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                        </svg>
-                        <span>History</span>
-                    </span>
-                </a>
                 <a href="{% url 'food:food_items_list' %}" class="nav-link px-5 py-2.5 rounded-lg text-gray-700 hover:text-green-600 transition-all duration-300 font-semibold text-sm relative z-10 {% if 'food/food-items' in request.path %}active{% endif %}">
                     <span class="flex items-center space-x-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -218,68 +266,128 @@
                         <span>Resources</span>
                     </span>
                 </a>
-                <a href="{% url 'uploads:upload_form' %}" class="nav-link px-5 py-2.5 rounded-lg text-gray-700 hover:text-green-600 transition-all duration-300 font-semibold text-sm relative z-10 {% if 'uploads' in request.path %}active{% endif %}">
-                    <span class="flex items-center space-x-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                        </svg>
-                        <span>Upload</span>
-                    </span>
-                </a>
-                <!-- AI Features Dropdown -->
-                <div class="relative group">
+                
+                <!-- All Features Dropdown -->
+                <div class="dropdown">
                     <button class="nav-link px-5 py-2.5 rounded-lg text-gray-700 hover:text-green-600 transition-all duration-300 font-semibold text-sm relative z-10 flex items-center space-x-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
                         </svg>
-                        <span>AI Features</span>
+                        <span>All Features</span>
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
-                    <div class="absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                    
+                    <!-- Dropdown Menu -->
+                    <div class="dropdown-menu">
                         <div class="py-2">
-                            <a href="{% url 'food:consumption_analysis' %}" class="block px-4 py-3 hover:bg-green-50 text-gray-700 hover:text-green-600 transition">
-                                <span class="flex items-center space-x-2">
-                                    <span>📊</span>
-                                    <span class="font-semibold text-sm">Consumption Analysis</span>
-                                </span>
+                            <!-- Inventory Management -->
+                            <div class="px-4 py-2 text-xs font-bold text-gray-500 uppercase tracking-wide">Inventory Management</div>
+                            <a href="{% url 'food:inventory_list' %}" class="dropdown-item flex items-center px-4 py-3 text-gray-700 hover:text-green-600">
+                                <svg class="w-5 h-5 mr-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                </svg>
+                                <div>
+                                    <div class="font-semibold">Food Inventory</div>
+                                    <div class="text-xs text-gray-500">Manage your food items</div>
+                                </div>
                             </a>
-                            <a href="{% url 'food:meal_planner' %}" class="block px-4 py-3 hover:bg-green-50 text-gray-700 hover:text-green-600 transition">
-                                <span class="flex items-center space-x-2">
-                                    <span>🍽️</span>
-                                    <span class="font-semibold text-sm">Meal Planner</span>
-                                </span>
+                            <a href="{% url 'food:inventory_form' %}" class="dropdown-item flex items-center px-4 py-3 text-gray-700 hover:text-green-600">
+                                <svg class="w-5 h-5 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                </svg>
+                                <div>
+                                    <div class="font-semibold">Add Item Manually</div>
+                                    <div class="text-xs text-gray-500">Quick add to inventory</div>
+                                </div>
                             </a>
-                            <a href="{% url 'food:nourish_bot' %}" class="block px-4 py-3 hover:bg-green-50 text-gray-700 hover:text-green-600 transition">
-                                <span class="flex items-center space-x-2">
-                                    <span>🤖</span>
-                                    <span class="font-semibold text-sm">NourishBot</span>
-                                </span>
+                            <a href="{% url 'uploads:upload_form' %}" class="dropdown-item flex items-center px-4 py-3 text-gray-700 hover:text-green-600">
+                                <svg class="w-5 h-5 mr-3 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                <div>
+                                    <div class="font-semibold">Upload Receipt</div>
+                                    <div class="text-xs text-gray-500">Scan receipt or image</div>
+                                </div>
                             </a>
-                            <a href="{% url 'food:sdg_score' %}" class="block px-4 py-3 hover:bg-green-50 text-gray-700 hover:text-green-600 transition">
-                                <span class="flex items-center space-x-2">
-                                    <span>🌍</span>
-                                    <span class="font-semibold text-sm">SDG Impact Score</span>
-                                </span>
+                            
+                            <div class="border-t border-gray-100 my-2"></div>
+                            
+                            <!-- AI Features -->
+                            <div class="px-4 py-2 text-xs font-bold text-gray-500 uppercase tracking-wide">AI Features</div>
+                            <a href="{% url 'food:priority_consumption' %}" class="dropdown-item flex items-center px-4 py-3 text-gray-700 hover:text-green-600">
+                                <svg class="w-5 h-5 mr-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <div>
+                                    <div class="font-semibold">Priority Consumption</div>
+                                    <div class="text-xs text-gray-500">FIFO + AI ranking</div>
+                                </div>
                             </a>
-                            <a href="{% url 'food:waste_estimation' %}" class="block px-4 py-3 hover:bg-green-50 text-gray-700 hover:text-green-600 transition">
-                                <span class="flex items-center space-x-2">
-                                    <span>📈</span>
-                                    <span class="font-semibold text-sm">Waste Estimation</span>
-                                </span>
+                            <a href="{% url 'food:waste_analytics' %}" class="dropdown-item flex items-center px-4 py-3 text-gray-700 hover:text-green-600">
+                                <svg class="w-5 h-5 mr-3 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                </svg>
+                                <div>
+                                    <div class="font-semibold">Waste Analytics</div>
+                                    <div class="text-xs text-gray-500">Track waste & projections</div>
+                                </div>
                             </a>
-                            <a href="{% url 'food:expiration_risks' %}" class="block px-4 py-3 hover:bg-green-50 text-gray-700 hover:text-green-600 transition">
-                                <span class="flex items-center space-x-2">
-                                    <span>⚠️</span>
-                                    <span class="font-semibold text-sm">Expiration Risks</span>
-                                </span>
+                            <a href="{% url 'food:meal_plan_list' %}" class="dropdown-item flex items-center px-4 py-3 text-gray-700 hover:text-green-600">
+                                <svg class="w-5 h-5 mr-3 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                <div>
+                                    <div class="font-semibold">AI Meal Planner</div>
+                                    <div class="text-xs text-gray-500">Budget-optimized weekly meals</div>
+                                </div>
                             </a>
-                            <a href="{% url 'food:waste_logs_list' %}" class="block px-4 py-3 hover:bg-green-50 text-gray-700 hover:text-green-600 transition border-t border-gray-200">
-                                <span class="flex items-center space-x-2">
-                                    <span>🗑️</span>
-                                    <span class="font-semibold text-sm">Waste Logs</span>
-                                </span>
+                            
+                            <div class="border-t border-gray-100 my-2"></div>
+                            
+                            <!-- Tracking & Logs -->
+                            <div class="px-4 py-2 text-xs font-bold text-gray-500 uppercase tracking-wide">Tracking & Logs</div>
+                            <a href="{% url 'food:logs_list' %}" class="dropdown-item flex items-center px-4 py-3 text-gray-700 hover:text-green-600">
+                                <svg class="w-5 h-5 mr-3 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                </svg>
+                                <div>
+                                    <div class="font-semibold">Consumption Logs</div>
+                                    <div class="text-xs text-gray-500">Track food usage</div>
+                                </div>
+                            </a>
+                            <a href="{% url 'food:history' %}" class="dropdown-item flex items-center px-4 py-3 text-gray-700 hover:text-green-600">
+                                <svg class="w-5 h-5 mr-3 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <div>
+                                    <div class="font-semibold">History & Charts</div>
+                                    <div class="text-xs text-gray-500">View detailed analytics</div>
+                                </div>
+                            </a>
+                            
+                            <div class="border-t border-gray-100 my-2"></div>
+                            
+                            <!-- Resources & Database -->
+                            <div class="px-4 py-2 text-xs font-bold text-gray-500 uppercase tracking-wide">Resources</div>
+                            <a href="{% url 'food:food_items_list' %}" class="dropdown-item flex items-center px-4 py-3 text-gray-700 hover:text-green-600">
+                                <svg class="w-5 h-5 mr-3 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                </svg>
+                                <div>
+                                    <div class="font-semibold">Food Database</div>
+                                    <div class="text-xs text-gray-500">Browse 5000+ items</div>
+                                </div>
+                            </a>
+                            <a href="{% url 'resources:resources_list' %}" class="dropdown-item flex items-center px-4 py-3 text-gray-700 hover:text-green-600">
+                                <svg class="w-5 h-5 mr-3 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                </svg>
+                                <div>
+                                    <div class="font-semibold">Learning Resources</div>
+                                    <div class="text-xs text-gray-500">Tips & guides</div>
+                                </div>
                             </a>
                         </div>
                     </div>
@@ -289,6 +397,32 @@
             <!-- Auth Buttons -->
             <div class="hidden lg:flex items-center space-x-3 auth-buttons-desktop">
                 {% if user.is_authenticated or request.session.test_user_logged_in %}
+                    <!-- Priority Alerts Notification Bell -->
+                    <div class="relative">
+                        <button id="notificationBell" class="relative p-2 rounded-lg hover:bg-green-50 transition-colors duration-200">
+                            <svg class="w-6 h-6 text-gray-700 hover:text-green-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                            </svg>
+                            <span id="notificationBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center badge-pulse hidden">0</span>
+                        </button>
+                        
+                        <!-- Notification Dropdown -->
+                        <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-96 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 max-h-[500px] overflow-y-auto">
+                            <div class="p-4 border-b border-gray-200 bg-gradient-to-r from-green-50 to-emerald-50">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="text-lg font-bold text-gray-900">Priority Alerts</h3>
+                                        <p class="text-sm text-gray-600">Items requiring urgent attention</p>
+                                    </div>
+                                    <a href="{% url 'food:priority_consumption' %}" class="text-sm font-semibold text-green-600 hover:text-green-700 hover:underline">View All</a>
+                                </div>
+                            </div>
+                            <div id="alertsList" class="divide-y divide-gray-100">
+                                <!-- Alerts will be loaded here via JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                    
                     <!-- Authenticated User -->
                     <div class="flex items-center space-x-2 px-4 py-2 bg-green-50 rounded-lg border border-green-200">
                         <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -377,14 +511,6 @@
                         <span>Logs</span>
                     </span>
                 </a>
-                <a href="{% url 'food:history' %}" class="block px-4 py-3 rounded-lg text-gray-700 hover:bg-green-50 hover:text-green-600 transition-all duration-200 font-semibold">
-                    <span class="flex items-center space-x-3">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                        </svg>
-                        <span>History</span>
-                    </span>
-                </a>
                 <a href="{% url 'food:food_items_list' %}" class="block px-4 py-3 rounded-lg text-gray-700 hover:bg-green-50 hover:text-green-600 transition-all duration-200 font-semibold">
                     <span class="flex items-center space-x-3">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -401,60 +527,41 @@
                         <span>Resources</span>
                     </span>
                 </a>
-                <a href="{% url 'uploads:upload_form' %}" class="block px-4 py-3 rounded-lg text-gray-700 hover:bg-green-50 hover:text-green-600 transition-all duration-200 font-semibold">
-                    <span class="flex items-center space-x-3">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                        </svg>
-                        <span>Upload</span>
-                    </span>
-                </a>
                 
-                <!-- AI Features Section in Mobile -->
-                <div class="pt-4 mt-4 border-t border-gray-200">
-                    <p class="px-4 py-2 text-xs font-bold text-gray-500 uppercase tracking-wider">AI Features</p>
-                    <a href="{% url 'food:consumption_analysis' %}" class="block px-4 py-3 rounded-lg text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-all duration-200 font-semibold">
-                        <span class="flex items-center space-x-3">
-                            <span class="text-xl">📊</span>
-                            <span>Consumption Analysis</span>
+                <!-- All Features Mobile Section -->
+                <div class="px-4 py-3 mt-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg">
+                    <button onclick="toggleMobileFeatures()" class="flex items-center justify-between w-full text-left font-bold text-gray-800">
+                        <span class="flex items-center space-x-2">
+                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                            </svg>
+                            <span>All Features</span>
                         </span>
-                    </a>
-                    <a href="{% url 'food:meal_planner' %}" class="block px-4 py-3 rounded-lg text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-all duration-200 font-semibold">
-                        <span class="flex items-center space-x-3">
-                            <span class="text-xl">🍽️</span>
-                            <span>Meal Planner</span>
-                        </span>
-                    </a>
-                    <a href="{% url 'food:nourish_bot' %}" class="block px-4 py-3 rounded-lg text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-all duration-200 font-semibold">
-                        <span class="flex items-center space-x-3">
-                            <span class="text-xl">🤖</span>
-                            <span>NourishBot</span>
-                        </span>
-                    </a>
-                    <a href="{% url 'food:sdg_score' %}" class="block px-4 py-3 rounded-lg text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-all duration-200 font-semibold">
-                        <span class="flex items-center space-x-3">
-                            <span class="text-xl">🌍</span>
-                            <span>SDG Impact Score</span>
-                        </span>
-                    </a>
-                    <a href="{% url 'food:waste_estimation' %}" class="block px-4 py-3 rounded-lg text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-all duration-200 font-semibold">
-                        <span class="flex items-center space-x-3">
-                            <span class="text-xl">📈</span>
-                            <span>Waste Estimation</span>
-                        </span>
-                    </a>
-                    <a href="{% url 'food:expiration_risks' %}" class="block px-4 py-3 rounded-lg text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-all duration-200 font-semibold">
-                        <span class="flex items-center space-x-3">
-                            <span class="text-xl">⚠️</span>
-                            <span>Expiration Risks</span>
-                        </span>
-                    </a>
-                    <a href="{% url 'food:waste_logs_list' %}" class="block px-4 py-3 rounded-lg text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-all duration-200 font-semibold">
-                        <span class="flex items-center space-x-3">
-                            <span class="text-xl">🗑️</span>
-                            <span>Waste Logs</span>
-                        </span>
-                    </a>
+                        <svg id="mobileFeaturesCaret" class="w-4 h-4 text-green-600 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    
+                    <div id="mobileFeaturesMenu" class="hidden mt-3 space-y-1">
+                        <a href="{% url 'food:priority_consumption' %}" class="block px-3 py-2 bg-white rounded-lg text-sm hover:bg-green-100 transition-colors">
+                            🎯 Priority Consumption
+                        </a>
+                        <a href="{% url 'food:waste_analytics' %}" class="block px-3 py-2 bg-white rounded-lg text-sm hover:bg-green-100 transition-colors">
+                            📊 Waste Analytics
+                        </a>
+                        <a href="{% url 'food:meal_plan_list' %}" class="block px-3 py-2 bg-white rounded-lg text-sm hover:bg-green-100 transition-colors">
+                            🗓️ AI Meal Planner
+                        </a>
+                        <a href="{% url 'food:history' %}" class="block px-3 py-2 bg-white rounded-lg text-sm hover:bg-green-100 transition-colors">
+                            📈 History & Charts
+                        </a>
+                        <a href="{% url 'food:inventory_form' %}" class="block px-3 py-2 bg-white rounded-lg text-sm hover:bg-green-100 transition-colors">
+                            ➕ Add Item Manually
+                        </a>
+                        <a href="{% url 'uploads:upload_form' %}" class="block px-3 py-2 bg-white rounded-lg text-sm hover:bg-green-100 transition-colors">
+                            📸 Upload Receipt
+                        </a>
+                    </div>
                 </div>
                 
                 <div class="pt-4 mt-4 border-t border-gray-200 space-y-2">
@@ -564,4 +671,114 @@
             link.style.color = '#10b981';
         }
     });
+    
+    // Notification Bell Toggle
+    const notificationBell = document.getElementById('notificationBell');
+    const notificationDropdown = document.getElementById('notificationDropdown');
+    
+    if (notificationBell && notificationDropdown) {
+        notificationBell.addEventListener('click', function(e) {
+            e.stopPropagation();
+            notificationDropdown.classList.toggle('hidden');
+            loadPriorityAlerts();
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!notificationDropdown.contains(e.target) && !notificationBell.contains(e.target)) {
+                notificationDropdown.classList.add('hidden');
+            }
+        });
+    }
+    
+    // Load Priority Alerts
+    function loadPriorityAlerts() {
+        fetch('/food/api/priority-alerts/')
+            .then(response => response.json())
+            .then(data => {
+                const alertsList = document.getElementById('alertsList');
+                const badge = document.getElementById('notificationBadge');
+                
+                if (data.alerts && data.alerts.length > 0) {
+                    badge.textContent = data.alerts.length;
+                    badge.classList.remove('hidden');
+                    
+                    alertsList.innerHTML = data.alerts.map(alert => `
+                        <div class="p-4 hover:bg-gray-50 transition-colors">
+                            <div class="flex items-start space-x-3">
+                                <div class="flex-shrink-0">
+                                    ${getPriorityIcon(alert.priority_level)}
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-semibold text-gray-900">${alert.name}</p>
+                                    <p class="text-xs text-gray-600 mt-1">${alert.message}</p>
+                                    <div class="flex items-center space-x-2 mt-2">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getPriorityColor(alert.priority_level)}">
+                                            Priority: ${Math.round(alert.priority_score)}
+                                        </span>
+                                        <span class="text-xs text-gray-500">${alert.days_until_expiry} days left</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    badge.classList.add('hidden');
+                    alertsList.innerHTML = `
+                        <div class="p-8 text-center">
+                            <svg class="w-16 h-16 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <p class="mt-4 text-gray-600 font-medium">All Good!</p>
+                            <p class="text-sm text-gray-500 mt-1">No urgent items to consume</p>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error loading alerts:', error);
+                document.getElementById('alertsList').innerHTML = `
+                    <div class="p-4 text-center text-red-600">
+                        <p class="text-sm">Failed to load alerts</p>
+                    </div>
+                `;
+            });
+    }
+    
+    function getPriorityIcon(level) {
+        const icons = {
+            'critical': '<span class="text-2xl">🔥</span>',
+            'high': '<span class="text-2xl">⚡</span>',
+            'medium': '<span class="text-2xl">📅</span>',
+            'low': '<span class="text-2xl">✅</span>'
+        };
+        return icons[level] || icons['low'];
+    }
+    
+    function getPriorityColor(level) {
+        const colors = {
+            'critical': 'bg-red-100 text-red-800',
+            'high': 'bg-orange-100 text-orange-800',
+            'medium': 'bg-yellow-100 text-yellow-800',
+            'low': 'bg-green-100 text-green-800'
+        };
+        return colors[level] || colors['low'];
+    }
+    
+    // Auto-refresh alerts every 5 minutes
+    if (document.getElementById('notificationBell')) {
+        loadPriorityAlerts(); // Initial load
+        setInterval(loadPriorityAlerts, 300000); // 5 minutes
+    }
+    
+    // Toggle mobile features menu
+    function toggleMobileFeatures() {
+        const menu = document.getElementById('mobileFeaturesMenu');
+        const caret = document.getElementById('mobileFeaturesCaret');
+        
+        if (menu && caret) {
+            menu.classList.toggle('hidden');
+            caret.classList.toggle('rotate-180');
+        }
+    }
 </script>

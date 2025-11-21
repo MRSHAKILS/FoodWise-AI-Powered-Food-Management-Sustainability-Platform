@@ -1,0 +1,33 @@
+User Input (Budget ৳5000, Week Start)
+         ↓
+Step 1: Get Inventory
+   - Urgent (0-7 days): [milk, tomato]
+   - Moderate (7-14 days): [chicken, onion]  
+   - Fresh (14+ days): [rice, flour]
+         ↓
+Step 2: Score Recipes
+   - Recipe with "tomato" ingredient: +10 (urgent match)
+   - Recipe with "chicken" ingredient: +5 (moderate match)
+   - Budget-friendly tag: +2
+   - Quick prep (<20 min): +1
+         ↓
+Step 3: Fill 21 Meals
+   - Monday Breakfast: Highest scoring recipe
+   - Monday Lunch: Next highest (different recipe)
+   - ... continue for 7 days
+         ↓
+Step 4: Check Budget
+   - Total cost = ৳4800 ✅ (within ৳5000)
+   - If over, replace expensive meals
+         ↓
+Step 5: Validate Nutrition
+   - Daily avg calories: 2100 ✅
+   - Daily avg protein: 65g ✅
+   - Daily avg carbs: 280g ✅
+         ↓
+Step 6: Shopping List
+   - Compare ingredients vs inventory
+   - Need: flour (500g), eggs (6), oil (200ml)
+   - Estimated cost: ৳180
+         ↓
+Output: Complete Meal Plan 🎉
