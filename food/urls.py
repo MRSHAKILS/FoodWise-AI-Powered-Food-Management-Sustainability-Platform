@@ -18,12 +18,16 @@ urlpatterns = [
     # History & Analytics (Phase 4 requirement)
     path('history/', views.consumption_history, name='history'),
     path('analysis/', views.consumption_analysis_dashboard, name='consumption_analysis'),
+    
     # Food Items Database (PART 4)
     path('food-items/', views.food_items_list, name='food_items_list'),
     path('food-items/<int:id>/', views.food_item_detail, name='food_item_detail'),
     path('food-database/', views.food_database_list, name='food_database_list'),
     path('food-database/<int:pk>/', views.food_database_detail, name='food_database_detail'),
     path('food-database/search/', views.food_database_search, name='food_database_search'),
+    
+    # AI Consumption Pattern Analyzer API (Advanced)
+    path('api/consumption-insights/', views.consumption_insights, name='consumption_insights'),
     
     # Dashboard & Recommendations API (PART 6)
     path('api/dashboard/summary/', views.dashboard_summary_api, name='dashboard_summary_api'),

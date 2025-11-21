@@ -26,9 +26,6 @@
                 Export CSV
             </button>
         </div>
-    <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-800 mb-2">Food Activity History</h1>
-        <p class="text-gray-600">Track your food additions and consumption over time</p>
     </div>
 
     <!-- Statistics Cards -->
@@ -118,31 +115,18 @@
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
                     {% for log in logs %}
                     <tr class="hover:bg-gray-50 transition duration-150">
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {{ log.date|date:"M d, Y" }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            {% if log.type == 'added' %}
-                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                ➕ Added
-                            </span>
-                            {% else %}
-                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
-                                🍽️ Consumed
-                            </span>
-                            {% endif %}
+                            {{ log.consumption_date|date:"M d, Y" }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                             {{ log.item_name }}
@@ -155,23 +139,17 @@
                                 {% elif log.category == 'meat' %}bg-red-100 text-red-800
                                 {% elif log.category == 'grain' %}bg-yellow-100 text-yellow-800
                                 {% else %}bg-gray-100 text-gray-800{% endif %}">
-                                {{ log.get_category_display }}
+                                {{ log.category|upper }}
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {{ log.quantity }} {{ log.unit }}
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                {{ log.category }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {{ log.quantity }}
+                            {{ log.quantity }} {{ log.unit|default:"units" }}
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
                             {{ log.notes|default:"-" }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <form action="{% url 'food:log_delete' pk=log.pk %}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to delete this log entry?');">
+                            <form action="{% url 'food:log_delete' pk=log.id %}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to delete this log entry?');">
                                 {% csrf_token %}
                                 <button type="submit" class="text-red-600 hover:text-red-900">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -266,9 +244,7 @@
 </div>
 
 <div class="fixed bottom-8 right-8">
-    <a href="{% url 'food:log_form' %}" class="bg-green-600 text-white rounded-full p-4 shadow-lg hover:bg-green-700 transition-all hover:scale-110">
-    <!-- Quick Add Button (Floating) -->
-    <a href="{% url 'food:inventory_form' %}" class="fixed bottom-8 right-8 bg-green-600 text-white p-4 rounded-full shadow-lg hover:bg-green-700 transition-all hover:scale-110">
+    <a href="{% url 'food:log_form' %}" class="bg-green-600 text-white rounded-full p-4 shadow-lg hover:bg-green-700 transition-all hover:scale-110" title="Quick Add Log">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
         </svg>

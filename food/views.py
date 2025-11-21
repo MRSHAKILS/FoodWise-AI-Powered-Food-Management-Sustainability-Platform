@@ -2,10 +2,14 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.db.models import Count, Q
+from django.utils import timezone
+from datetime import timedelta
 from .models import FoodItem, ConsumptionLog, FoodItemDatabase
 from users.forms import FoodItemForm, ConsumptionLogForm
 from .utils import calculate_dashboard_summary, generate_recommendations
 from .risk_predictor import FoodRiskPredictor
+from .services import ConsumptionAnalyzer
 
 
 # Inventory Views
@@ -550,3 +554,24 @@ def consumption_analysis_dashboard(request):
     }
     
     return render(request, 'food/analysis_dashboard.html', context)
+
+
+@login_required
+def consumption_insights(request):
+    """
+    JSON API endpoint for AI consumption insights.
+    
+    GET /food/api/consumption-insights/
+    
+    Returns comprehensive analysis including:
+    - Weekly trends
+    - Imbalances detected
+    - Waste predictions
+    - Heatmap data
+    """
+    analyzer = ConsumptionAnalyzer(request.user)
+    
+    # Generate comprehensive report
+    report = analyzer.generate_report()
+    
+    return JsonResponse(report, safe=False)
