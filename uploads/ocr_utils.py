@@ -21,7 +21,7 @@ def configure_gemini():
             "https://makersuite.google.com/app/apikey"
         )
     genai.configure(api_key=api_key)
-    return genai.GenerativeModel('gemini-2.0-flash-exp')
+    return genai.GenerativeModel('gemini-2.0-flash-lite')
 
 
 def process_food_image(image_path):

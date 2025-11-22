@@ -33,11 +33,11 @@ class GeminiService:
     MAX_REQUESTS_PER_WINDOW = 15
     CACHE_PREFIX = 'gemini_rate_limit'
     
-    def __init__(self, model_name='gemini-2.0-flash-exp'):
+    def __init__(self, model_name='gemini-2.0-flash-lite'):
         """
         Initialize Gemini service
         Args:
-            model_name: Model to use (gemini-2.0-flash-exp - lightweight experimental flash model)
+            model_name: Model to use (gemini-2.0-flash-lite - lightweight flash model with better quota)
         """
         self.model_name = model_name
         self.model = None
@@ -308,7 +308,7 @@ def chat_with_nourish_bot(
     Returns:
         Bot response
     """
-    service = GeminiService(model_name='gemini-2.0-flash-exp')
+    service = GeminiService(model_name='gemini-2.0-flash-lite')
     
     # Build detailed context with actual user data
     inventory_items = user_context.get('inventory', [])
@@ -441,7 +441,7 @@ def extract_food_from_image(image_path: str) -> Optional[List[Dict]]:
     """
     from PIL import Image
     
-    service = GeminiService(model_name='gemini-2.0-flash-exp')
+    service = GeminiService(model_name='gemini-2.0-flash-lite')
     
     try:
         image = Image.open(image_path)

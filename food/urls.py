@@ -20,6 +20,7 @@ urlpatterns = [
     
     # Food Items Database (PART 4)
     path('food-items/', views.food_items_list, name='food_items_list'),
+    path('items/', views.food_items_list, name='food_items_list_alias'),  # Alias for README docs
     path('food-items/<int:id>/', views.food_item_detail, name='food_item_detail'),
     path('food-database/', views.food_database_list, name='food_database_list'),
     path('food-database/<int:pk>/', views.food_database_detail, name='food_database_detail'),

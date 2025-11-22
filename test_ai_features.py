@@ -221,7 +221,7 @@ def test_model_names():
         print(f"✅ Default model: {service_default.model_name}")
         
         # Test with specific model
-        service_flash = GeminiService(model_name='gemini-2.0-flash-exp')
+        service_flash = GeminiService(model_name='gemini-2.0-flash-lite')
         print(f"✅ Flash model: {service_flash.model_name}")
         
         service_exp = GeminiService(model_name='gemini-exp-1206')

@@ -560,9 +560,13 @@ def analyze_consumption_api(request):
         
         consumption_data = list(consumption_logs)
         
-        # Convert dates to strings for JSON serialization
+        # Convert dates and Decimals to JSON-serializable types
+        from decimal import Decimal
         for log in consumption_data:
             log['consumption_date'] = log['consumption_date'].isoformat()
+            # Convert Decimal to float
+            if isinstance(log.get('quantity'), Decimal):
+                log['quantity'] = float(log['quantity'])
         
         if not consumption_data:
             return JsonResponse({

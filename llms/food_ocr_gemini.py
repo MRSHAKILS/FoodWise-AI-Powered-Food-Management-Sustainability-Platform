@@ -17,8 +17,8 @@ def analyze_image(image_path):
     # 1. Configure API
     genai.configure(api_key=API_KEY)
     
-    # 2. Load Model (Using gemini-2.0-flash-exp - lightweight experimental flash model)
-    model = genai.GenerativeModel('gemini-2.0-flash-exp')
+    # 2. Load Model (Using gemini-2.0-flash-lite - lightweight flash model)
+    model = genai.GenerativeModel('gemini-2.0-flash-lite')
 
     # 3. Load Image
     try:
