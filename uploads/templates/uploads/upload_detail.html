@@ -32,14 +32,12 @@
                     Link to Item
                 </a>
                 
-                <a href="{% url 'uploads:upload_delete' upload.pk %}" 
-                   onclick="return confirm('Are you sure you want to delete this upload? This action cannot be undone.');"
-                   class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200 font-semibold shadow-md hover:shadow-lg flex items-center">
+                <form method="post" action="{% url 'uploads:upload_delete' upload.pk %}" onsubmit="return confirm('Are you sure you want to delete this upload? This action cannot be undone.');" class="flex">{% csrf_token %}<button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200 font-semibold shadow-md hover:shadow-lg flex items-center">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                     </svg>
                     Delete
-                </a>
+                </button></form>
             </div>
         </div>
     </div>
@@ -84,7 +82,7 @@
                 <!-- Image Display -->
                 <div class="p-8 bg-gray-50 flex items-center justify-center min-h-[400px]">
                     {% if upload.file %}
-                        <img src="{{ upload.file.url }}" 
+                        <img src="{% url 'uploads:upload_file' upload.pk %}" 
                              alt="{{ upload.file_name }}"
                              class="max-w-full max-h-[600px] rounded-lg shadow-lg object-contain">
                     {% else %}

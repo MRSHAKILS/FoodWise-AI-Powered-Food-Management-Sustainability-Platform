@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Link {{ upload.file_name }} - FoodWise{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-3xl">
+    <nav class="text-sm mb-4">
+        <a href="{% url 'uploads:upload_list' %}" class="text-green-600 hover:text-green-700">Uploads</a>
+        <span class="mx-2 text-gray-400">/</span>
+        <a href="{% url 'uploads:upload_detail' upload.pk %}" class="text-green-600 hover:text-green-700">{{ upload.file_name }}</a>
+        <span class="mx-2 text-gray-400">/</span>
+        <span class="text-gray-600">Link</span>
+    </nav>
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">Link Image to an Item</h1>
+
+    <div class="space-y-6">
+        <form method="post" class="bg-white rounded-xl shadow-lg p-6 space-y-4">
+            {% csrf_token %}
+            <input type="hidden" name="link_type" value="inventory">
+            <label for="inventory_item" class="block text-sm font-bold text-gray-700">Inventory item</label>
+            {% if inventory_items %}
+            <select id="inventory_item" name="item_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg">
+                {% for item in inventory_items %}
+                <option value="{{ item.pk }}"{% if upload.associated_inventory_id == item.pk %} selected{% endif %}>{{ item.name }} ({{ item.quantity }} {{ item.unit }})</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold">Link to Inventory</button>
+            {% else %}
+            <p class="text-gray-600">No inventory items yet.</p>
+            {% endif %}
+        </form>
+
+        <form method="post" class="bg-white rounded-xl shadow-lg p-6 space-y-4">
+            {% csrf_token %}
+            <input type="hidden" name="link_type" value="log">
+            <label for="consumption_log" class="block text-sm font-bold text-gray-700">Recent consumption log</label>
+            {% if consumption_logs %}
+            <select id="consumption_log" name="item_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg">
+                {% for log in consumption_logs %}
+                <option value="{{ log.pk }}"{% if upload.associated_log_id == log.pk %} selected{% endif %}>{{ log.item_name }} - {{ log.consumption_date }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold">Link to Log</button>
+            {% else %}
+            <p class="text-gray-600">No consumption logs yet.</p>
+            {% endif %}
+        </form>
+
+        {% if upload.associated_inventory or upload.associated_log %}
+        <form method="post" class="bg-white rounded-xl shadow-lg p-6">
+            {% csrf_token %}
+            <input type="hidden" name="link_type" value="unlink">
+            <button type="submit" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 font-semibold">Unlink from all items</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

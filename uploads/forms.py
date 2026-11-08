@@ -1,5 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
+from PIL import Image, UnidentifiedImageError
 from .models import Upload
 
 
@@ -58,6 +59,18 @@ class UploadForm(forms.ModelForm):
                 raise ValidationError(
                     f'Invalid MIME type: {file.content_type}. Only JPEG and PNG images are allowed.'
                 )
+        
+        # Validate actual image content
+        try:
+            image = Image.open(file)
+            image_format = image.format
+            image.verify()
+        except (UnidentifiedImageError, OSError, SyntaxError):
+            raise ValidationError('The uploaded file is not a valid JPEG or PNG image.')
+        finally:
+            file.seek(0)
+        if image_format not in ('JPEG', 'PNG'):
+            raise ValidationError('Only JPEG and PNG images are allowed.')
         
         # Validate file size (max 5MB)
         max_size = 5 * 1024 * 1024  # 5MB in bytes

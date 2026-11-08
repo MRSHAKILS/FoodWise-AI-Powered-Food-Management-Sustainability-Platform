@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Q
-from .models import Resource
+from .models import Resource, json_list_contains_any
 
 
 def resources_list(request):
@@ -21,14 +21,13 @@ def resources_list(request):
     # Apply tag filter if provided
     tag = request.GET.get('tag')
     if tag:
-        resources = resources.filter(tags__contains=[tag])
+        resources = resources.filter(json_list_contains_any('tags', [tag]))
     
     # Apply relevant_food_categories filter if provided
     food_category = request.GET.get('food_category')
     if food_category:
         resources = resources.filter(
-            Q(relevant_food_categories__contains=[food_category]) |
-            Q(relevant_food_categories__contains=['all'])
+            json_list_contains_any('relevant_food_categories', [food_category, 'all'])
         )
     
     # Apply search filter if provided (search in title and description)

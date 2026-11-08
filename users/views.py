@@ -4,6 +4,8 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.urls import reverse
 from .models import User
@@ -71,6 +73,11 @@ def register_view(request):
 
         if password != confirm_password:
             return render(request, "users/register.html", {"error": "Passwords do not match!"})
+
+        try:
+            validate_password(password, user=User(username=email, email=email, full_name=full_name))
+        except ValidationError as e:
+            return render(request, "users/register.html", {"error": " ".join(e.messages)})
 
         # ✔ FIX: prevent duplicate email/username
         if User.objects.filter(email=email).exists():
@@ -184,6 +191,8 @@ def google_auth_view(request):
     if request.method == "POST":
         data = json.loads(request.body)
         token = data.get("credential")
+        if not settings.GOOGLE_CLIENT_ID:
+            return JsonResponse({"status": "error", "message": "Google sign-in is not configured."}, status=503)
 
         try:
             google_user = id_token.verify_oauth2_token(
@@ -191,6 +200,9 @@ def google_auth_view(request):
                 requests.Request(),
                 settings.GOOGLE_CLIENT_ID
             )
+
+            if not google_user.get("email_verified"):
+                return JsonResponse({"status": "error", "message": "Google email is not verified."}, status=403)
 
             email = google_user["email"]
             name = google_user.get("name", "")

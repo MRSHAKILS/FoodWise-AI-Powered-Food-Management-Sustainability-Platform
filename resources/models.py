@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 
 
 class Resource(models.Model):
@@ -62,3 +63,16 @@ class Resource(models.Model):
     
     def __str__(self):
         return f"{self.title} ({self.get_category_display()})"
+
+
+def json_list_contains_any(field, values):
+    """Q matching Resources whose JSON list `field` contains any of `values`.
+
+    SQLite does not support JSONField `__contains`, so membership is checked in Python.
+    """
+    wanted = set(values)
+    ids = [
+        pk for pk, items in Resource.objects.values_list('id', field)
+        if isinstance(items, list) and wanted.intersection(items)
+    ]
+    return Q(id__in=ids)

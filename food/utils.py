@@ -8,7 +8,7 @@ from datetime import timedelta
 from collections import Counter
 
 from food.models import FoodItem, ConsumptionLog
-from resources.models import Resource
+from resources.models import Resource, json_list_contains_any
 
 
 def calculate_dashboard_summary(user):
@@ -174,8 +174,7 @@ def generate_recommendations(user):
     # RULE 1: Category Match - If user logged dairy → recommend dairy storage resources
     if 'dairy' in logged_categories or 'dairy' in inventory_categories:
         dairy_resources = Resource.objects.filter(
-            Q(relevant_food_categories__contains=['dairy']) | 
-            Q(relevant_food_categories__contains=['all']),
+            json_list_contains_any('relevant_food_categories', ['dairy', 'all']),
             category='storage_tips'
         ).exclude(id__in=seen_resource_ids)[:2]
         
@@ -193,7 +192,7 @@ def generate_recommendations(user):
     if urgent_expiring.exists():
         expiring_count = urgent_expiring.count()
         waste_resources = Resource.objects.filter(
-            Q(category='waste_reduction') | Q(tags__contains=['expiration'])
+            Q(category='waste_reduction') | json_list_contains_any('tags', ['expiration'])
         ).exclude(id__in=seen_resource_ids)[:2]
         
         for resource in waste_resources:
@@ -223,8 +222,7 @@ def generate_recommendations(user):
         mapped_category = category_map.get(most_frequent_category, 'all')
         
         budget_resources = Resource.objects.filter(
-            Q(relevant_food_categories__contains=[mapped_category]) |
-            Q(relevant_food_categories__contains=['all']),
+            json_list_contains_any('relevant_food_categories', [mapped_category, 'all']),
             category='budget_tips'
         ).exclude(id__in=seen_resource_ids)[:2]
         
@@ -270,8 +268,7 @@ def generate_recommendations(user):
         mapped_category = category_map.get(category, 'all')
         
         storage_resources = Resource.objects.filter(
-            Q(relevant_food_categories__contains=[mapped_category]) |
-            Q(relevant_food_categories__contains=['all']),
+            json_list_contains_any('relevant_food_categories', [mapped_category, 'all']),
             category='storage_tips'
         ).exclude(id__in=seen_resource_ids)[:1]
         

@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponse
 from django.db.models import Sum, Q
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 from datetime import timedelta
 import json
 from .models import FoodItem, ConsumptionLog, FoodItemDatabase
@@ -107,6 +108,7 @@ def inventory_edit(request, pk):
 
 
 @login_required
+@require_POST
 def inventory_delete(request, pk):
     """Delete inventory item and create consumption log"""
     item = get_object_or_404(FoodItem, pk=pk, user=request.user)

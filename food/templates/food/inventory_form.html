@@ -130,6 +130,7 @@
 
             <form method="post" class="p-8 space-y-6" id="inventoryForm">
                 {% csrf_token %}
+                <input type="hidden" name="notes" value="{{ form.notes.value|default_if_none:'' }}">
 
                 <!-- Quick Add from Database -->
                 <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-5">
@@ -177,6 +178,7 @@
                         type="text" 
                         id="name" 
                         name="name" 
+                        value="{{ form.name.value|default_if_none:''|stringformat:'s' }}"
                         placeholder="e.g., Fresh Milk, Organic Bananas, Whole Wheat Bread"
                         class="input-field w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-200 focus:border-green-500 focus:outline-none transition-all"
                         required
@@ -194,7 +196,7 @@
                     </label>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
                         <label class="category-card relative p-4 bg-white border-2 border-gray-200 rounded-xl">
-                            <input type="radio" name="category" value="vegetable" class="peer sr-only" required>
+                            <input type="radio" name="category" value="vegetable" class="peer sr-only"{% if form.category.value == 'vegetable' %} checked{% endif %} required>
                             <div class="text-center peer-checked:text-green-600">
                                 <div class="text-3xl mb-2">🥬</div>
                                 <p class="font-semibold text-sm">Vegetables</p>
@@ -207,7 +209,7 @@
                         </label>
 
                         <label class="category-card relative p-4 bg-white border-2 border-gray-200 rounded-xl">
-                            <input type="radio" name="category" value="fruit" class="peer sr-only">
+                            <input type="radio" name="category" value="fruit" class="peer sr-only"{% if form.category.value == 'fruit' %} checked{% endif %}>
                             <div class="text-center peer-checked:text-green-600">
                                 <div class="text-3xl mb-2">🍎</div>
                                 <p class="font-semibold text-sm">Fruits</p>
@@ -220,7 +222,7 @@
                         </label>
 
                         <label class="category-card relative p-4 bg-white border-2 border-gray-200 rounded-xl">
-                            <input type="radio" name="category" value="dairy" class="peer sr-only">
+                            <input type="radio" name="category" value="dairy" class="peer sr-only"{% if form.category.value == 'dairy' %} checked{% endif %}>
                             <div class="text-center peer-checked:text-green-600">
                                 <div class="text-3xl mb-2">🥛</div>
                                 <p class="font-semibold text-sm">Dairy</p>
@@ -233,7 +235,7 @@
                         </label>
 
                         <label class="category-card relative p-4 bg-white border-2 border-gray-200 rounded-xl">
-                            <input type="radio" name="category" value="meat" class="peer sr-only">
+                            <input type="radio" name="category" value="meat" class="peer sr-only"{% if form.category.value == 'meat' %} checked{% endif %}>
                             <div class="text-center peer-checked:text-green-600">
                                 <div class="text-3xl mb-2">🍗</div>
                                 <p class="font-semibold text-sm">Protein</p>
@@ -246,7 +248,7 @@
                         </label>
 
                         <label class="category-card relative p-4 bg-white border-2 border-gray-200 rounded-xl">
-                            <input type="radio" name="category" value="grain" class="peer sr-only">
+                            <input type="radio" name="category" value="grain" class="peer sr-only"{% if form.category.value == 'grain' %} checked{% endif %}>
                             <div class="text-center peer-checked:text-green-600">
                                 <div class="text-3xl mb-2">🌾</div>
                                 <p class="font-semibold text-sm">Grains</p>
@@ -259,7 +261,7 @@
                         </label>
 
                         <label class="category-card relative p-4 bg-white border-2 border-gray-200 rounded-xl">
-                            <input type="radio" name="category" value="snack" class="peer sr-only">
+                            <input type="radio" name="category" value="snack" class="peer sr-only"{% if form.category.value == 'snack' %} checked{% endif %}>
                             <div class="text-center peer-checked:text-green-600">
                                 <div class="text-3xl mb-2">🍪</div>
                                 <p class="font-semibold text-sm">Snacks</p>
@@ -286,6 +288,7 @@
                             type="number" 
                             id="quantity" 
                             name="quantity" 
+                            value="{{ form.quantity.value|default_if_none:''|stringformat:'s' }}"
                             step="0.01"
                             min="0.01"
                             placeholder="e.g., 2.5"
@@ -309,14 +312,14 @@
                             required
                         >
                             <option value="">Select unit</option>
-                            <option value="kg">Kilogram (kg)</option>
-                            <option value="g">Gram (g)</option>
-                            <option value="L">Liter (L)</option>
-                            <option value="mL">Milliliter (mL)</option>
-                            <option value="pieces">Pieces</option>
-                            <option value="packets">Packets</option>
-                            <option value="bottles">Bottles</option>
-                            <option value="cans">Cans</option>
+                            <option value="kg"{% if form.unit.value == 'kg' %} selected{% endif %}>Kilogram (kg)</option>
+                            <option value="g"{% if form.unit.value == 'g' %} selected{% endif %}>Gram (g)</option>
+                            <option value="L"{% if form.unit.value == 'L' %} selected{% endif %}>Liter (L)</option>
+                            <option value="mL"{% if form.unit.value == 'mL' %} selected{% endif %}>Milliliter (mL)</option>
+                            <option value="pieces"{% if form.unit.value == 'pieces' %} selected{% endif %}>Pieces</option>
+                            <option value="packets"{% if form.unit.value == 'packets' %} selected{% endif %}>Packets</option>
+                            <option value="bottles"{% if form.unit.value == 'bottles' %} selected{% endif %}>Bottles</option>
+                            <option value="cans"{% if form.unit.value == 'cans' %} selected{% endif %}>Cans</option>
                         </select>
                         <p class="text-xs text-gray-500 mt-1.5">Measurement unit</p>
                     </div>
@@ -335,6 +338,7 @@
                             type="date" 
                             id="purchase_date" 
                             name="purchase_date" 
+                            value="{{ form.purchase_date.value|default_if_none:''|stringformat:'s' }}"
                             class="input-field w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-200 focus:border-green-500 focus:outline-none"
                             required
                         >
@@ -352,6 +356,7 @@
                             type="date" 
                             id="expiration_date" 
                             name="expiration_date" 
+                            value="{{ form.expiration_date.value|default_if_none:''|stringformat:'s' }}"
                             class="input-field w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-200 focus:border-green-500 focus:outline-none"
                         >
                         <p class="text-xs text-gray-500 mt-1.5">When does it expire? (Optional)</p>
@@ -368,6 +373,7 @@
                             type="number" 
                             id="price" 
                             name="price" 
+                            value="{{ form.price.value|default_if_none:''|stringformat:'s' }}"
                             step="0.01"
                             min="0"
                             placeholder="e.g., 4.99"

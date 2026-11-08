@@ -529,9 +529,9 @@
                             <a href="{% url 'food:inventory_edit' item.pk %}" class="flex-1 bg-green-100 text-green-700 py-2 rounded-lg font-semibold hover:bg-green-200 transition-colors text-center text-sm">
                                 Edit
                             </a>
-                            <a href="{% url 'food:inventory_delete' item.pk %}" onclick="return confirm('Mark {{ item.name }} ({{ item.quantity }} {{ item.unit }}) as consumed and remove from inventory?')" class="flex-1 bg-red-100 text-red-700 py-2 rounded-lg font-semibold hover:bg-red-200 transition-colors text-center text-sm">
+                            <form method="post" action="{% url 'food:inventory_delete' item.pk %}" onsubmit="return confirm('Mark {{ item.name }} ({{ item.quantity }} {{ item.unit }}) as consumed and remove from inventory?')" class="flex-1 flex">{% csrf_token %}<button type="submit" class="w-full bg-red-100 text-red-700 py-2 rounded-lg font-semibold hover:bg-red-200 transition-colors text-center text-sm">
                                 Consume
-                            </a>
+                            </button></form>
                         </div>
                     </div>
                 </div>

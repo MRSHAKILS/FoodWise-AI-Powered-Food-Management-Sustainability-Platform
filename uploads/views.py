@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import FileResponse, Http404, JsonResponse
 from django.views.decorators.http import require_POST
 from .models import Upload
 from .forms import UploadForm
@@ -192,6 +192,16 @@ def process_ocr_view(request, pk):
 
 
 @login_required
+def upload_file(request, pk):
+    """Serve an uploaded image to its owner only"""
+    upload = get_object_or_404(Upload, pk=pk, user=request.user)
+    if not upload.file:
+        raise Http404
+    return FileResponse(upload.file.open('rb'))
+
+
+@login_required
+@require_POST
 def upload_delete(request, pk):
     """Delete uploaded file and database record"""
     upload = get_object_or_404(Upload, pk=pk, user=request.user)
