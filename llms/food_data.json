@@ -1,0 +1,184 @@
+{
+  "food_items": [
+    {
+      "item_name": "Sagor Kola (Banana)",
+      "category": "Fruit",
+      "quantity": 1,
+      "quantity_unit": "pcs",
+      "typical_expiration_days": 4,
+      "sample_cost_per_unit": 10.00,
+      "unit": "pcs"
+    },
+    {
+      "item_name": "Chicken Egg (Farm)",
+      "category": "Dairy/Poultry",
+      "quantity": 1,
+      "quantity_unit": "pcs",
+      "typical_expiration_days": 17,
+      "sample_cost_per_unit": 12.50,
+      "unit": "pcs"
+    },
+    {
+      "item_name": "Minikit Rice",
+      "category": "Grain",
+      "quantity": 1,
+      "quantity_unit": "kg",
+      "typical_expiration_days": 365,
+      "sample_cost_per_unit": 75.00,
+      "unit": "kg"
+    },
+    {
+      "item_name": "Masoor Dal (Lentil)",
+      "category": "Grain",
+      "quantity": 1,
+      "quantity_unit": "kg",
+      "typical_expiration_days": 365,
+      "sample_cost_per_unit": 140.00,
+      "unit": "kg"
+    },
+    {
+      "item_name": "Ruhi Fish (Whole)",
+      "category": "Fish/Meat",
+      "quantity": 1,
+      "quantity_unit": "kg",
+      "typical_expiration_days": 2,
+      "sample_cost_per_unit": 450.00,
+      "unit": "kg"
+    },
+    {
+      "item_name": "Broiler Chicken",
+      "category": "Fish/Meat",
+      "quantity": 1,
+      "quantity_unit": "kg",
+      "typical_expiration_days": 2,
+      "sample_cost_per_unit": 210.00,
+      "unit": "kg"
+    },
+    {
+      "item_name": "Potato (Diamond)",
+      "category": "Vegetable",
+      "quantity": 1,
+      "quantity_unit": "kg",
+      "typical_expiration_days": 30,
+      "sample_cost_per_unit": 60.00,
+      "unit": "kg"
+    },
+    {
+      "item_name": "Onion (Deshi)",
+      "category": "Vegetable",
+      "quantity": 1,
+      "quantity_unit": "kg",
+      "typical_expiration_days": 30,
+      "sample_cost_per_unit": 110.00,
+      "unit": "kg"
+    },
+    {
+      "item_name": "Green Chili",
+      "category": "Vegetable",
+      "quantity": 1,
+      "quantity_unit": "kg",
+      "typical_expiration_days": 7,
+      "sample_cost_per_unit": 200.00,
+      "unit": "kg"
+    },
+    {
+      "item_name": "Liquid Milk (Aarong)",
+      "category": "Dairy",
+      "quantity": 1,
+      "quantity_unit": "liter",
+      "typical_expiration_days": 2,
+      "sample_cost_per_unit": 90.00,
+      "unit": "liter"
+    },
+    {
+      "item_name": "Soybean Oil",
+      "category": "Oil/Fat",
+      "quantity": 1,
+      "quantity_unit": "liter",
+      "typical_expiration_days": 365,
+      "sample_cost_per_unit": 170.00,
+      "unit": "liter"
+    },
+    {
+      "item_name": "Red Spinach (Lal Shak)",
+      "category": "Vegetable",
+      "quantity": 1,
+      "quantity_unit": "bundle",
+      "typical_expiration_days": 2,
+      "sample_cost_per_unit": 20.00,
+      "unit": "bundle"
+    },
+    {
+      "item_name": "Atta (Flour)",
+      "category": "Grain",
+      "quantity": 1,
+      "quantity_unit": "kg",
+      "typical_expiration_days": 90,
+      "sample_cost_per_unit": 55.00,
+      "unit": "kg"
+    },
+    {
+      "item_name": "Garlic (Imported)",
+      "category": "Spice",
+      "quantity": 1,
+      "quantity_unit": "kg",
+      "typical_expiration_days": 60,
+      "sample_cost_per_unit": 220.00,
+      "unit": "kg"
+    },
+    {
+      "item_name": "Ginger",
+      "category": "Spice",
+      "quantity": 1,
+      "quantity_unit": "kg",
+      "typical_expiration_days": 30,
+      "sample_cost_per_unit": 240.00,
+      "unit": "kg"
+    },
+    {
+      "item_name": "Tomato",
+      "category": "Vegetable",
+      "quantity": 1,
+      "quantity_unit": "kg",
+      "typical_expiration_days": 6,
+      "sample_cost_per_unit": 80.00,
+      "unit": "kg"
+    },
+    {
+      "item_name": "Bread (Sliced)",
+      "category": "Grain/Snack",
+      "quantity": 1,
+      "quantity_unit": "packet",
+      "typical_expiration_days": 4,
+      "sample_cost_per_unit": 60.00,
+      "unit": "packet"
+    },
+    {
+      "item_name": "Tea Leaves (Ispahani)",
+      "category": "Dry Good",
+      "quantity": 1,
+      "quantity_unit": "packet",
+      "typical_expiration_days": 365,
+      "sample_cost_per_unit": 130.00,
+      "unit": "packet"
+    },
+    {
+      "item_name": "Ilish Fish",
+      "category": "Fish/Meat",
+      "quantity": 1,
+      "quantity_unit": "kg",
+      "typical_expiration_days": 2,
+      "sample_cost_per_unit": 1200.00,
+      "unit": "kg"
+    },
+    {
+      "item_name": "Sweet Yogurt (Mishti Doi)",
+      "category": "Dairy",
+      "quantity": 1,
+      "quantity_unit": "kg",
+      "typical_expiration_days": 4,
+      "sample_cost_per_unit": 300.00,
+      "unit": "kg"
+    }
+  ]
+}

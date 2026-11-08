@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-lg mx-auto mt-10 p-6 bg-white rounded shadow">
+  <h2 class="text-2xl font-bold text-red-600 mb-4">Google Sign-In Error</h2>
+  <p class="text-gray-700 mb-2">There was a problem signing in with Google. Please try again or use another login method.</p>
+  <a href="{% url 'users:login' %}" class="text-green-600 underline">Back to Login</a>
+</div>
+{% endblock %}
