@@ -110,7 +110,7 @@ class ConsumptionAnalyzer:
 
         api_key = getattr(settings, 'GEMINI_API_KEY', None)
         if not api_key:
-            return self._error_response("API Key missing. Please add GEMINI_API_KEY to settings.py.")
+            return self._error_response("API Key missing. Please set the GEMINI_API_KEY environment variable.")
 
         try:
             # Initialize Model (Gemini Pro is good for text)
